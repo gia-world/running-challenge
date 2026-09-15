@@ -1,7 +1,10 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { currentWeekRangeInSeoul, WEEKLY_GOAL } from "@/lib/week";
+import { formatKoreanDate } from "@/lib/format";
 import { WeeklyDots } from "@/components/WeeklyDots";
+import { BottomNav } from "@/components/BottomNav";
 import { SignOutButton } from "./SignOutButton";
 import type { Activity } from "@/lib/types";
 
@@ -39,7 +42,7 @@ export default async function HomePage() {
   const displayName = profile?.name ?? "러너";
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
+    <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
       <header className="flex items-center justify-between border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
         <div>
           <p className="text-xs font-medium text-orange-500">RUNNING CREW</p>
@@ -95,20 +98,15 @@ export default async function HomePage() {
           )}
         </section>
 
-        <button
-          type="button"
-          disabled
-          title="인증 업로드 화면은 곧 추가돼요"
-          className="mt-auto flex items-center justify-center gap-2 rounded-xl bg-zinc-200 px-5 py-3.5 font-semibold text-zinc-400 dark:bg-zinc-800 dark:text-zinc-600"
+        <Link
+          href="/certify"
+          className="mt-auto flex items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 py-3.5 font-semibold text-white"
         >
-          인증하기 (준비 중)
-        </button>
+          인증하기
+        </Link>
       </main>
+
+      <BottomNav active="home" />
     </div>
   );
-}
-
-function formatKoreanDate(isoDate: string) {
-  const [, month, day] = isoDate.split("-");
-  return `${Number(month)}월 ${Number(day)}일`;
 }
