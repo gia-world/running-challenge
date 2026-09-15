@@ -8,8 +8,8 @@
 
 - [x] 카카오 소셜 로그인 (Supabase Auth)
 - [x] 홈 — 이번 주 인증 현황 (●●○)
-- [ ] 피드 — 크루원 인증 타임라인
-- [ ] 인증 — 인증샷 수동 업로드
+- [x] 피드 — 크루원 인증 타임라인
+- [x] 인증 — 인증샷 수동 업로드
 - [ ] 관리자 — 심사 대기함 / 크루원 관리
 
 ## 스택
@@ -22,7 +22,8 @@
 ### 1. Supabase 프로젝트 준비
 
 1. [supabase.com](https://supabase.com) 에서 프로젝트 생성
-2. `supabase/migrations/0001_init.sql` 을 SQL Editor에서 실행 (profiles / activities 테이블 + RLS 정책 생성)
+2. `supabase/migrations/0001_init.sql`, `0002_storage.sql` 을 순서대로 SQL Editor에서 실행
+   (profiles / activities 테이블 + RLS 정책, 인증샷용 private Storage 버킷 생성)
 3. [developers.kakao.com](https://developers.kakao.com) 에서 앱 등록 후 REST API 키 발급
 4. Supabase Dashboard → Authentication → Providers → Kakao 활성화, REST API 키(Client ID)와 Client Secret 입력
 5. Kakao 개발자 콘솔의 Redirect URI에 `https://<your-project>.supabase.co/auth/v1/callback` 등록
