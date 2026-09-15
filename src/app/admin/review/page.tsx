@@ -1,0 +1,75 @@
+import { createClient } from "@/lib/supabase/server";
+import { formatKoreanDate } from "@/lib/format";
+import { ReviewItem } from "./ReviewItem";
+
+const PHOTO_SIGNED_URL_TTL_SECONDS = 60 * 60;
+
+type PendingRow = {
+  id: string;
+  activity_date: string;
+  distance_km: number;
+  photo_url: string;
+  profiles: { name: string } | null;
+};
+
+export default async function AdminReviewPage() {
+  const supabase = await createClient();
+
+  const { data: activities } = await supabase
+    .from("activities")
+    .select("id, activity_date, distance_km, photo_url, profiles(name)")
+    .eq("status", "pending")
+    .order("created_at", { ascending: true })
+    .returns<PendingRow[]>();
+
+  const rows = activities ?? [];
+  const items = await Promise.all(
+    rows.map(async (row) => {
+      const { data } = await supabase.storage
+        .from("certifications")
+        .createSignedUrl(row.photo_url, PHOTO_SIGNED_URL_TTL_SECONDS);
+      return { ...row, signedUrl: data?.signedUrl ?? null };
+    }),
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+        심사 대기 ({items.length})
+      </h1>
+
+      {items.length === 0 ? (
+        <p className="mt-10 text-center text-sm text-zinc-400 dark:text-zinc-600">
+          심사할 인증이 없어요.
+        </p>
+      ) : (
+        items.map((item) => (
+          <div
+            key={item.id}
+            className="overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-zinc-900"
+          >
+            {item.signedUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={item.signedUrl}
+                alt="인증샷"
+                className="aspect-square w-full object-cover"
+              />
+            )}
+            <div className="px-4 py-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                  {item.profiles?.name ?? "러너"}
+                </span>
+                <span className="text-zinc-500 dark:text-zinc-400">
+                  {formatKoreanDate(item.activity_date)} · {Number(item.distance_km).toFixed(1)}km
+                </span>
+              </div>
+              <ReviewItem activityId={item.id} />
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}

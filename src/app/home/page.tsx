@@ -20,7 +20,7 @@ export default async function HomePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("name")
+    .select("name, role")
     .eq("id", user.id)
     .single();
 
@@ -50,7 +50,17 @@ export default async function HomePage() {
             {displayName}님, 안녕하세요 👋
           </h1>
         </div>
-        <SignOutButton />
+        <div className="flex items-center gap-3">
+          {profile?.role === "admin" && (
+            <Link
+              href="/admin/review"
+              className="text-sm font-medium text-orange-500 hover:text-orange-600"
+            >
+              관리자
+            </Link>
+          )}
+          <SignOutButton />
+        </div>
       </header>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10">
