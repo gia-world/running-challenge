@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LoginButton } from "./LoginButton";
+import { CrewEyebrow } from "@/components/CrewEyebrow";
 
 export default async function LoginPage({
   searchParams,
@@ -21,7 +22,7 @@ export default async function LoginPage({
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
       <div className="w-full max-w-sm text-center">
-        <p className="text-sm font-medium text-orange-500">RUNNING CREW</p>
+        <CrewEyebrow size="lg" />
         <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
           매주 3번, 함께 달려요
         </h1>

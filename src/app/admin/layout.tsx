@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AdminTabs } from "@/components/AdminTabs";
 import { BottomNav } from "@/components/BottomNav";
+import { CrewEyebrow } from "@/components/CrewEyebrow";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -26,7 +27,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
       <header className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
-        <p className="text-xs font-medium text-orange-500">RUNNING CREW · ADMIN</p>
+        <CrewEyebrow suffix="ADMIN" />
         <AdminTabs />
       </header>
 

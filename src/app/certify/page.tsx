@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
+import { CrewEyebrow } from "@/components/CrewEyebrow";
 import { CertifyForm } from "./CertifyForm";
 
 export default async function CertifyPage() {
@@ -22,7 +23,7 @@ export default async function CertifyPage() {
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
       <header className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
-        <p className="text-xs font-medium text-orange-500">RUNNING CREW</p>
+        <CrewEyebrow />
         <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">인증하기</h1>
       </header>
 

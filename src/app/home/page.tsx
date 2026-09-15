@@ -5,6 +5,7 @@ import { currentWeekRangeInSeoul, WEEKLY_GOAL } from "@/lib/week";
 import { formatKoreanDate } from "@/lib/format";
 import { WeeklyDots } from "@/components/WeeklyDots";
 import { BottomNav } from "@/components/BottomNav";
+import { CrewEyebrow } from "@/components/CrewEyebrow";
 import { SignOutButton } from "./SignOutButton";
 import type { Activity } from "@/lib/types";
 
@@ -45,7 +46,7 @@ export default async function HomePage() {
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
       <header className="flex items-center justify-between border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
         <div>
-          <p className="text-xs font-medium text-orange-500">RUNNING CREW</p>
+          <CrewEyebrow />
           <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
             {displayName}님, 안녕하세요 👋
           </h1>
