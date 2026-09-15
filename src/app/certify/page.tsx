@@ -13,6 +13,12 @@ export default async function CertifyPage() {
     redirect("/login");
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
       <header className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
@@ -24,7 +30,7 @@ export default async function CertifyPage() {
         <CertifyForm userId={user.id} />
       </main>
 
-      <BottomNav active="certify" />
+      <BottomNav active="certify" isAdmin={profile?.role === "admin"} />
     </div>
   );
 }

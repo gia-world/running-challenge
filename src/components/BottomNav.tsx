@@ -1,21 +1,24 @@
 import Link from "next/link";
 
+type ActiveTab = "home" | "feed" | "certify" | "admin";
+
 const ITEMS = [
-  { href: "/home", label: "홈", icon: "🏠" },
-  { href: "/feed", label: "피드", icon: "📷" },
-  { href: "/certify", label: "인증", icon: "➕" },
-] as const;
+  { key: "home", href: "/home", label: "홈", icon: "🏠" },
+  { key: "feed", href: "/feed", label: "피드", icon: "📷" },
+  { key: "certify", href: "/certify", label: "인증", icon: "➕" },
+  { key: "admin", href: "/admin/review", label: "관리자", icon: "🛠️" },
+] as const satisfies { key: ActiveTab; href: string; label: string; icon: string }[];
 
-type ActiveTab = "home" | "feed" | "certify";
+export function BottomNav({ active, isAdmin = false }: { active: ActiveTab; isAdmin?: boolean }) {
+  const items = ITEMS.filter((item) => item.key !== "admin" || isAdmin);
 
-export function BottomNav({ active }: { active: ActiveTab }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 flex border-t border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)] dark:border-zinc-800 dark:bg-zinc-950">
-      {ITEMS.map((item) => {
-        const isActive = item.href === `/${active}`;
+      {items.map((item) => {
+        const isActive = item.key === active;
         return (
           <Link
-            key={item.href}
+            key={item.key}
             href={item.href}
             className={
               isActive

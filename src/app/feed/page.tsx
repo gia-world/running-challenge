@@ -24,6 +24,12 @@ export default async function FeedPage() {
     redirect("/login");
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
   const { data: activities, error } = await supabase
     .from("activities")
     .select("id, activity_date, distance_km, photo_url, profiles!user_id(name)")
@@ -85,7 +91,7 @@ export default async function FeedPage() {
         )}
       </main>
 
-      <BottomNav active="feed" />
+      <BottomNav active="feed" isAdmin={profile?.role === "admin"} />
     </div>
   );
 }
