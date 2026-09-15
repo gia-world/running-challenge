@@ -24,13 +24,17 @@ export default async function FeedPage() {
     redirect("/login");
   }
 
-  const { data: activities } = await supabase
+  const { data: activities, error } = await supabase
     .from("activities")
-    .select("id, activity_date, distance_km, photo_url, profiles(name)")
+    .select("id, activity_date, distance_km, photo_url, profiles!user_id(name)")
     .eq("status", "approved")
     .order("created_at", { ascending: false })
     .limit(FEED_LIMIT)
     .returns<FeedRow[]>();
+
+  if (error) {
+    console.error("[feed] failed to load approved activities:", error.message);
+  }
 
   const rows = activities ?? [];
   const items = await Promise.all(

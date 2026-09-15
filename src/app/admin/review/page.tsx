@@ -15,12 +15,16 @@ type PendingRow = {
 export default async function AdminReviewPage() {
   const supabase = await createClient();
 
-  const { data: activities } = await supabase
+  const { data: activities, error } = await supabase
     .from("activities")
-    .select("id, activity_date, distance_km, photo_url, profiles(name)")
+    .select("id, activity_date, distance_km, photo_url, profiles!user_id(name)")
     .eq("status", "pending")
     .order("created_at", { ascending: true })
     .returns<PendingRow[]>();
+
+  if (error) {
+    console.error("[admin/review] failed to load pending activities:", error.message);
+  }
 
   const rows = activities ?? [];
   const items = await Promise.all(
