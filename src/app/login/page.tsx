@@ -5,7 +5,7 @@ import { LoginButton } from "./LoginButton";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; reason?: string }>;
 }) {
   const supabase = await createClient();
   const {
@@ -16,7 +16,7 @@ export default async function LoginPage({
     redirect("/home");
   }
 
-  const { error } = await searchParams;
+  const { error, reason } = await searchParams;
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
@@ -32,6 +32,7 @@ export default async function LoginPage({
         {error && (
           <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
             로그인에 실패했어요. 다시 시도해 주세요.
+            {reason && <span className="mt-1 block text-xs opacity-80">({reason})</span>}
           </p>
         )}
 
