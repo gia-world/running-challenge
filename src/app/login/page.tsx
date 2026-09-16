@@ -24,16 +24,18 @@ export default async function LoginPage({
       <div className="w-full max-w-sm text-center">
         <CrewEyebrow size="lg" />
         <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-          매주 3번, 함께 달려요
+          뛰런인챌
         </h1>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          인증샷 한 장이면 충분해요. 카카오 계정으로 바로 시작하세요.
+          카카오 계정으로 바로 시작하세요.
         </p>
 
         {error && (
           <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
             로그인에 실패했어요. 다시 시도해 주세요.
-            {reason && <span className="mt-1 block text-xs opacity-80">({reason})</span>}
+            {reason && (
+              <span className="mt-1 block text-xs opacity-80">({reason})</span>
+            )}
           </p>
         )}
 
