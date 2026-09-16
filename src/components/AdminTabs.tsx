@@ -5,25 +5,32 @@ import { usePathname } from "next/navigation";
 
 const TABS = [
   { href: "/admin/review", label: "심사 대기" },
-  { href: "/admin/members", label: "크루원 관리" },
+  { href: "/admin/members", label: "팀원 관리" },
+  { href: "/admin/season", label: "시즌 관리" },
+  { href: "/admin/season-members", label: "시즌 참여자" },
 ] as const;
 
-export function AdminTabs() {
+export function AdminTabs({ pendingCount = 0 }: { pendingCount?: number }) {
   const pathname = usePathname();
 
   return (
-    <nav className="mt-2 flex gap-4">
+    <nav className="mt-2 flex gap-4 overflow-x-auto whitespace-nowrap">
       {TABS.map((tab) => (
         <Link
           key={tab.href}
           href={tab.href}
           className={
             pathname === tab.href
-              ? "text-lg font-bold text-zinc-900 dark:text-zinc-50"
-              : "text-lg font-bold text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+              ? "flex items-center gap-1 text-base font-bold text-zinc-900 dark:text-zinc-50"
+              : "flex items-center gap-1 text-base font-bold text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
           }
         >
           {tab.label}
+          {tab.href === "/admin/review" && pendingCount > 0 && (
+            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white">
+              {pendingCount}
+            </span>
+          )}
         </Link>
       ))}
     </nav>

@@ -6,12 +6,19 @@ import { createClient } from "@/lib/supabase/client";
 import { compressImage } from "@/lib/image";
 import { todayInSeoul } from "@/lib/week";
 
-const UNIQUE_VIOLATION = "23505";
+type PendingPhoto = { file: File; previewUrl: string };
 
-export function CertifyForm({ userId }: { userId: string }) {
+export function CertifyForm({
+  userId,
+  seasonId,
+  alreadyCertifiedToday,
+}: {
+  userId: string;
+  seasonId: string;
+  alreadyCertifiedToday: boolean;
+}) {
   const router = useRouter();
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<PendingPhoto[]>([]);
   const [activityDate, setActivityDate] = useState(todayInSeoul());
   const [distanceKm, setDistanceKm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,16 +26,19 @@ export function CertifyForm({ userId }: { userId: string }) {
   const [isDone, setIsDone] = useState(false);
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const selected = e.target.files?.[0] ?? null;
-    setFile(selected);
-    setPreviewUrl(selected ? URL.createObjectURL(selected) : null);
+    const selected = Array.from(e.target.files ?? []);
+    setPhotos(selected.map((file) => ({ file, previewUrl: URL.createObjectURL(file) })));
+  }
+
+  function removePhoto(index: number) {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
 
-    if (!file) {
+    if (photos.length === 0) {
       setError("인증샷을 선택해주세요.");
       return;
     }
@@ -40,9 +50,9 @@ export function CertifyForm({ userId }: { userId: string }) {
 
     setIsSubmitting(true);
 
-    let compressed: Blob;
+    let compressed: Blob[];
     try {
-      compressed = await compressImage(file);
+      compressed = await Promise.all(photos.map((p) => compressImage(p.file)));
     } catch {
       setError("사진을 읽을 수 없어요. 다른 사진을 선택해주세요.");
       setIsSubmitting(false);
@@ -50,32 +60,49 @@ export function CertifyForm({ userId }: { userId: string }) {
     }
 
     const supabase = createClient();
-    const path = `${userId}/${activityDate}-${Date.now()}.jpg`;
+    const uploadedPaths: string[] = [];
+    for (const [index, blob] of compressed.entries()) {
+      const path = `${userId}/${activityDate}-${Date.now()}-${index}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from("certifications")
+        .upload(path, blob, { contentType: "image/jpeg" });
 
-    const { error: uploadError } = await supabase.storage
-      .from("certifications")
-      .upload(path, compressed, { contentType: "image/jpeg" });
+      if (uploadError) {
+        setError("사진 업로드에 실패했어요. 다시 시도해주세요.");
+        setIsSubmitting(false);
+        return;
+      }
+      uploadedPaths.push(path);
+    }
 
-    if (uploadError) {
-      setError("사진 업로드에 실패했어요. 다시 시도해주세요.");
+    const { data: activity, error: insertError } = await supabase
+      .from("activities")
+      .insert({
+        user_id: userId,
+        season_id: seasonId,
+        activity_date: activityDate,
+        distance_km: distance,
+        status: "pending",
+      })
+      .select("id")
+      .single();
+
+    if (insertError || !activity) {
+      setError("인증 등록에 실패했어요. 다시 시도해주세요.");
       setIsSubmitting(false);
       return;
     }
 
-    const { error: insertError } = await supabase.from("activities").insert({
-      user_id: userId,
-      activity_date: activityDate,
-      distance_km: distance,
-      photo_url: path,
-      status: "pending",
-    });
+    const { error: photosError } = await supabase.from("activity_photos").insert(
+      uploadedPaths.map((storage_path, sort_order) => ({
+        activity_id: activity.id,
+        storage_path,
+        sort_order,
+      })),
+    );
 
-    if (insertError) {
-      setError(
-        insertError.code === UNIQUE_VIOLATION
-          ? "오늘은 이미 인증을 올렸어요."
-          : "인증 등록에 실패했어요. 다시 시도해주세요.",
-      );
+    if (photosError) {
+      setError("사진 등록에 실패했어요. 다시 시도해주세요.");
       setIsSubmitting(false);
       return;
     }
@@ -105,15 +132,37 @@ export function CertifyForm({ userId }: { userId: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      {alreadyCertifiedToday && (
+        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+          오늘은 이미 인증하셨어요. 이 건은 주간 집계에는 포함되지 않아요.
+        </p>
+      )}
+
       <label className="flex flex-col gap-2">
-        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">인증샷</span>
-        {previewUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={previewUrl}
-            alt="선택한 인증샷"
-            className="aspect-square w-full rounded-xl object-cover"
-          />
+        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          인증샷 (여러 장 가능)
+        </span>
+        {photos.length > 0 ? (
+          <div className="grid grid-cols-3 gap-2">
+            {photos.map((photo, index) => (
+              <div key={photo.previewUrl} className="relative aspect-square">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photo.previewUrl}
+                  alt={`선택한 인증샷 ${index + 1}`}
+                  className="h-full w-full rounded-xl object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removePhoto(index)}
+                  className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-xs font-bold text-white"
+                  aria-label="사진 삭제"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="flex aspect-square w-full items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 px-4 text-center text-sm text-zinc-400 dark:border-zinc-700">
             날짜·거리가 보이는 스크린샷을 선택하세요
@@ -123,6 +172,7 @@ export function CertifyForm({ userId }: { userId: string }) {
           type="file"
           accept="image/*"
           capture="environment"
+          multiple
           onChange={handleFileChange}
           className="text-sm"
         />

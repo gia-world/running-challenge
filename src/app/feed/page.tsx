@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
+import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { formatKoreanDate } from "@/lib/format";
+import { loadViewerContext } from "@/lib/viewer";
 
 const PHOTO_SIGNED_URL_TTL_SECONDS = 60 * 60;
 const FEED_LIMIT = 50;
@@ -11,8 +13,8 @@ type FeedRow = {
   id: string;
   activity_date: string;
   distance_km: number;
-  photo_url: string;
   profiles: { name: string } | null;
+  activity_photos: { storage_path: string; sort_order: number }[];
 };
 
 export default async function FeedPage() {
@@ -25,15 +27,17 @@ export default async function FeedPage() {
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  const viewer = await loadViewerContext(supabase, user.id);
+
+  if (!viewer.teamId) {
+    redirect("/join");
+  }
 
   const { data: activities, error } = await supabase
     .from("activities")
-    .select("id, activity_date, distance_km, photo_url, profiles!user_id(name)")
+    .select(
+      "id, activity_date, distance_km, profiles!user_id(name), activity_photos(storage_path, sort_order)",
+    )
     .eq("status", "approved")
     .order("created_at", { ascending: false })
     .limit(FEED_LIMIT)
@@ -46,10 +50,16 @@ export default async function FeedPage() {
   const rows = activities ?? [];
   const items = await Promise.all(
     rows.map(async (row) => {
-      const { data } = await supabase.storage
-        .from("certifications")
-        .createSignedUrl(row.photo_url, PHOTO_SIGNED_URL_TTL_SECONDS);
-      return { ...row, signedUrl: data?.signedUrl ?? null };
+      const sortedPhotos = [...row.activity_photos].sort((a, b) => a.sort_order - b.sort_order);
+      const signedUrls = await Promise.all(
+        sortedPhotos.map(async (photo) => {
+          const { data } = await supabase.storage
+            .from("certifications")
+            .createSignedUrl(photo.storage_path, PHOTO_SIGNED_URL_TTL_SECONDS);
+          return data?.signedUrl ?? null;
+        }),
+      );
+      return { ...row, photoUrls: signedUrls.filter((url): url is string => !!url) };
     }),
   );
 
@@ -70,13 +80,8 @@ export default async function FeedPage() {
               key={item.id}
               className="overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-zinc-900"
             >
-              {item.signedUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.signedUrl}
-                  alt="인증샷"
-                  className="aspect-square w-full object-cover"
-                />
+              {item.photoUrls.length > 0 && (
+                <PhotoCarousel photoUrls={item.photoUrls} alt="인증샷" />
               )}
               <div className="flex items-center justify-between px-4 py-3 text-sm">
                 <span className="font-semibold text-zinc-900 dark:text-zinc-50">
@@ -91,7 +96,7 @@ export default async function FeedPage() {
         )}
       </main>
 
-      <BottomNav active="feed" isAdmin={profile?.role === "admin"} />
+      <BottomNav active="feed" isAdmin={viewer.teamRole === "admin"} />
     </div>
   );
 }

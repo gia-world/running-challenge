@@ -1,11 +1,12 @@
 import Link from "next/link";
 
-type ActiveTab = "home" | "feed" | "certify" | "admin";
+type ActiveTab = "home" | "feed" | "certify" | "status" | "admin";
 
 const ITEMS = [
   { key: "home", href: "/home", label: "홈", icon: "🏠" },
   { key: "feed", href: "/feed", label: "피드", icon: "📷" },
   { key: "certify", href: "/certify", label: "인증", icon: "➕" },
+  { key: "status", href: "/status", label: "현황판", icon: "📊" },
   { key: "admin", href: "/admin/review", label: "관리자", icon: "🛠️" },
 ] as const satisfies { key: ActiveTab; href: string; label: string; icon: string }[];
 
