@@ -51,8 +51,14 @@ export default async function AdminSeasonDetailPage({
     .select("user_id")
     .eq("season_id", season.id);
 
-  const participantIds = new Set((seasonMemberships ?? []).map((m) => m.user_id));
-  const weeklyStats = await computeSeasonWeeklyStats(supabase, season.id, season.start_date);
+  const participantIds = new Set(
+    (seasonMemberships ?? []).map((m) => m.user_id),
+  );
+  const weeklyStats = await computeSeasonWeeklyStats(
+    supabase,
+    season.id,
+    season.start_date,
+  );
   const isActive = season.id === viewer.activeSeason?.id;
 
   const members = (memberships ?? [])
@@ -71,7 +77,8 @@ export default async function AdminSeasonDetailPage({
         </Link>
         <div className="mt-1 flex items-center gap-2">
           <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-            {formatKoreanDate(season.start_date)} ~ {formatKoreanDate(season.end_date)}
+            {formatKoreanDate(season.start_date)} ~{" "}
+            {formatKoreanDate(season.end_date)}
           </h1>
           {isActive && (
             <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-600 dark:bg-orange-950 dark:text-orange-400">
@@ -79,9 +86,8 @@ export default async function AdminSeasonDetailPage({
             </span>
           )}
         </div>
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">참여자</p>
       </div>
-
+      <h2 className=" text-zinc-500 dark:text-zinc-400 mt-2">참여자</h2>
       <ul className="flex flex-col gap-2">
         {members.map((member) => {
           const isParticipant = participantIds.has(member.id);
