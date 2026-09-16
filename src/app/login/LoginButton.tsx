@@ -3,16 +3,25 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export function LoginButton() {
+export function LoginButton({ inviteCode }: { inviteCode?: string }) {
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleLogin() {
     setIsLoading(true);
     const supabase = createClient();
+    // Kakao/Supabase's redirect chain lands back on /auth/callback with no
+    // memory of why the user started logging in — an invite link's ?code=
+    // has to be threaded through explicitly via `next`, or a first-time
+    // crew member clicking a /join?code= link loses the code the moment
+    // they're bounced through login and ends up on a blank join form.
+    const next = inviteCode ? `/join?code=${encodeURIComponent(inviteCode)}` : undefined;
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
+    if (next) callbackUrl.searchParams.set("next", next);
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "kakao",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
         scopes: "profile_nickname profile_image",
       },
     });

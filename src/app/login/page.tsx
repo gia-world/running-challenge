@@ -7,18 +7,18 @@ import { CrewEyebrow } from "@/components/CrewEyebrow";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; reason?: string }>;
+  searchParams: Promise<{ error?: string; reason?: string; code?: string }>;
 }) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user) {
-    redirect("/home");
-  }
+  const { error, reason, code } = await searchParams;
 
-  const { error, reason } = await searchParams;
+  if (user) {
+    redirect(code ? `/join?code=${encodeURIComponent(code)}` : "/home");
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
@@ -42,7 +42,7 @@ export default async function LoginPage({
 
         <div className="mt-8">
           <KakaoInAppBrowserNotice />
-          <LoginButton />
+          <LoginButton inviteCode={code} />
         </div>
       </div>
     </div>
