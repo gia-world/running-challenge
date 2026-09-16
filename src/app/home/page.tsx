@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { WEEKLY_GOAL, todayInSeoul } from "@/lib/week";
 import { seasonWeekIndexForDate, seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
 import { loadViewerContext } from "@/lib/viewer";
@@ -12,15 +12,19 @@ import { SeasonGate } from "@/components/SeasonGate";
 import { SignOutButton } from "./SignOutButton";
 
 export default async function HomePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
 
   if (!user) {
     redirect("/login");
   }
 
+  const viewer = await loadViewerContext(user.id);
+
+  if (!viewer.teamId) {
+    redirect("/join");
+  }
+
+  const supabase = await createClient();
   const { data: profile } = await supabase
     .from("profiles")
     .select("name")
@@ -28,11 +32,6 @@ export default async function HomePage() {
     .single();
 
   const displayName = profile?.name ?? "러너";
-  const viewer = await loadViewerContext(supabase, user.id);
-
-  if (!viewer.teamId) {
-    redirect("/join");
-  }
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
@@ -72,15 +71,20 @@ async function SeasonProgress({
   const currentWeekIndex = seasonWeekIndexForDate(season.start_date, today) ?? 0;
   const { start, end } = seasonWeekRange(season.start_date, currentWeekIndex);
 
-  const { data: seasonActivities } = await supabase
+  // Fetched once and reused for both the season-wide weekly tally and this
+  // week's activity list below, rather than querying the season twice.
+  const { data: seasonActivitiesRaw } = await supabase
     .from("activities")
-    .select("activity_date")
+    .select("id, activity_date, distance_km, created_at")
     .eq("user_id", userId)
     .eq("season_id", season.id)
-    .eq("status", "approved");
+    .eq("status", "approved")
+    .order("created_at", { ascending: true });
+
+  const seasonActivities = seasonActivitiesRaw ?? [];
 
   const datesByWeek: Set<string>[] = Array.from({ length: SEASON_WEEKS }, () => new Set());
-  for (const activity of seasonActivities ?? []) {
+  for (const activity of seasonActivities) {
     const weekIndex = seasonWeekIndexForDate(season.start_date, activity.activity_date);
     if (weekIndex !== null) {
       datesByWeek[weekIndex].add(activity.activity_date);
@@ -91,18 +95,9 @@ async function SeasonProgress({
   const achieved = datesByWeek[currentWeekIndex]?.size ?? 0;
   const remaining = Math.max(WEEKLY_GOAL - achieved, 0);
 
-  const { data: weekActivitiesRaw } = await supabase
-    .from("activities")
-    .select("id, activity_date, distance_km, created_at")
-    .eq("user_id", userId)
-    .eq("season_id", season.id)
-    .eq("status", "approved")
-    .gte("activity_date", start)
-    .lte("activity_date", end)
-    .order("created_at", { ascending: true });
-
   const seenDates = new Set<string>();
-  const weekActivities = (weekActivitiesRaw ?? []).filter((activity) => {
+  const weekActivities = seasonActivities.filter((activity) => {
+    if (activity.activity_date < start || activity.activity_date > end) return false;
     if (seenDates.has(activity.activity_date)) return false;
     seenDates.add(activity.activity_date);
     return true;

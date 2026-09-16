@@ -1,4 +1,5 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { cache } from "react";
+import { createClient } from "./supabase/server";
 import { todayInSeoul } from "./week";
 import type { UserRole } from "./types";
 
@@ -19,12 +20,13 @@ export type ViewerContext = {
 /**
  * Resolves a signed-in user's team membership, today's active season for
  * that team (if any), and whether they're a participant in it. Centralized
- * here since home/feed/certify/admin all need this same context.
+ * here since home/feed/certify/admin all need this same context. Wrapped in
+ * cache() so admin's nested layout+page (both of which need this) share one
+ * set of queries per request instead of running it twice.
  */
-export async function loadViewerContext(
-  supabase: SupabaseClient,
-  userId: string,
-): Promise<ViewerContext> {
+export const loadViewerContext = cache(async (userId: string): Promise<ViewerContext> => {
+  const supabase = await createClient();
+
   const { data: membership } = await supabase
     .from("team_memberships")
     .select("team_id, role")
@@ -63,4 +65,4 @@ export async function loadViewerContext(
     activeSeason: season ?? null,
     isSeasonMember,
   };
-}
+});

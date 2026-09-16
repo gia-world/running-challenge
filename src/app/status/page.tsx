@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { loadViewerContext } from "@/lib/viewer";
 import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
 import { seasonWeekIndexForDate } from "@/lib/season";
@@ -14,16 +14,13 @@ type MembershipRow = {
 };
 
 export default async function StatusPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
 
   if (!user) {
     redirect("/login");
   }
 
-  const viewer = await loadViewerContext(supabase, user.id);
+  const viewer = await loadViewerContext(user.id);
   if (!viewer.teamId) {
     redirect("/join");
   }

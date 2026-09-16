@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { SeasonGate } from "@/components/SeasonGate";
@@ -8,16 +8,13 @@ import { todayInSeoul } from "@/lib/week";
 import { CertifyForm } from "./CertifyForm";
 
 export default async function CertifyPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
 
   if (!user) {
     redirect("/login");
   }
 
-  const viewer = await loadViewerContext(supabase, user.id);
+  const viewer = await loadViewerContext(user.id);
 
   if (!viewer.teamId) {
     redirect("/join");

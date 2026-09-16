@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
@@ -21,21 +21,19 @@ type FeedRow = {
 };
 
 export default async function FeedPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
 
   if (!user) {
     redirect("/login");
   }
 
-  const viewer = await loadViewerContext(supabase, user.id);
+  const viewer = await loadViewerContext(user.id);
 
   if (!viewer.teamId) {
     redirect("/join");
   }
 
+  const supabase = await createClient();
   const { data: activities, error } = await supabase
     .from("activities")
     .select(

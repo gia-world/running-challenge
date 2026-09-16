@@ -1,21 +1,18 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { AdminTabs } from "@/components/AdminTabs";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { loadViewerContext } from "@/lib/viewer";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
 
   if (!user) {
     redirect("/login");
   }
 
-  const viewer = await loadViewerContext(supabase, user.id);
+  const viewer = await loadViewerContext(user.id);
 
   if (!viewer.teamId) {
     redirect("/join");
@@ -25,6 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/home");
   }
 
+  const supabase = await createClient();
   const { count: pendingCount } = await supabase
     .from("activities")
     .select("id, seasons!inner(team_id)", { count: "exact", head: true })

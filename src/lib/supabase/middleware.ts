@@ -43,11 +43,15 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && !isAuthRoute && !isOnboardingRoute) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("name_confirmed")
-      .eq("id", user.id)
-      .single();
+    // Run independently of each other (neither's result depends on the
+    // other), so fire them in parallel instead of paying two sequential
+    // round-trips on every navigation.
+    const [{ data: profile }, { data: membership }] = await Promise.all([
+      supabase.from("profiles").select("name_confirmed").eq("id", user.id).single(),
+      isJoinRoute
+        ? Promise.resolve({ data: null })
+        : supabase.from("team_memberships").select("id").eq("user_id", user.id).maybeSingle(),
+    ]);
 
     if (profile && !profile.name_confirmed) {
       const url = request.nextUrl.clone();
@@ -55,18 +59,10 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    if (!isJoinRoute) {
-      const { data: membership } = await supabase
-        .from("team_memberships")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!membership) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/join";
-        return NextResponse.redirect(url);
-      }
+    if (!isJoinRoute && !membership) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/join";
+      return NextResponse.redirect(url);
     }
   }
 
