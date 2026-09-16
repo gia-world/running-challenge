@@ -25,7 +25,7 @@ export default async function LoginPage({
       <div className="w-full max-w-sm text-center">
         <CrewEyebrow size="lg" />
         <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-          뛰런인챌
+          주 3회 러닝 인증 챌린지
         </h1>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
           카카오 계정으로 바로 시작하세요.
