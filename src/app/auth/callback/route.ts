@@ -23,6 +23,20 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }
+
+    // The code may have already been exchanged by an earlier hit on this
+    // same callback URL (a page reload, the browser retrying a slow
+    // request, or the user navigating back) — OAuth codes are single-use,
+    // so a second exchange attempt fails even though the user is already
+    // signed in. Treat an existing session as success instead of bouncing
+    // them back to /login.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      return NextResponse.redirect(`${origin}${next}`);
+    }
+
     console.error("[auth/callback] exchangeCodeForSession failed:", error.message);
     return NextResponse.redirect(
       `${origin}/login?error=auth_failed&reason=${encodeURIComponent(error.message)}`,

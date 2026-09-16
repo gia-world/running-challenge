@@ -9,13 +9,20 @@ export function LoginButton() {
   async function handleLogin() {
     setIsLoading(true);
     const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "kakao",
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
         scopes: "profile_nickname profile_image",
       },
     });
+    // On success this navigates away, so isLoading never needs to reset.
+    // If it fails before navigating (e.g. offline), reset so the button
+    // isn't stuck showing "이동 중...".
+    if (error) {
+      console.error("[login] signInWithOAuth failed:", error.message);
+      setIsLoading(false);
+    }
   }
 
   return (

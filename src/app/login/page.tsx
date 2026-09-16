@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LoginButton } from "./LoginButton";
+import { KakaoInAppBrowserNotice } from "./KakaoInAppBrowserNotice";
 import { CrewEyebrow } from "@/components/CrewEyebrow";
 
 export default async function LoginPage({
@@ -40,6 +41,7 @@ export default async function LoginPage({
         )}
 
         <div className="mt-8">
+          <KakaoInAppBrowserNotice />
           <LoginButton />
         </div>
       </div>
