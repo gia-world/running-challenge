@@ -15,11 +15,13 @@ function totalSuccess(member: Member) {
 }
 
 function cellClassName(week: WeekStat, isCurrentWeek: boolean) {
-  const base = "flex h-10 w-10 items-center justify-center rounded-lg text-xs font-semibold";
+  const base =
+    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold";
   const ring = isCurrentWeek ? " ring-2 ring-orange-400" : "";
   if (week.isSuccess) return `${base} bg-green-500 text-white${ring}`;
-  if (week.achieved > 0) return `${base} bg-zinc-300 text-zinc-700 dark:bg-zinc-600 dark:text-zinc-100${ring}`;
-  return `${base} bg-zinc-100 text-zinc-300 dark:bg-zinc-800 dark:text-zinc-600${ring}`;
+  if (week.achieved > 0)
+    return `${base} bg-zinc-100 text-zinc-700 dark:bg-zinc-600 dark:text-zinc-100${ring}`;
+  return `${base} bg-zinc-100 text-zinc-300 dark:bg-zinc-800 border border-zinc-200 dark:text-zinc-600${ring}`;
 }
 
 export function StatusBoard({
@@ -36,9 +38,11 @@ export function StatusBoard({
   seasonStartDate: string;
 }) {
   const [sortKey, setSortKey] = useState<SortKey>("name");
-  const [modal, setModal] = useState<{ name: string; weekIndex: number; photoUrls: string[] } | null>(
-    null,
-  );
+  const [modal, setModal] = useState<{
+    name: string;
+    weekIndex: number;
+    photoUrls: string[];
+  } | null>(null);
   const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
 
   const sortedMembers = [...members].sort((a, b) => {
@@ -63,7 +67,9 @@ export function StatusBoard({
       .eq("status", "approved")
       .gte("activity_date", start)
       .lte("activity_date", end)
-      .returns<{ activity_photos: { storage_path: string; sort_order: number }[] }[]>();
+      .returns<
+        { activity_photos: { storage_path: string; sort_order: number }[] }[]
+      >();
 
     const allPhotos = (activities ?? [])
       .flatMap((a) => a.activity_photos)
@@ -92,21 +98,25 @@ export function StatusBoard({
         <button
           type="button"
           onClick={() => setSortKey("name")}
-          className={sortKey === "name" ? "font-bold text-orange-500" : "text-zinc-400"}
+          className={
+            sortKey === "name" ? "font-bold text-orange-500" : "text-zinc-400"
+          }
         >
           이름순
         </button>
         <button
           type="button"
           onClick={() => setSortKey("total")}
-          className={sortKey === "total" ? "font-bold text-orange-500" : "text-zinc-400"}
+          className={
+            sortKey === "total" ? "font-bold text-orange-500" : "text-zinc-400"
+          }
         >
-          누적순
+          성공횟수순
         </button>
       </div>
 
       <div className="overflow-x-auto rounded-2xl bg-white shadow-sm dark:bg-zinc-900">
-        <table className="w-full min-w-[360px] border-collapse text-sm">
+        <table className="w-full min-w-90 border-collapse text-sm">
           <thead>
             <tr className="text-xs text-zinc-400">
               <th className="px-3 py-2 text-left font-medium">이름</th>
@@ -122,7 +132,7 @@ export function StatusBoard({
                   {i + 1}주
                 </th>
               ))}
-              <th className="px-3 py-2 font-medium">누적</th>
+              <th className="px-3 py-2 font-medium">성공횟수</th>
             </tr>
           </thead>
           <tbody>
@@ -144,7 +154,10 @@ export function StatusBoard({
                       type="button"
                       onClick={() => openCell(member, weekIndex)}
                       disabled={week.achieved === 0}
-                      className={cellClassName(week, weekIndex === currentWeekIndex)}
+                      className={cellClassName(
+                        week,
+                        weekIndex === currentWeekIndex,
+                      )}
                       title={`${weekIndex + 1}주차 ${week.achieved}회`}
                     >
                       {week.achieved > 0 ? week.achieved : ""}
@@ -173,9 +186,13 @@ export function StatusBoard({
               {modal.name} · {modal.weekIndex + 1}주차
             </p>
             {isLoadingPhotos ? (
-              <p className="mt-4 py-8 text-center text-sm text-zinc-400">불러오는 중...</p>
+              <p className="mt-4 py-8 text-center text-sm text-zinc-400">
+                불러오는 중...
+              </p>
             ) : modal.photoUrls.length === 0 ? (
-              <p className="mt-4 py-8 text-center text-sm text-zinc-400">사진이 없어요.</p>
+              <p className="mt-4 py-8 text-center text-sm text-zinc-400">
+                사진이 없어요.
+              </p>
             ) : (
               <div className="mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto">
                 {modal.photoUrls.map((url) => (
@@ -184,7 +201,7 @@ export function StatusBoard({
                     key={url}
                     src={url}
                     alt="인증샷"
-                    className="aspect-square w-full flex-shrink-0 snap-center rounded-xl object-cover"
+                    className="aspect-square w-full shrink-0 snap-center rounded-xl object-cover"
                   />
                 ))}
               </div>
