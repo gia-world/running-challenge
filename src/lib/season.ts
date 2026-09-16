@@ -40,3 +40,26 @@ export function seasonWeekIndexForDate(
   if (diffDays < 0 || diffDays >= SEASON_LENGTH_DAYS) return null;
   return Math.floor(diffDays / 7);
 }
+
+/**
+ * Labels a date as the Nth certification of its season week, among a
+ * user's other approved certification dates (for display, e.g. feed
+ * captions like "2주차 1회째"). `approvedDates` need not be sorted or
+ * deduped and should include `targetDate` itself.
+ */
+export function describeSeasonOccurrence(
+  seasonStartDate: string,
+  approvedDates: string[],
+  targetDate: string,
+): { weekIndex: number; ordinal: number } | null {
+  const weekIndex = seasonWeekIndexForDate(seasonStartDate, targetDate);
+  if (weekIndex === null) return null;
+
+  const distinctDatesInWeek = Array.from(
+    new Set(
+      approvedDates.filter((date) => seasonWeekIndexForDate(seasonStartDate, date) === weekIndex),
+    ),
+  ).sort();
+
+  return { weekIndex, ordinal: distinctDatesInWeek.indexOf(targetDate) + 1 };
+}
