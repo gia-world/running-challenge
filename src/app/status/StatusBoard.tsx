@@ -16,12 +16,13 @@ function totalSuccess(member: Member) {
 
 function cellClassName(week: WeekStat, isCurrentWeek: boolean) {
   const base =
-    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold";
-  const ring = isCurrentWeek ? " ring-2 ring-orange-400" : "";
-  if (week.isSuccess) return `${base} bg-green-500 text-white${ring}`;
+    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold border border-zinc-200";
+  const ring = isCurrentWeek ? " ring-2 ring-orange-400 border-0" : "";
+  if (week.isSuccess)
+    return `${base} text-bold text-base! bg-white text-green-500 border-green-500${ring}`;
   if (week.achieved > 0)
     return `${base} bg-zinc-100 text-zinc-700 dark:bg-zinc-600 dark:text-zinc-100${ring}`;
-  return `${base} bg-zinc-100 text-zinc-300 dark:bg-zinc-800 border border-zinc-200 dark:text-zinc-600${ring}`;
+  return `${base} bg-zinc-100 text-zinc-300 dark:bg-zinc-800 dark:text-zinc-600${ring}`;
 }
 
 export function StatusBoard({
