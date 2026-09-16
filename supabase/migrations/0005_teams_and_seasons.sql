@@ -175,88 +175,91 @@ alter table seasons enable row level security;
 alter table season_memberships enable row level security;
 alter table activity_photos enable row level security;
 
+-- security definer so checking membership from inside a policy never
+-- re-triggers that same policy (a plain subquery against team_memberships
+-- from within team_memberships' own policy causes "infinite recursion
+-- detected in policy for relation team_memberships", 42P17, and the same
+-- for anything that joins through it).
+create or replace function public.is_team_member(p_team_id uuid) returns boolean
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select exists (
+    select 1 from team_memberships
+    where team_id = p_team_id and user_id = auth.uid()
+  );
+$$;
+
+create or replace function public.is_team_admin(p_team_id uuid) returns boolean
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select exists (
+    select 1 from team_memberships
+    where team_id = p_team_id and user_id = auth.uid() and role = 'admin'
+  );
+$$;
+
+grant execute on function public.is_team_member(uuid) to authenticated;
+grant execute on function public.is_team_admin(uuid) to authenticated;
+
 create policy "team members can view their team"
   on teams for select
   to authenticated
-  using (exists (
-    select 1 from team_memberships tm
-    where tm.team_id = teams.id and tm.user_id = auth.uid()
-  ));
+  using (is_team_member(id));
 
 create policy "team admins can update their team"
   on teams for update
   to authenticated
-  using (exists (
-    select 1 from team_memberships tm
-    where tm.team_id = teams.id and tm.user_id = auth.uid() and tm.role = 'admin'
-  ));
+  using (is_team_admin(id));
 
 create policy "team members can view memberships in their team"
   on team_memberships for select
   to authenticated
-  using (exists (
-    select 1 from team_memberships tm2
-    where tm2.team_id = team_memberships.team_id and tm2.user_id = auth.uid()
-  ));
+  using (is_team_member(team_id));
 
 create policy "team admins can update memberships in their team"
   on team_memberships for update
   to authenticated
-  using (exists (
-    select 1 from team_memberships tm2
-    where tm2.team_id = team_memberships.team_id
-      and tm2.user_id = auth.uid()
-      and tm2.role = 'admin'
-  ));
+  using (is_team_admin(team_id));
 
 create policy "team members can view seasons in their team"
   on seasons for select
   to authenticated
-  using (exists (
-    select 1 from team_memberships tm
-    where tm.team_id = seasons.team_id and tm.user_id = auth.uid()
-  ));
+  using (is_team_member(team_id));
 
 create policy "team admins can create seasons"
   on seasons for insert
   to authenticated
-  with check (exists (
-    select 1 from team_memberships tm
-    where tm.team_id = seasons.team_id and tm.user_id = auth.uid() and tm.role = 'admin'
-  ));
+  with check (is_team_admin(team_id));
 
 create policy "team admins can update seasons"
   on seasons for update
   to authenticated
-  using (exists (
-    select 1 from team_memberships tm
-    where tm.team_id = seasons.team_id and tm.user_id = auth.uid() and tm.role = 'admin'
-  ));
+  using (is_team_admin(team_id));
 
 create policy "team members can view season memberships in their team"
   on season_memberships for select
   to authenticated
   using (exists (
-    select 1
-    from seasons s
-    join team_memberships tm on tm.team_id = s.team_id
-    where s.id = season_memberships.season_id and tm.user_id = auth.uid()
+    select 1 from seasons s
+    where s.id = season_memberships.season_id and is_team_member(s.team_id)
   ));
 
 create policy "team admins can manage season memberships"
   on season_memberships for all
   to authenticated
   using (exists (
-    select 1
-    from seasons s
-    join team_memberships tm on tm.team_id = s.team_id
-    where s.id = season_memberships.season_id and tm.user_id = auth.uid() and tm.role = 'admin'
+    select 1 from seasons s
+    where s.id = season_memberships.season_id and is_team_admin(s.team_id)
   ))
   with check (exists (
-    select 1
-    from seasons s
-    join team_memberships tm on tm.team_id = s.team_id
-    where s.id = season_memberships.season_id and tm.user_id = auth.uid() and tm.role = 'admin'
+    select 1 from seasons s
+    where s.id = season_memberships.season_id and is_team_admin(s.team_id)
   ));
 
 create policy "activities are visible to their owner or the team once approved"
@@ -267,10 +270,7 @@ create policy "activities are visible to their owner or the team once approved"
     or (
       status = 'approved'
       and exists (
-        select 1
-        from seasons s
-        join team_memberships tm on tm.team_id = s.team_id
-        where s.id = activities.season_id and tm.user_id = auth.uid()
+        select 1 from seasons s where s.id = activities.season_id and is_team_member(s.team_id)
       )
     )
   );
@@ -279,20 +279,14 @@ create policy "team admins can view all activities in their team"
   on activities for select
   to authenticated
   using (exists (
-    select 1
-    from seasons s
-    join team_memberships tm on tm.team_id = s.team_id
-    where s.id = activities.season_id and tm.user_id = auth.uid() and tm.role = 'admin'
+    select 1 from seasons s where s.id = activities.season_id and is_team_admin(s.team_id)
   ));
 
 create policy "team admins can review any activity in their team"
   on activities for update
   to authenticated
   using (exists (
-    select 1
-    from seasons s
-    join team_memberships tm on tm.team_id = s.team_id
-    where s.id = activities.season_id and tm.user_id = auth.uid() and tm.role = 'admin'
+    select 1 from seasons s where s.id = activities.season_id and is_team_admin(s.team_id)
   ));
 
 create policy "activity photos follow their activity's visibility"
@@ -336,9 +330,6 @@ create policy "team admins can view any certification photo in their team"
       from activity_photos ap
       join activities a on a.id = ap.activity_id
       join seasons s on s.id = a.season_id
-      join team_memberships tm on tm.team_id = s.team_id
-      where ap.storage_path = storage.objects.name
-        and tm.user_id = auth.uid()
-        and tm.role = 'admin'
+      where ap.storage_path = storage.objects.name and is_team_admin(s.team_id)
     )
   );

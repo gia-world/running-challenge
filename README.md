@@ -32,11 +32,15 @@
 ### 1. Supabase 프로젝트 준비
 
 1. [supabase.com](https://supabase.com) 에서 프로젝트 생성
-2. `supabase/migrations/` 아래 `0001`~`0005`를 **번호 순서대로** SQL Editor에서 실행
+2. `supabase/migrations/` 아래 `0001`~`0006`을 **번호 순서대로** SQL Editor에서 실행
    - `0005_teams_and_seasons.sql`은 스키마를 크게 바꿉니다: `profiles.role`을 없애고
      `team_memberships.role`로 옮기고, `activities.photo_url`을 `activity_photos` 테이블로
      옮기고, 팀/시즌 테이블을 새로 만듭니다. 기존에 크루원·인증 데이터가 있어도 안전하게
      마이그레이션되도록 만들었어요(팀 1개 자동 시딩, 기존 활동을 임시 시즌에 배정).
+   - `0006_fix_team_membership_recursion.sql`은 `0005`가 심어둔 RLS 버그 하나를 고칩니다
+     (`team_memberships`를 스스로 참조하는 정책이 "infinite recursion detected in policy"
+     42P17 에러를 냄 — 팀/시즌 관련 화면이 전부 이 에러로 막혀요). `0005`를 이미 실행한
+     프로젝트는 꼭 `0006`도 실행해야 하고, 새로 시작하는 프로젝트도 순서대로 실행하면 됩니다.
 3. [developers.kakao.com](https://developers.kakao.com) 에서 앱 등록 후 REST API 키 발급
 4. Supabase Dashboard → Authentication → Providers → Kakao 활성화, REST API 키(Client ID)와 Client Secret 입력
 5. Kakao 개발자 콘솔의 Redirect URI에 `https://<your-project>.supabase.co/auth/v1/callback` 등록
