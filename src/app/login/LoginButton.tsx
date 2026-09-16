@@ -23,7 +23,7 @@ export function LoginButton() {
       type="button"
       onClick={handleLogin}
       disabled={isLoading}
-      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FEE500] px-5 py-3.5 font-semibold text-[#191600] transition-opacity hover:opacity-90 disabled:opacity-60 cursor-pointer"
+      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FEE500] px-5 py-3.5 font-semibold text-[#191600] transition-opacity hover:opacity-90 disabled:opacity-60"
     >
       <svg
         aria-hidden="true"

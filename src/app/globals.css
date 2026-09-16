@@ -110,3 +110,7 @@ body {
     "Segoe UI Symbol",
     sans-serif;
 }
+
+button {
+  cursor: pointer;
+}
