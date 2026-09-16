@@ -63,10 +63,18 @@ export default async function FeedPage() {
           .select("user_id, season_id, activity_date")
           .eq("status", "approved")
           .in("season_id", seasonIds)
-      : Promise.resolve({ data: [] as { user_id: string; season_id: string; activity_date: string }[] }),
+      : Promise.resolve({
+          data: [] as {
+            user_id: string;
+            season_id: string;
+            activity_date: string;
+          }[],
+        }),
   ]);
 
-  const seasonStartDates = new Map((seasons ?? []).map((s) => [s.id, s.start_date]));
+  const seasonStartDates = new Map(
+    (seasons ?? []).map((s) => [s.id, s.start_date]),
+  );
   const datesByUserSeason = new Map<string, string[]>();
   for (const activity of allApproved ?? []) {
     const key = `${activity.user_id}:${activity.season_id}`;
@@ -77,7 +85,9 @@ export default async function FeedPage() {
 
   const items = await Promise.all(
     rows.map(async (row) => {
-      const sortedPhotos = [...row.activity_photos].sort((a, b) => a.sort_order - b.sort_order);
+      const sortedPhotos = [...row.activity_photos].sort(
+        (a, b) => a.sort_order - b.sort_order,
+      );
       const signedUrls = await Promise.all(
         sortedPhotos.map(async (photo) => {
           const { data } = await supabase.storage
@@ -88,7 +98,8 @@ export default async function FeedPage() {
       );
 
       const seasonStart = seasonStartDates.get(row.season_id);
-      const dates = datesByUserSeason.get(`${row.user_id}:${row.season_id}`) ?? [];
+      const dates =
+        datesByUserSeason.get(`${row.user_id}:${row.season_id}`) ?? [];
       const occurrence = seasonStart
         ? describeSeasonOccurrence(seasonStart, dates, row.activity_date)
         : null;
@@ -96,7 +107,9 @@ export default async function FeedPage() {
       return {
         ...row,
         photoUrls: signedUrls.filter((url): url is string => !!url),
-        occurrenceLabel: occurrence ? `${occurrence.weekIndex + 1}주차 ${occurrence.ordinal}회째` : null,
+        occurrenceLabel: occurrence
+          ? `${occurrence.weekIndex + 1}주차 ${occurrence.ordinal}회`
+          : null,
       };
     }),
   );
@@ -104,7 +117,9 @@ export default async function FeedPage() {
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
       <PageHeader>
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">피드</h1>
+        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+          피드
+        </h1>
       </PageHeader>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-6">
@@ -122,18 +137,22 @@ export default async function FeedPage() {
                 <PhotoCarousel photoUrls={item.photoUrls} alt="인증샷" />
               )}
               <div className="flex items-center justify-between px-4 py-3 text-sm">
-                <span className="font-semibold text-zinc-900 dark:text-zinc-50">
-                  {item.profiles?.name ?? "러너"}
-                </span>
-                <div className="flex flex-col items-end gap-0.5">
-                  <span className="text-zinc-500 dark:text-zinc-400">
-                    {formatKoreanDate(item.activity_date)} · {Number(item.distance_km).toFixed(1)}km
+                <p>
+                  <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                    {item.profiles?.name ?? "러너"}
                   </span>
+                  {" · "}
                   {item.occurrenceLabel && (
                     <span className="text-xs font-medium text-orange-500">
                       {item.occurrenceLabel}
                     </span>
                   )}
+                </p>
+                <div className="flex flex-col items-end gap-0.5">
+                  <span className="text-zinc-500 dark:text-zinc-400">
+                    {formatKoreanDate(item.activity_date)} ·{" "}
+                    {Number(item.distance_km).toFixed(1)}km
+                  </span>
                 </div>
               </div>
             </article>
