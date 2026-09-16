@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { loadViewerContext } from "@/lib/viewer";
@@ -9,7 +10,12 @@ type MembershipRow = {
   profiles: { id: string; name: string } | null;
 };
 
-export default async function AdminSeasonMembersPage() {
+export default async function AdminSeasonDetailPage({
+  params,
+}: {
+  params: Promise<{ seasonId: string }>;
+}) {
+  const { seasonId } = await params;
   const supabase = await createClient();
   const {
     data: { user },
@@ -24,18 +30,15 @@ export default async function AdminSeasonMembersPage() {
     redirect("/join");
   }
 
-  if (!viewer.activeSeason) {
-    return (
-      <div className="flex flex-col gap-4">
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">시즌 참여자</h1>
-        <p className="rounded-2xl border-2 border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-          진행 중인 시즌이 없어요. 시즌 관리에서 먼저 시즌을 만들어주세요.
-        </p>
-      </div>
-    );
-  }
+  const { data: season } = await supabase
+    .from("seasons")
+    .select("id, start_date, end_date")
+    .eq("id", seasonId)
+    .single();
 
-  const season = viewer.activeSeason;
+  if (!season) {
+    redirect("/admin/season");
+  }
 
   const { data: memberships } = await supabase
     .from("team_memberships")
@@ -50,6 +53,7 @@ export default async function AdminSeasonMembersPage() {
 
   const participantIds = new Set((seasonMemberships ?? []).map((m) => m.user_id));
   const weeklyStats = await computeSeasonWeeklyStats(supabase, season.id, season.start_date);
+  const isActive = season.id === viewer.activeSeason?.id;
 
   const members = (memberships ?? [])
     .map((m) => m.profiles)
@@ -59,10 +63,23 @@ export default async function AdminSeasonMembersPage() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">시즌 참여자</h1>
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          {formatKoreanDate(season.start_date)} ~ {formatKoreanDate(season.end_date)}
-        </p>
+        <Link
+          href="/admin/season"
+          className="text-xs font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+        >
+          ← 시즌 관리
+        </Link>
+        <div className="mt-1 flex items-center gap-2">
+          <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+            {formatKoreanDate(season.start_date)} ~ {formatKoreanDate(season.end_date)}
+          </h1>
+          {isActive && (
+            <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-600 dark:bg-orange-950 dark:text-orange-400">
+              진행중
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">참여자</p>
       </div>
 
       <ul className="flex flex-col gap-2">

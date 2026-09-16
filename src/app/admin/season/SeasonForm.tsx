@@ -67,7 +67,7 @@ export function SeasonForm({
     }
 
     setIsSubmitting(false);
-    router.push("/admin/season-members");
+    router.push(`/admin/season/${season.id}`);
     router.refresh();
   }
 
