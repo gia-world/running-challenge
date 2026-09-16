@@ -193,7 +193,6 @@ export function CertifyForm({
         <input
           type="file"
           accept="image/*"
-          capture="environment"
           multiple
           disabled={isBlocked}
           onChange={handleFileChange}
