@@ -3,10 +3,18 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
+import { formatKoreanDate } from "@/lib/format";
 import type { WeekStat } from "@/lib/seasonStats";
 
 type Member = { id: string; name: string; weeks: WeekStat[] };
 type SortKey = "name" | "total";
+type ModalActivity = {
+  id: string;
+  ordinal: number;
+  activityDate: string;
+  distanceKm: number;
+  photoUrls: string[];
+};
 
 const PHOTO_SIGNED_URL_TTL_SECONDS = 60 * 60;
 
@@ -42,7 +50,7 @@ export function StatusBoard({
   const [modal, setModal] = useState<{
     name: string;
     weekIndex: number;
-    photoUrls: string[];
+    activities: ModalActivity[];
   } | null>(null);
   const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
 
@@ -55,41 +63,53 @@ export function StatusBoard({
     if (member.weeks[weekIndex].achieved === 0) return;
 
     setIsLoadingPhotos(true);
-    setModal({ name: member.name, weekIndex, photoUrls: [] });
+    setModal({ name: member.name, weekIndex, activities: [] });
 
     const supabase = createClient();
     const { start, end } = seasonWeekRange(seasonStartDate, weekIndex);
 
     const { data: activities } = await supabase
       .from("activities")
-      .select("activity_photos(storage_path, sort_order)")
+      .select("id, activity_date, distance_km, activity_photos(storage_path, sort_order)")
       .eq("user_id", member.id)
       .eq("season_id", seasonId)
       .eq("status", "approved")
       .gte("activity_date", start)
       .lte("activity_date", end)
+      .order("activity_date", { ascending: true })
       .returns<
-        { activity_photos: { storage_path: string; sort_order: number }[] }[]
+        {
+          id: string;
+          activity_date: string;
+          distance_km: number;
+          activity_photos: { storage_path: string; sort_order: number }[];
+        }[]
       >();
 
-    const allPhotos = (activities ?? [])
-      .flatMap((a) => a.activity_photos)
-      .sort((a, b) => a.sort_order - b.sort_order);
-
-    const signedUrls = await Promise.all(
-      allPhotos.map(async (photo) => {
-        const { data } = await supabase.storage
-          .from("certifications")
-          .createSignedUrl(photo.storage_path, PHOTO_SIGNED_URL_TTL_SECONDS);
-        return data?.signedUrl ?? null;
+    const modalActivities = await Promise.all(
+      (activities ?? []).map(async (activity, index) => {
+        const sortedPhotos = [...activity.activity_photos].sort(
+          (a, b) => a.sort_order - b.sort_order,
+        );
+        const signedUrls = await Promise.all(
+          sortedPhotos.map(async (photo) => {
+            const { data } = await supabase.storage
+              .from("certifications")
+              .createSignedUrl(photo.storage_path, PHOTO_SIGNED_URL_TTL_SECONDS);
+            return data?.signedUrl ?? null;
+          }),
+        );
+        return {
+          id: activity.id,
+          ordinal: index + 1,
+          activityDate: activity.activity_date,
+          distanceKm: Number(activity.distance_km),
+          photoUrls: signedUrls.filter((url): url is string => !!url),
+        };
       }),
     );
 
-    setModal({
-      name: member.name,
-      weekIndex,
-      photoUrls: signedUrls.filter((url): url is string => !!url),
-    });
+    setModal({ name: member.name, weekIndex, activities: modalActivities });
     setIsLoadingPhotos(false);
   }
 
@@ -190,20 +210,32 @@ export function StatusBoard({
               <p className="mt-4 py-8 text-center text-sm text-zinc-400">
                 불러오는 중...
               </p>
-            ) : modal.photoUrls.length === 0 ? (
+            ) : modal.activities.length === 0 ? (
               <p className="mt-4 py-8 text-center text-sm text-zinc-400">
                 사진이 없어요.
               </p>
             ) : (
-              <div className="mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto">
-                {modal.photoUrls.map((url) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={url}
-                    src={url}
-                    alt="인증샷"
-                    className="aspect-square w-full shrink-0 snap-center rounded-xl object-cover"
-                  />
+              <div className="mt-3 flex max-h-[70vh] flex-col gap-4 overflow-y-auto">
+                {modal.activities.map((activity) => (
+                  <div key={activity.id} className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-orange-500">
+                        {activity.ordinal}회째 · {formatKoreanDate(activity.activityDate)}
+                      </span>
+                      <span className="text-zinc-400">{activity.distanceKm.toFixed(1)}km</span>
+                    </div>
+                    <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto">
+                      {activity.photoUrls.map((url) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          key={url}
+                          src={url}
+                          alt="인증샷"
+                          className="aspect-square w-full shrink-0 snap-center rounded-xl object-cover"
+                        />
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
