@@ -4,6 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+const REJECT_REASONS = [
+  "날짜가 안 보여요",
+  "거리가 안 보여요",
+  "페이스가 안 보여요",
+  "본인 기록인지 확인이 안 돼요",
+] as const;
+
 export function ReviewItem({ activityId }: { activityId: string }) {
   const router = useRouter();
   const [isShowingReject, setIsShowingReject] = useState(false);
@@ -65,11 +72,28 @@ export function ReviewItem({ activityId }: { activityId: string }) {
   if (isShowingReject) {
     return (
       <div className="mt-3 flex flex-col gap-2">
+        <div className="flex flex-wrap gap-1.5">
+          {REJECT_REASONS.map((presetReason) => (
+            <button
+              key={presetReason}
+              type="button"
+              onClick={() => setReason(presetReason)}
+              disabled={isSubmitting}
+              className={
+                reason === presetReason
+                  ? "rounded-full bg-red-500 px-3 py-1.5 text-xs font-medium text-white"
+                  : "rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+              }
+            >
+              {presetReason}
+            </button>
+          ))}
+        </div>
         <input
           type="text"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          placeholder="불인정 사유 (예: 날짜가 안 보여요)"
+          placeholder="불인정 사유 (직접 입력도 가능해요)"
           className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
         />
         {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
