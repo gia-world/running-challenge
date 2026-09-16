@@ -93,6 +93,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  /* Stops double-tap-to-zoom on mobile (buttons/taps feel laggy without
+     this, since the browser waits to see if a second tap is coming).
+     Pinch-zoom still works since "manipulation" keeps pan-x/pan-y/pinch. */
+  touch-action: manipulation;
   font-family:
     "Pretendard Variable",
     Pretendard,
