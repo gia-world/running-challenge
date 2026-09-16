@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
-import { CrewEyebrow } from "@/components/CrewEyebrow";
+import { PageHeader } from "@/components/PageHeader";
 import { formatKoreanDate } from "@/lib/format";
 
 const PHOTO_SIGNED_URL_TTL_SECONDS = 60 * 60;
@@ -55,10 +55,9 @@ export default async function FeedPage() {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
-      <header className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
-        <CrewEyebrow />
+      <PageHeader>
         <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">피드</h1>
-      </header>
+      </PageHeader>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-6">
         {items.length === 0 ? (

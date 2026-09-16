@@ -5,6 +5,7 @@ export type Profile = {
   id: string;
   name: string;
   role: UserRole;
+  name_confirmed: boolean;
   created_at: string;
 };
 

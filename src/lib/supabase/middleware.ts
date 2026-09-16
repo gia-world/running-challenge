@@ -33,11 +33,26 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute =
     request.nextUrl.pathname.startsWith("/login") ||
     request.nextUrl.pathname.startsWith("/auth");
+  const isOnboardingRoute = request.nextUrl.pathname.startsWith("/onboarding");
 
   if (!user && !isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
+  }
+
+  if (user && !isAuthRoute && !isOnboardingRoute) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("name_confirmed")
+      .eq("id", user.id)
+      .single();
+
+    if (profile && !profile.name_confirmed) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/onboarding";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;

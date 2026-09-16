@@ -1,0 +1,43 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { CrewEyebrow } from "@/components/CrewEyebrow";
+import { OnboardingForm } from "./OnboardingForm";
+
+export default async function OnboardingPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("name, name_confirmed")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.name_confirmed) {
+    redirect("/home");
+  }
+
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
+      <div className="w-full max-w-sm text-center">
+        <CrewEyebrow size="lg" />
+        <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+          이름을 확인해주세요
+        </h1>
+        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+          크루원들에게는 이 이름으로 보여요.
+        </p>
+
+        <div className="mt-8">
+          <OnboardingForm userId={user.id} currentName={profile?.name ?? "러너"} />
+        </div>
+      </div>
+    </div>
+  );
+}

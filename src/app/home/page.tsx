@@ -5,7 +5,7 @@ import { currentWeekRangeInSeoul, WEEKLY_GOAL } from "@/lib/week";
 import { formatKoreanDate } from "@/lib/format";
 import { WeeklyDots } from "@/components/WeeklyDots";
 import { BottomNav } from "@/components/BottomNav";
-import { CrewEyebrow } from "@/components/CrewEyebrow";
+import { PageHeader } from "@/components/PageHeader";
 import { SignOutButton } from "./SignOutButton";
 import type { Activity } from "@/lib/types";
 
@@ -44,15 +44,11 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
-      <header className="flex items-center justify-between border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
-        <div>
-          <CrewEyebrow />
-          <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-            {displayName}님, 안녕하세요 👋
-          </h1>
-        </div>
-        <SignOutButton />
-      </header>
+      <PageHeader action={<SignOutButton />}>
+        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+          {displayName}님, 안녕하세요 👋
+        </h1>
+      </PageHeader>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10">
         <section className="rounded-2xl bg-white p-6 text-center shadow-sm dark:bg-zinc-900">

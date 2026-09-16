@@ -11,6 +11,7 @@
 - [x] 피드 — 크루원 인증 타임라인
 - [x] 인증 — 인증샷 수동 업로드
 - [x] 관리자 — 심사 대기 / 크루원 관리
+- [x] 최초 로그인 시 실명 확인 온보딩
 
 ## 스택
 
@@ -22,8 +23,8 @@
 ### 1. Supabase 프로젝트 준비
 
 1. [supabase.com](https://supabase.com) 에서 프로젝트 생성
-2. `supabase/migrations/0001_init.sql`, `0002_storage.sql`, `0003_admin_access.sql` 을 순서대로 SQL Editor에서 실행
-   (profiles / activities 테이블 + RLS 정책, 인증샷용 private Storage 버킷, 관리자 조회 정책 생성)
+2. `supabase/migrations/0001_init.sql`, `0002_storage.sql`, `0003_admin_access.sql`, `0004_name_confirmation.sql` 을 순서대로 SQL Editor에서 실행
+   (profiles / activities 테이블 + RLS 정책, 인증샷용 private Storage 버킷, 관리자 조회 정책, 실명 확인 여부 컬럼 생성)
 3. [developers.kakao.com](https://developers.kakao.com) 에서 앱 등록 후 REST API 키 발급
 4. Supabase Dashboard → Authentication → Providers → Kakao 활성화, REST API 키(Client ID)와 Client Secret 입력
 5. Kakao 개발자 콘솔의 Redirect URI에 `https://<your-project>.supabase.co/auth/v1/callback` 등록
@@ -48,7 +49,9 @@ npm run dev
 ```
 
 [http://localhost:3000](http://localhost:3000) 접속 시 로그인 상태가 아니면 `/login` 으로,
-로그인 상태면 `/home` (이번 주 인증 현황)으로 이동합니다.
+로그인 상태면 `/home` (이번 주 인증 현황)으로 이동합니다. 카카오 로그인 직후 실명 확인이
+안 된 계정(`profiles.name_confirmed = false`)은 `/onboarding` 으로 먼저 이동해 이름을
+확인/수정한 뒤에야 나머지 화면에 접근할 수 있습니다.
 
 ## 인증 규칙 (v0)
 
