@@ -19,13 +19,22 @@ export function JoinForm({ initialCode }: { initialCode?: string }) {
 
     setIsSubmitting(true);
     setError(null);
-    const supabase = createClient();
-    const { error: rpcError } = await supabase.rpc("join_team_by_invite_code", {
-      p_code: trimmed,
-    });
 
-    if (rpcError) {
-      setError("초대 코드가 올바르지 않아요. 다시 확인해주세요.");
+    try {
+      const supabase = createClient();
+      const { error: rpcError } = await supabase.rpc("join_team_by_invite_code", {
+        p_code: trimmed,
+      });
+
+      if (rpcError) {
+        console.error("[join] join_team_by_invite_code failed:", rpcError.message);
+        setError("초대 코드가 올바르지 않아요. 다시 확인해주세요.");
+        setIsSubmitting(false);
+        return;
+      }
+    } catch (err) {
+      console.error("[join] unexpected error calling join_team_by_invite_code:", err);
+      setError("참여에 실패했어요. 잠시 후 다시 시도해주세요.");
       setIsSubmitting(false);
       return;
     }
