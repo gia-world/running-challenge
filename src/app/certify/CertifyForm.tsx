@@ -8,6 +8,9 @@ import { todayInSeoul } from "@/lib/week";
 
 type PendingPhoto = { file: File; previewUrl: string };
 
+const UNIQUE_VIOLATION = "23505";
+const ALREADY_CERTIFIED_MESSAGE = "오늘은 이미 인증하셨어요.";
+
 export function CertifyForm({
   userId,
   seasonId,
@@ -18,12 +21,15 @@ export function CertifyForm({
   alreadyCertifiedToday: boolean;
 }) {
   const router = useRouter();
+  const today = todayInSeoul();
   const [photos, setPhotos] = useState<PendingPhoto[]>([]);
-  const [activityDate, setActivityDate] = useState(todayInSeoul());
+  const [activityDate, setActivityDate] = useState(today);
   const [distanceKm, setDistanceKm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDone, setIsDone] = useState(false);
+
+  const isBlocked = activityDate === today && alreadyCertifiedToday;
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files ?? []);
@@ -39,6 +45,11 @@ export function CertifyForm({
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (isBlocked) {
+      setError(ALREADY_CERTIFIED_MESSAGE);
+      return;
+    }
 
     if (photos.length === 0) {
       setError("인증샷을 선택해주세요.");
@@ -90,7 +101,11 @@ export function CertifyForm({
       .single();
 
     if (insertError || !activity) {
-      setError("인증 등록에 실패했어요. 다시 시도해주세요.");
+      setError(
+        insertError?.code === UNIQUE_VIOLATION
+          ? ALREADY_CERTIFIED_MESSAGE
+          : "인증 등록에 실패했어요. 다시 시도해주세요.",
+      );
       setIsSubmitting(false);
       return;
     }
@@ -138,10 +153,10 @@ export function CertifyForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      {alreadyCertifiedToday && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:bg-amber-950 dark:text-amber-400">
-          오늘은 이미 인증하셨어요. 오늘 추가 등록 건은 주간 집계에는 포함되지
-          않아요.
+      {isBlocked && (
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+          {ALREADY_CERTIFIED_MESSAGE} 다른 날짜를 선택하면 추가로 인증할 수
+          있어요.
         </p>
       )}
 
@@ -180,6 +195,7 @@ export function CertifyForm({
           accept="image/*"
           capture="environment"
           multiple
+          disabled={isBlocked}
           onChange={handleFileChange}
           className="text-sm"
         />
@@ -192,7 +208,7 @@ export function CertifyForm({
         <input
           type="date"
           value={activityDate}
-          max={todayInSeoul()}
+          max={today}
           onChange={(e) => setActivityDate(e.target.value)}
           className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
         />
@@ -210,7 +226,8 @@ export function CertifyForm({
           value={distanceKm}
           onChange={(e) => setDistanceKm(e.target.value)}
           placeholder="5.0"
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          disabled={isBlocked}
+          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900"
         />
       </label>
 
@@ -222,10 +239,14 @@ export function CertifyForm({
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || isBlocked}
         className="rounded-xl bg-orange-500 px-5 py-3.5 font-semibold text-white disabled:opacity-60"
       >
-        {isSubmitting ? "업로드 중..." : "인증하기"}
+        {isBlocked
+          ? "오늘은 이미 인증했어요"
+          : isSubmitting
+            ? "업로드 중..."
+            : "인증하기"}
       </button>
     </form>
   );

@@ -32,7 +32,7 @@
 ### 1. Supabase 프로젝트 준비
 
 1. [supabase.com](https://supabase.com) 에서 프로젝트 생성
-2. `supabase/migrations/` 아래 `0001`~`0006`을 **번호 순서대로** SQL Editor에서 실행
+2. `supabase/migrations/` 아래 `0001`~`0007`을 **번호 순서대로** SQL Editor에서 실행
    - `0005_teams_and_seasons.sql`은 스키마를 크게 바꿉니다: `profiles.role`을 없애고
      `team_memberships.role`로 옮기고, `activities.photo_url`을 `activity_photos` 테이블로
      옮기고, 팀/시즌 테이블을 새로 만듭니다. 기존에 크루원·인증 데이터가 있어도 안전하게
@@ -41,6 +41,10 @@
      (`team_memberships`를 스스로 참조하는 정책이 "infinite recursion detected in policy"
      42P17 에러를 냄 — 팀/시즌 관련 화면이 전부 이 에러로 막혀요). `0005`를 이미 실행한
      프로젝트는 꼭 `0006`도 실행해야 하고, 새로 시작하는 프로젝트도 순서대로 실행하면 됩니다.
+   - `0007_restore_one_per_day.sql`은 하루 1건 제한을 다시 DB 제약으로 되살립니다
+     (`0005`가 잠깐 풀어놨던 것). 같은 날짜에 반려 아닌 건이 이미 있으면 새로 못 넣도록
+     unique index를 만들고, 실행 전에 이미 같은 날 중복 건이 있으면 가장 먼저 올라온
+     건만 남기고 나머지는 자동으로 반려 처리합니다(기록은 남되 무효 처리).
 3. [developers.kakao.com](https://developers.kakao.com) 에서 앱 등록 후 REST API 키 발급
 4. Supabase Dashboard → Authentication → Providers → Kakao 활성화, REST API 키(Client ID)와 Client Secret 입력
 5. Kakao 개발자 콘솔의 Redirect URI에 `https://<your-project>.supabase.co/auth/v1/callback` 등록
@@ -79,7 +83,11 @@ npm run dev
 ## 인증 규칙 (v0)
 
 - 주 시작 요일: 월요일 (Asia/Seoul 기준), 시즌은 시작일부터 4주(28일)
-- 판정 기준: 5km 이상. 하루에 여러 번 업로드는 가능하지만 집계에는 하루 1건만
-  반영되고(거리 합산 없음), 이미 그날 인증이 있으면 업로드 화면에 안내가 떠요
+- 판정 기준: 5km 이상. **하루에 인증은 최대 1건**까지만 가능 — 이미 그날 인증(심사중
+  포함)이 있으면 업로드 자체가 막히고 "오늘은 이미 인증하셨어요" 안내가 떠요(DB에도
+  unique index로 강제되어 있어요)
+- 주 3회를 넘어서, 그 주 안에서 아직 인증 안 한 다른 날짜에 추가로 인증하는 건 계속
+  가능해요. 초과분도 집계에 그대로 반영되지만(현황판은 "3회 이상 달성 여부"만 표시하므로
+  초과 횟수를 따로 다르게 처리할 필요는 없음), v0에는 랭킹이 없어서 별도로 쓰이진 않아요
 - 불인정된 건은 수정 불가 — 새로 업로드해야 하고, 기존 건은 무효 기록으로 남습니다
 - 자동 연동(스트라바 등) 없이 수동 업로드 + 관리자 인정/불인정 심사로 시작
