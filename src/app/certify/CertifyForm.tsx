@@ -27,7 +27,9 @@ export function CertifyForm({
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files ?? []);
-    setPhotos(selected.map((file) => ({ file, previewUrl: URL.createObjectURL(file) })));
+    setPhotos(
+      selected.map((file) => ({ file, previewUrl: URL.createObjectURL(file) })),
+    );
   }
 
   function removePhoto(index: number) {
@@ -93,13 +95,15 @@ export function CertifyForm({
       return;
     }
 
-    const { error: photosError } = await supabase.from("activity_photos").insert(
-      uploadedPaths.map((storage_path, sort_order) => ({
-        activity_id: activity.id,
-        storage_path,
-        sort_order,
-      })),
-    );
+    const { error: photosError } = await supabase
+      .from("activity_photos")
+      .insert(
+        uploadedPaths.map((storage_path, sort_order) => ({
+          activity_id: activity.id,
+          storage_path,
+          sort_order,
+        })),
+      );
 
     if (photosError) {
       setError("사진 등록에 실패했어요. 다시 시도해주세요.");
@@ -115,7 +119,9 @@ export function CertifyForm({
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
         <p className="text-3xl">🎉</p>
-        <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">인증샷을 올렸어요!</p>
+        <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+          인증샷을 올렸어요!
+        </p>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           관리자 심사 후 이번 주 기록에 반영돼요.
         </p>
@@ -134,7 +140,8 @@ export function CertifyForm({
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       {alreadyCertifiedToday && (
         <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:bg-amber-950 dark:text-amber-400">
-          오늘은 이미 인증하셨어요. 이 건은 주간 집계에는 포함되지 않아요.
+          오늘은 이미 인증하셨어요. 오늘 추가 등록 건은 주간 집계에는 포함되지
+          않아요.
         </p>
       )}
 
@@ -165,7 +172,7 @@ export function CertifyForm({
           </div>
         ) : (
           <div className="flex aspect-square w-full items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 px-4 text-center text-sm text-zinc-400 dark:border-zinc-700">
-            날짜·거리가 보이는 스크린샷을 선택하세요
+            날짜, 거리, 페이스가 보이는 스크린샷을 선택하세요
           </div>
         )}
         <input
@@ -179,7 +186,9 @@ export function CertifyForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">날짜</span>
+        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          날짜
+        </span>
         <input
           type="date"
           value={activityDate}
@@ -190,7 +199,9 @@ export function CertifyForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">거리 (km)</span>
+        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          거리 (km)
+        </span>
         <input
           type="number"
           step="0.1"
