@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatKoreanDate } from "@/lib/format";
+import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { ReviewItem } from "./ReviewItem";
 
 const PHOTO_SIGNED_URL_TTL_SECONDS = 60 * 60;
@@ -8,8 +9,8 @@ type PendingRow = {
   id: string;
   activity_date: string;
   distance_km: number;
-  photo_url: string;
   profiles: { name: string } | null;
+  activity_photos: { storage_path: string; sort_order: number }[];
 };
 
 export default async function AdminReviewPage() {
@@ -17,7 +18,9 @@ export default async function AdminReviewPage() {
 
   const { data: activities, error } = await supabase
     .from("activities")
-    .select("id, activity_date, distance_km, photo_url, profiles!user_id(name)")
+    .select(
+      "id, activity_date, distance_km, profiles!user_id(name), activity_photos(storage_path, sort_order)",
+    )
     .eq("status", "pending")
     .order("created_at", { ascending: true })
     .returns<PendingRow[]>();
@@ -29,10 +32,16 @@ export default async function AdminReviewPage() {
   const rows = activities ?? [];
   const items = await Promise.all(
     rows.map(async (row) => {
-      const { data } = await supabase.storage
-        .from("certifications")
-        .createSignedUrl(row.photo_url, PHOTO_SIGNED_URL_TTL_SECONDS);
-      return { ...row, signedUrl: data?.signedUrl ?? null };
+      const sortedPhotos = [...row.activity_photos].sort((a, b) => a.sort_order - b.sort_order);
+      const signedUrls = await Promise.all(
+        sortedPhotos.map(async (photo) => {
+          const { data } = await supabase.storage
+            .from("certifications")
+            .createSignedUrl(photo.storage_path, PHOTO_SIGNED_URL_TTL_SECONDS);
+          return data?.signedUrl ?? null;
+        }),
+      );
+      return { ...row, photoUrls: signedUrls.filter((url): url is string => !!url) };
     }),
   );
 
@@ -52,13 +61,8 @@ export default async function AdminReviewPage() {
             key={item.id}
             className="overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-zinc-900"
           >
-            {item.signedUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={item.signedUrl}
-                alt="인증샷"
-                className="aspect-square w-full object-cover"
-              />
+            {item.photoUrls.length > 0 && (
+              <PhotoCarousel photoUrls={item.photoUrls} alt="인증샷" />
             )}
             <div className="px-4 py-3">
               <div className="flex items-center justify-between text-sm">

@@ -34,6 +34,7 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/login") ||
     request.nextUrl.pathname.startsWith("/auth");
   const isOnboardingRoute = request.nextUrl.pathname.startsWith("/onboarding");
+  const isJoinRoute = request.nextUrl.pathname.startsWith("/join");
 
   if (!user && !isAuthRoute) {
     const url = request.nextUrl.clone();
@@ -52,6 +53,20 @@ export async function updateSession(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = "/onboarding";
       return NextResponse.redirect(url);
+    }
+
+    if (!isJoinRoute) {
+      const { data: membership } = await supabase
+        .from("team_memberships")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!membership) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/join";
+        return NextResponse.redirect(url);
+      }
     }
   }
 
