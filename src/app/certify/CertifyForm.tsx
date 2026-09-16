@@ -103,7 +103,7 @@ export function CertifyForm({
     if (insertError || !activity) {
       setError(
         insertError?.code === UNIQUE_VIOLATION
-          ? ALREADY_CERTIFIED_MESSAGE
+          ? "이 날은 이미 인증하셨어요."
           : "인증 등록에 실패했어요. 다시 시도해주세요.",
       );
       setIsSubmitting(false);
@@ -155,8 +155,8 @@ export function CertifyForm({
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       {isBlocked && (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
-          {ALREADY_CERTIFIED_MESSAGE} 다른 날짜를 선택하면 추가로 인증할 수
-          있어요.
+          오늘은 이미 인증하셨어요.
+          <br /> 다른 날짜를 선택하면 추가로 인증할 수 있어요.
         </p>
       )}
 
