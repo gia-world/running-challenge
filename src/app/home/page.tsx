@@ -8,6 +8,7 @@ import { formatKoreanDate } from "@/lib/format";
 import { WeeklyDots } from "@/components/WeeklyDots";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
+import { SeasonGate } from "@/components/SeasonGate";
 import { SignOutButton } from "./SignOutButton";
 
 export default async function HomePage() {
@@ -42,16 +43,9 @@ export default async function HomePage() {
       </PageHeader>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10">
-        {!viewer.activeSeason ? (
-          <EmptyState message="지금 진행 중인 시즌이 없어요. 관리자가 시즌을 만들면 인증을 시작할 수 있어요." />
-        ) : !viewer.isSeasonMember ? (
-          <EmptyState message="이번 시즌에는 참여 중이 아니에요. 관리자에게 참여를 요청해주세요." />
-        ) : (
-          <SeasonProgress
-            userId={user.id}
-            season={viewer.activeSeason}
-          />
-        )}
+        <SeasonGate viewer={viewer}>
+          {viewer.activeSeason && <SeasonProgress userId={user.id} season={viewer.activeSeason} />}
+        </SeasonGate>
 
         <Link
           href="/certify"
@@ -63,14 +57,6 @@ export default async function HomePage() {
 
       <BottomNav active="home" isAdmin={viewer.teamRole === "admin"} />
     </div>
-  );
-}
-
-function EmptyState({ message }: { message: string }) {
-  return (
-    <section className="rounded-2xl border-2 border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-      {message}
-    </section>
   );
 }
 
