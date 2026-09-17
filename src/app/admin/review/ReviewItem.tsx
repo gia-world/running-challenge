@@ -41,7 +41,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
 
   async function reject() {
     if (!reason.trim()) {
-      setError("불인정 사유를 입력해주세요.");
+      setError("반려 사유를 입력해주세요.");
       return;
     }
     setIsSubmitting(true);
@@ -93,7 +93,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
           type="text"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          placeholder="불인정 사유 (직접 입력도 가능해요)"
+          placeholder="반려 사유 (직접 입력도 가능해요)"
           className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
         />
         {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
@@ -104,7 +104,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
             disabled={isSubmitting}
             className="flex-1 rounded-lg bg-red-500 py-2 text-sm font-semibold text-white disabled:opacity-60"
           >
-            불인정 확정
+            반려 확정
           </button>
           <button
             type="button"
@@ -140,7 +140,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
           disabled={isSubmitting}
           className="flex-1 rounded-lg bg-zinc-200 py-2 text-sm font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
         >
-          불인정
+          반려
         </button>
       </div>
     </div>
