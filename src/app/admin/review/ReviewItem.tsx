@@ -81,6 +81,15 @@ export function ReviewItem({ activityId }: { activityId: string }) {
       return;
     }
     await resolveReviewRequests(user?.id);
+
+    // Best-effort — a missed KakaoTalk notification shouldn't affect the
+    // rejection itself, which already succeeded above.
+    fetch("/api/notify/activity-rejected", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ activityId }),
+    }).catch((err) => console.error("[admin/review] notify activity-rejected failed:", err));
+
     router.refresh();
   }
 

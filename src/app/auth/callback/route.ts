@@ -19,8 +19,20 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // Only present if the user granted the optional talk_message scope.
+      // Stored so the backend can send KakaoTalk notifications later,
+      // without the user needing to be in an active browser session.
+      const refreshToken = data.session?.provider_refresh_token;
+      if (refreshToken && data.session) {
+        const { error: tokenError } = await supabase
+          .from("kakao_tokens")
+          .upsert({ user_id: data.session.user.id, refresh_token: refreshToken });
+        if (tokenError) {
+          console.error("[auth/callback] failed to store kakao refresh token:", tokenError.message);
+        }
+      }
       return NextResponse.redirect(`${origin}${next}`);
     }
 

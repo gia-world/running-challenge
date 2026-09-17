@@ -32,7 +32,7 @@
 ### 1. Supabase 프로젝트 준비
 
 1. [supabase.com](https://supabase.com) 에서 프로젝트 생성
-2. `supabase/migrations/` 아래 `0001`~`0012`를 **번호 순서대로** SQL Editor에서 실행
+2. `supabase/migrations/` 아래 `0001`~`0013`을 **번호 순서대로** SQL Editor에서 실행
    - `0005_teams_and_seasons.sql`은 스키마를 크게 바꿉니다: `profiles.role`을 없애고
      `team_memberships.role`로 옮기고, `activities.photo_url`을 `activity_photos` 테이블로
      옮기고, 팀/시즌 테이블을 새로 만듭니다. 기존에 팀원·인증 데이터가 있어도 안전하게
@@ -74,15 +74,24 @@
      데이터를 `❤️` 반응으로 그대로 이관한 뒤 `activity_likes` 테이블은 삭제합니다.
      한 사람이 한 활동에 여러 종류의 이모지를 동시에 남길 수 있고, 같은 이모지를
      중복으로 남기는 것만 unique 제약으로 막습니다.
+   - `0013_kakao_tokens.sql`은 카카오톡 알림 발송용입니다. 로그인할 때 선택
+     동의 항목으로 `talk_message` scope를 같이 요청해서, 동의한 사람의 카카오
+     refresh token을 `kakao_tokens`에 저장합니다(재인증 요청 발생 시 관리자에게,
+     반려 처리 시 본인에게 "나에게 보내기"로 알림을 보내는 데 씁니다). 본인 것만
+     select/insert/update 가능하고, 다른 사람 토큰을 읽는 건 서버 쪽 service_role
+     코드(`src/app/api/notify/*`)만 할 수 있어요.
 3. [developers.kakao.com](https://developers.kakao.com) 에서 앱 등록 후 REST API 키 발급
 4. Supabase Dashboard → Authentication → Providers → Kakao 활성화, REST API 키(Client ID)와 Client Secret 입력
 5. Kakao 개발자 콘솔의 Redirect URI에 `https://<your-project>.supabase.co/auth/v1/callback` 등록
-6. **마이그레이션 실행 후, 반드시 관리자로 새 시즌을 하나 만들어주세요** (`/admin/season`).
+6. Kakao 개발자 콘솔에서 "카카오톡 메시지 전송"(`talk_message`) 동의항목을 "이용 중 동의"로
+   활성화 (카카오톡 알림 기능에 필요 — 안 켜져 있으면 그 동의 항목 없이도 로그인 자체는 되지만
+   알림은 안 감)
+7. **마이그레이션 실행 후, 반드시 관리자로 새 시즌을 하나 만들어주세요** (`/admin/season`).
    `0005` 마이그레이션이 기존 인증 기록을 위해 과거 날짜 범위의 임시 시즌을 하나 만들어두긴
    하지만, 그건 오늘 날짜를 포함하지 않을 가능성이 높아서 실제로 인증을 계속하려면 새
    시즌이 필요합니다. 시즌이 없으면 홈/인증/현황판이 전부 "진행 중인 시즌이 없어요" 빈
    상태로 보여요.
-7. 관리자 지정은 v0에서 UI 없이 SQL로 직접 합니다 (기획서 기준 1~2명 하드코딩):
+8. 관리자 지정은 v0에서 UI 없이 SQL로 직접 합니다 (기획서 기준 1~2명 하드코딩):
    ```sql
    update team_memberships set role = 'admin'
    where user_id = '<카카오로 로그인한 유저의 UUID>';
@@ -90,11 +99,16 @@
 
 ### 2. 환경 변수
 
-`.env.example` 을 `.env.local` 로 복사하고 Supabase 프로젝트의 URL/anon key를 채워주세요.
+`.env.example` 을 `.env.local` 로 복사하고 값을 채워주세요.
 
 ```bash
 cp .env.example .env.local
 ```
+
+- `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase 프로젝트 URL/anon key
+- `SUPABASE_SERVICE_ROLE_KEY` / `KAKAO_CLIENT_ID` / `KAKAO_CLIENT_SECRET` / `NEXT_PUBLIC_APP_URL`:
+  카카오톡 알림 발송(`src/app/api/notify/*`)에 필요. 배포 환경(Vercel 등)에도 같은 이름으로
+  설정해야 알림이 실제로 나갑니다 — 안 설정해도 로그인/인증 등 나머지 기능은 그대로 동작해요.
 
 ### 3. 개발 서버 실행
 

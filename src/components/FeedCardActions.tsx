@@ -122,6 +122,14 @@ export function FeedCardActions({
           .insert({ activity_id: activityId, requested_by: currentUserId });
         if (error && error.code !== UNIQUE_VIOLATION) throw error;
         setRequested(true);
+
+        // Best-effort — a missed KakaoTalk notification shouldn't affect
+        // the request itself, which already succeeded above.
+        fetch("/api/notify/review-request", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ activityId }),
+        }).catch((err) => console.error("[feed] notify review-request failed:", err));
       }
     } catch (err) {
       console.error("[feed] review request toggle failed:", err);

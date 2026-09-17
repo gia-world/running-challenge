@@ -22,7 +22,11 @@ export function LoginButton({ inviteCode }: { inviteCode?: string }) {
       provider: "kakao",
       options: {
         redirectTo: callbackUrl.toString(),
-        scopes: "profile_nickname profile_image",
+        // talk_message lets us later send a "나에게 보내기" KakaoTalk
+        // notification (new re-review request, or your own activity being
+        // rejected) — it's an optional consent item, so declining it just
+        // means no notifications, not a blocked login.
+        scopes: "profile_nickname profile_image talk_message",
       },
     });
     // On success this navigates away, so isLoading never needs to reset.
