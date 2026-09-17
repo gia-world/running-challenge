@@ -42,7 +42,7 @@ export default async function FeedPage() {
   const seasonIds = Array.from(new Set(rows.map((row) => row.season_id)));
   const activityIds = rows.map((row) => row.id);
 
-  const [{ data: seasons }, { data: allApproved }, { data: likes }, { data: reviewRequests }] =
+  const [{ data: seasons }, { data: allApproved }, { data: reactions }, { data: reviewRequests }] =
     await Promise.all([
       seasonIds.length > 0
         ? supabase.from("seasons").select("id, start_date").in("id", seasonIds)
@@ -62,10 +62,12 @@ export default async function FeedPage() {
           }),
       activityIds.length > 0
         ? supabase
-            .from("activity_likes")
-            .select("activity_id, user_id")
+            .from("activity_reactions")
+            .select("activity_id, user_id, emoji")
             .in("activity_id", activityIds)
-        : Promise.resolve({ data: [] as { activity_id: string; user_id: string }[] }),
+        : Promise.resolve({
+            data: [] as { activity_id: string; user_id: string; emoji: string }[],
+          }),
       activityIds.length > 0
         ? supabase
             .from("activity_review_requests")
@@ -88,16 +90,16 @@ export default async function FeedPage() {
     datesByUserSeason.set(key, dates);
   }
 
-  const likeCountByActivity = new Map<string, number>();
-  const likedByMe = new Set<string>();
-  for (const like of likes ?? []) {
-    likeCountByActivity.set(
-      like.activity_id,
-      (likeCountByActivity.get(like.activity_id) ?? 0) + 1,
-    );
-    if (like.user_id === user.id) {
-      likedByMe.add(like.activity_id);
+  const reactionsByActivity = new Map<string, Map<string, { count: number; reactedByMe: boolean }>>();
+  for (const reaction of reactions ?? []) {
+    const emojiMap = reactionsByActivity.get(reaction.activity_id) ?? new Map();
+    const entry = emojiMap.get(reaction.emoji) ?? { count: 0, reactedByMe: false };
+    entry.count += 1;
+    if (reaction.user_id === user.id) {
+      entry.reactedByMe = true;
     }
+    emojiMap.set(reaction.emoji, entry);
+    reactionsByActivity.set(reaction.activity_id, emojiMap);
   }
 
   const requestedByMe = new Set(
@@ -123,8 +125,10 @@ export default async function FeedPage() {
         occurrenceLabel: occurrence
           ? `${occurrence.weekIndex + 1}주차 ${occurrence.ordinal}회`
           : null,
-        likeCount: likeCountByActivity.get(row.id) ?? 0,
-        likedByMe: likedByMe.has(row.id),
+        reactions: Array.from(
+          reactionsByActivity.get(row.id) ?? new Map(),
+          ([emoji, state]) => ({ emoji, ...state }),
+        ),
         requestedByMe: requestedByMe.has(row.id),
       };
     }),
@@ -175,8 +179,7 @@ export default async function FeedPage() {
                 activityId={item.id}
                 currentUserId={user.id}
                 isOwnActivity={item.user_id === user.id}
-                initialLiked={item.likedByMe}
-                initialLikeCount={item.likeCount}
+                initialReactions={item.reactions}
                 initialRequested={item.requestedByMe}
               />
             </article>

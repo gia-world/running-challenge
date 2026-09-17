@@ -32,7 +32,7 @@
 ### 1. Supabase 프로젝트 준비
 
 1. [supabase.com](https://supabase.com) 에서 프로젝트 생성
-2. `supabase/migrations/` 아래 `0001`~`0011`을 **번호 순서대로** SQL Editor에서 실행
+2. `supabase/migrations/` 아래 `0001`~`0012`를 **번호 순서대로** SQL Editor에서 실행
    - `0005_teams_and_seasons.sql`은 스키마를 크게 바꿉니다: `profiles.role`을 없애고
      `team_memberships.role`로 옮기고, `activities.photo_url`을 `activity_photos` 테이블로
      옮기고, 팀/시즌 테이블을 새로 만듭니다. 기존에 팀원·인증 데이터가 있어도 안전하게
@@ -67,7 +67,13 @@
    - `0011_activity_likes.sql`은 피드 열람을 유도하기 위한 좋아요 기능입니다.
      `activity_likes` 테이블 하나만 추가하고 주간 집계나 재인증 요청 로직과는
      무관합니다. 같은 팀원끼리만 보고 누를 수 있고, 좋아요 취소는 본인만
-     가능합니다.
+     가능합니다. (`0012`에서 이모지 반응으로 대체되면서 제거됩니다.)
+   - `0012_activity_reactions.sql`은 `0011`의 단일 좋아요를 다중 이모지 반응으로
+     확장합니다. `activity_reactions` 테이블(Activity × User × emoji, 이모지는
+     `❤️👍🔥💪🎉👏🎶😢🤣🫢` 10종 고정)을 새로 만들고, 기존 `activity_likes`
+     데이터를 `❤️` 반응으로 그대로 이관한 뒤 `activity_likes` 테이블은 삭제합니다.
+     한 사람이 한 활동에 여러 종류의 이모지를 동시에 남길 수 있고, 같은 이모지를
+     중복으로 남기는 것만 unique 제약으로 막습니다.
 3. [developers.kakao.com](https://developers.kakao.com) 에서 앱 등록 후 REST API 키 발급
 4. Supabase Dashboard → Authentication → Providers → Kakao 활성화, REST API 키(Client ID)와 Client Secret 입력
 5. Kakao 개발자 콘솔의 Redirect URI에 `https://<your-project>.supabase.co/auth/v1/callback` 등록
