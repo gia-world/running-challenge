@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getAuthUser } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { LoginButton } from "./LoginButton";
 import { KakaoInAppBrowserNotice } from "./KakaoInAppBrowserNotice";
 import { TeamEyebrow } from "@/components/TeamEyebrow";
@@ -17,10 +17,21 @@ export default async function LoginPage({
     redirect(code ? `/join?code=${encodeURIComponent(code)}` : "/home");
   }
 
+  // Not signed in yet, so there's no team membership to read a name from —
+  // but a ?code= link already points at a specific team, so look its name
+  // up directly (get_team_name_by_invite_code is callable by anon for
+  // exactly this, same trust model as the invite code itself).
+  let teamName: string | null = null;
+  if (code) {
+    const supabase = await createClient();
+    const { data } = await supabase.rpc("get_team_name_by_invite_code", { p_code: code });
+    teamName = data ?? null;
+  }
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
       <div className="w-full max-w-sm text-center">
-        <TeamEyebrow size="lg" />
+        <TeamEyebrow teamName={teamName} size="lg" />
         <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
           주 3회 러닝 인증 챌린지
         </h1>

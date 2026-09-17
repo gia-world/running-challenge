@@ -28,10 +28,16 @@ export default async function JoinPage({
 
   const { code } = await searchParams;
 
+  let teamName: string | null = null;
+  if (code) {
+    const { data } = await supabase.rpc("get_team_name_by_invite_code", { p_code: code });
+    teamName = data ?? null;
+  }
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
       <div className="w-full max-w-sm text-center">
-        <TeamEyebrow size="lg" />
+        <TeamEyebrow teamName={teamName} size="lg" />
         <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
           팀에 참여하세요
         </h1>

@@ -32,7 +32,7 @@
 ### 1. Supabase 프로젝트 준비
 
 1. [supabase.com](https://supabase.com) 에서 프로젝트 생성
-2. `supabase/migrations/` 아래 `0001`~`0008`을 **번호 순서대로** SQL Editor에서 실행
+2. `supabase/migrations/` 아래 `0001`~`0009`를 **번호 순서대로** SQL Editor에서 실행
    - `0005_teams_and_seasons.sql`은 스키마를 크게 바꿉니다: `profiles.role`을 없애고
      `team_memberships.role`로 옮기고, `activities.photo_url`을 `activity_photos` 테이블로
      옮기고, 팀/시즌 테이블을 새로 만듭니다. 기존에 팀원·인증 데이터가 있어도 안전하게
@@ -49,6 +49,13 @@
      `crew` 값을 `user`로 바꿉니다(코드/화면 문구가 "크루원"/"팀원"으로 섞여 있던 걸
      정리하면서 역할 값도 `admin`/`user`로 통일). `ALTER TYPE ... RENAME VALUE`라서
      기존 데이터는 자동으로 반영되고 별도 백필은 필요 없어요.
+   - `0009_get_team_name_by_invite_code.sql`은 `get_team_name_by_invite_code(code)`
+     함수를 추가합니다. 로그인 전(`/login?code=...`)이나 아직 팀에 안 들어간 상태
+     (`/join?code=...`)에서도 초대 코드가 가리키는 팀 이름을 보여줄 수 있도록,
+     `join_team_by_invite_code`와 같은 이유(초대 코드 컬럼에 넓은 SELECT 정책을
+     안 열어주기 위해)로 `security definer`로 만들었고, `anon`/`authenticated`
+     둘 다 실행 권한을 줬어요. 팀 이름 외에는 아무것도 노출하지 않고, 잘못된 코드는
+     에러 없이 `null`을 반환합니다.
 3. [developers.kakao.com](https://developers.kakao.com) 에서 앱 등록 후 REST API 키 발급
 4. Supabase Dashboard → Authentication → Providers → Kakao 활성화, REST API 키(Client ID)와 Client Secret 입력
 5. Kakao 개발자 콘솔의 Redirect URI에 `https://<your-project>.supabase.co/auth/v1/callback` 등록
