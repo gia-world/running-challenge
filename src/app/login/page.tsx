@@ -24,15 +24,24 @@ export default async function LoginPage({
   let teamName: string | null = null;
   if (code) {
     const supabase = await createClient();
-    const { data } = await supabase.rpc("get_team_name_by_invite_code", { p_code: code });
+    const { data } = await supabase.rpc("get_team_name_by_invite_code", {
+      p_code: code,
+    });
     teamName = data ?? null;
   }
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
       <div className="w-full max-w-sm text-center">
-        <TeamEyebrow teamName={teamName} size="lg" />
-        <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+        {teamName ? (
+          <p className=" text-xl">
+            <span className="text-orange-500 font-extrabold">{teamName}</span>
+            &apos;s
+          </p>
+        ) : (
+          <TeamEyebrow teamName={teamName} size="lg" />
+        )}
+        <h1 className="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
           주 3회 러닝 인증 챌린지
         </h1>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
