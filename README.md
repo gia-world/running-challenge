@@ -74,11 +74,14 @@
      데이터를 `❤️` 반응으로 그대로 이관한 뒤 `activity_likes` 테이블은 삭제합니다.
      한 사람이 한 활동에 여러 종류의 이모지를 동시에 남길 수 있고, 같은 이모지를
      중복으로 남기는 것만 unique 제약으로 막습니다.
-   - `0013_kakao_tokens.sql`은 카카오톡 알림 발송용입니다. 로그인할 때 선택
-     동의 항목으로 `talk_message` scope를 같이 요청해서, 동의한 사람의 카카오
-     refresh token을 `kakao_tokens`에 저장합니다(재인증 요청 발생 시 관리자에게,
-     반려 처리 시 본인에게 "나에게 보내기"로 알림을 보내는 데 씁니다). 본인 것만
-     select/insert/update 가능하고, 다른 사람 토큰을 읽는 건 서버 쪽 service_role
+   - `0013_kakao_tokens.sql`은 카카오톡 알림 발송용입니다. 로그인 성공 후
+     `/auth/kakao-consent`에서 `talk_message` scope를 별도로 요청해서(카카오가
+     이 항목을 "이용 중 동의"로 분류해서, 로그인 시 scope 목록에 같이 넣는
+     것만으로는 동의 화면 자체가 안 뜸 — 반드시 단독으로 요청해야 함), 동의한
+     사람의 카카오 refresh token을 `kakao_tokens`에 저장합니다(재인증 요청
+     발생 시 관리자에게, 반려 처리 시 본인에게 "나에게 보내기"로 알림을 보내는
+     데 씁니다). 본인 것만 select/insert/update 가능하고, 다른 사람 토큰을
+     읽는 건 서버 쪽 service_role
      코드(`src/app/api/notify/*`)만 할 수 있어요.
 3. [developers.kakao.com](https://developers.kakao.com) 에서 앱 등록 후 REST API 키 발급
 4. Supabase Dashboard → Authentication → Providers → Kakao 활성화, REST API 키(Client ID)와 Client Secret 입력

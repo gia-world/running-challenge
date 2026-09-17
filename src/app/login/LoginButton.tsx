@@ -22,11 +22,11 @@ export function LoginButton({ inviteCode }: { inviteCode?: string }) {
       provider: "kakao",
       options: {
         redirectTo: callbackUrl.toString(),
-        // talk_message lets us later send a "나에게 보내기" KakaoTalk
-        // notification (new re-review request, or your own activity being
-        // rejected) — it's an optional consent item, so declining it just
-        // means no notifications, not a blocked login.
-        scopes: "profile_nickname profile_image talk_message",
+        // talk_message is requested separately (see /auth/kakao-consent) —
+        // it's categorized as "이용 중 동의" on Kakao's side, which doesn't
+        // surface a consent checkbox just from being listed here at login;
+        // Kakao only prompts for it via its own dedicated request.
+        scopes: "profile_nickname profile_image",
       },
     });
     // On success this navigates away, so isLoading never needs to reset.
