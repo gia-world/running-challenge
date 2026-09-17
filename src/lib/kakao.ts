@@ -46,13 +46,17 @@ export async function sendKakaoMemo(
   // Trim a trailing slash so a base URL configured with one (e.g.
   // "https://example.com/") doesn't double up with linkPath's leading "/".
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "");
+  if (!baseUrl) {
+    console.error("[kakao] NEXT_PUBLIC_APP_URL is not set — sending memo without a link");
+  }
+  const hasLink = Boolean(baseUrl && linkPath);
   const templateObject = {
     object_type: "text",
     text,
-    link:
-      baseUrl && linkPath
-        ? { web_url: `${baseUrl}${linkPath}`, mobile_web_url: `${baseUrl}${linkPath}` }
-        : {},
+    link: hasLink ? { web_url: `${baseUrl}${linkPath}`, mobile_web_url: `${baseUrl}${linkPath}` } : {},
+    // Kakao's default "text" template only renders a tappable button when
+    // button_title is set — populating `link` alone isn't enough.
+    ...(hasLink ? { button_title: "바로 확인" } : {}),
   };
 
   const response = await fetch(KAKAO_MEMO_URL, {
