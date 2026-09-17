@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
-import { seasonWeekIndexForDate, SEASON_WEEKS } from "@/lib/season";
+import { seasonWeekIndexForDate, seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
+import { formatKoreanDate } from "@/lib/format";
+import { todayInSeoul } from "@/lib/week";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { SeasonGate } from "@/components/SeasonGate";
@@ -58,14 +60,26 @@ async function SeasonHistory({
     }
   }
 
+  const today = todayInSeoul();
+
   return (
     <>
-      {weeks.map((weekActivities, index) => (
-        <section key={index}>
-          <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{index + 1}주차</h2>
-          <ActivityStatusList activities={weekActivities} emptyMessage="이 주에는 인증 기록이 없어요." />
-        </section>
-      ))}
+      {weeks.map((weekActivities, index) => {
+        const { start, end } = seasonWeekRange(season.start_date, index);
+        const isFutureWeek = start > today;
+
+        return (
+          <section key={index}>
+            <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+              {index + 1}주차 ({formatKoreanDate(start)}~{formatKoreanDate(end)})
+            </h2>
+            <ActivityStatusList
+              activities={weekActivities}
+              emptyMessage={isFutureWeek ? `${index + 1}주차도 화이팅!` : "이 주에는 인증 기록이 없어요."}
+            />
+          </section>
+        );
+      })}
     </>
   );
 }

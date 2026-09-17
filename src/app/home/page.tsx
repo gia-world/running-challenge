@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { WEEKLY_GOAL, todayInSeoul } from "@/lib/week";
 import { seasonWeekIndexForDate, seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
+import { formatKoreanDate } from "@/lib/format";
 import { requireTeamViewer } from "@/lib/viewer";
 import { WeeklyDots } from "@/components/WeeklyDots";
 import { BottomNav } from "@/components/BottomNav";
@@ -127,7 +128,7 @@ async function SeasonProgress({
 
       <section>
         <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-          이번 주 인증 기록
+          이번 주 인증 기록 ({formatKoreanDate(start)}~{formatKoreanDate(end)})
         </h2>
         <ActivityStatusList activities={weekActivities} emptyMessage="아직 이번 주 인증 기록이 없어요." />
         <Link
