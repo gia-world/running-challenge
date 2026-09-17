@@ -11,7 +11,7 @@ export default async function CertifyPage() {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
-      <PageHeader>
+      <PageHeader teamName={viewer.teamName}>
         <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">인증하기</h1>
       </PageHeader>
 

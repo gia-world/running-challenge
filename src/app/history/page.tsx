@@ -12,7 +12,7 @@ export default async function HistoryPage() {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
-      <PageHeader>
+      <PageHeader teamName={viewer.teamName}>
         <Link
           href="/home"
           className="text-xs font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"

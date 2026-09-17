@@ -13,6 +13,7 @@ export type ActiveSeason = {
 
 export type ViewerContext = {
   teamId: string | null;
+  teamName: string | null;
   teamRole: UserRole | null;
   activeSeason: ActiveSeason | null;
   isSeasonMember: boolean;
@@ -30,12 +31,18 @@ export const loadViewerContext = cache(async (userId: string): Promise<ViewerCon
 
   const { data: membership } = await supabase
     .from("team_memberships")
-    .select("team_id, role")
+    .select("team_id, role, teams(name)")
     .eq("user_id", userId)
-    .maybeSingle();
+    .maybeSingle<{ team_id: string; role: UserRole; teams: { name: string } | null }>();
 
   if (!membership) {
-    return { teamId: null, teamRole: null, activeSeason: null, isSeasonMember: false };
+    return {
+      teamId: null,
+      teamName: null,
+      teamRole: null,
+      activeSeason: null,
+      isSeasonMember: false,
+    };
   }
 
   const today = todayInSeoul();
@@ -62,6 +69,7 @@ export const loadViewerContext = cache(async (userId: string): Promise<ViewerCon
 
   return {
     teamId: membership.team_id,
+    teamName: membership.teams?.name ?? null,
     teamRole: membership.role,
     activeSeason: season ?? null,
     isSeasonMember,

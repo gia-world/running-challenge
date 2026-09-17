@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
-import { CrewEyebrow } from "@/components/CrewEyebrow";
+import { TeamEyebrow } from "@/components/TeamEyebrow";
 import { OnboardingForm } from "./OnboardingForm";
 
 export default async function OnboardingPage() {
@@ -25,7 +25,7 @@ export default async function OnboardingPage() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
       <div className="w-full max-w-sm text-center">
-        <CrewEyebrow size="lg" />
+        <TeamEyebrow size="lg" />
         <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
           이름을 확인해주세요
         </h1>

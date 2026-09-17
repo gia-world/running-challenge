@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
-      <PageHeader suffix="ADMIN">
+      <PageHeader teamName={viewer.teamName} suffix="ADMIN">
         <AdminTabs pendingCount={pendingCount ?? 0} />
       </PageHeader>
 

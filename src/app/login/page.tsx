@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getAuthUser } from "@/lib/supabase/server";
 import { LoginButton } from "./LoginButton";
 import { KakaoInAppBrowserNotice } from "./KakaoInAppBrowserNotice";
-import { CrewEyebrow } from "@/components/CrewEyebrow";
+import { TeamEyebrow } from "@/components/TeamEyebrow";
 import { ErrorBanner } from "@/components/ErrorBanner";
 
 export default async function LoginPage({
@@ -20,7 +20,7 @@ export default async function LoginPage({
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
       <div className="w-full max-w-sm text-center">
-        <CrewEyebrow size="lg" />
+        <TeamEyebrow size="lg" />
         <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
           주 3회 러닝 인증 챌린지
         </h1>

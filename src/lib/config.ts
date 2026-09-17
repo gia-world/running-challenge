@@ -1,2 +1,4 @@
-// v0은 단일 크루 전제. 멀티 팀 지원이 들어가면 여기를 팀별 name 필드로 바꾼다.
-export const CREW_NAME = "RUNNING CHALLENGE";
+// Fallback for screens with no team context yet (login/join/onboarding,
+// and loading.tsx skeletons that render before any data fetch) — everywhere
+// else the team's own name (teams.name) is shown instead.
+export const DEFAULT_TEAM_NAME = "RUNNING CHALLENGE";

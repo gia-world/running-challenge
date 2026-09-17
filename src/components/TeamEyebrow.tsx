@@ -1,12 +1,16 @@
-import { CREW_NAME } from "@/lib/config";
+import { DEFAULT_TEAM_NAME } from "@/lib/config";
 
-export function CrewEyebrow({
+export function TeamEyebrow({
+  teamName,
   suffix,
   size = "sm",
 }: {
+  teamName?: string | null;
   suffix?: string;
   size?: "sm" | "lg";
 }) {
+  const name = teamName ?? DEFAULT_TEAM_NAME;
+
   return (
     <p
       className={
@@ -15,7 +19,7 @@ export function CrewEyebrow({
           : "text-xs font-medium text-orange-500"
       }
     >
-      {suffix ? `${CREW_NAME} · ${suffix}` : CREW_NAME}
+      {suffix ? `${name} · ${suffix}` : name}
     </p>
   );
 }
