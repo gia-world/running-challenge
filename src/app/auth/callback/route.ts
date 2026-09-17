@@ -24,20 +24,25 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      // Only present on the /auth/kakao-consent leg, where talk_message is
-      // requested on its own. Stored so the backend can send KakaoTalk
-      // notifications later, without the user needing an active session.
-      const refreshToken = data.session?.provider_refresh_token;
-      if (refreshToken && data.session) {
-        const { error: tokenError } = await supabase
-          .from("kakao_tokens")
-          .upsert({ user_id: data.session.user.id, refresh_token: refreshToken });
-        if (tokenError) {
-          console.error("[auth/callback] failed to store kakao refresh token:", tokenError.message);
+      if (consentAttempted) {
+        // The /auth/kakao-consent leg, where talk_message was requested on
+        // its own — store whatever refresh token came back (present only
+        // if the user actually approved it there).
+        const refreshToken = data.session?.provider_refresh_token;
+        if (refreshToken && data.session) {
+          const { error: tokenError } = await supabase
+            .from("kakao_tokens")
+            .upsert({ user_id: data.session.user.id, refresh_token: refreshToken });
+          if (tokenError) {
+            console.error("[auth/callback] failed to store kakao refresh token:", tokenError.message);
+          }
         }
-      }
-
-      if (!consentAttempted && data.session) {
+      } else if (data.session) {
+        // The normal login leg. Kakao always returns *some*
+        // provider_refresh_token here regardless of granted scopes, so it's
+        // never stored — a token without talk_message is useless to us and
+        // storing it would make the check below always find a row and skip
+        // asking. Only decide here whether we still need to ask.
         const { data: existingToken } = await supabase
           .from("kakao_tokens")
           .select("user_id")
