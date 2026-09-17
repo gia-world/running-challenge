@@ -71,6 +71,7 @@ async function SeasonProgress({
     .select("id, activity_date, distance_km, created_at, status, rejected_reason")
     .eq("user_id", userId)
     .eq("season_id", season.id)
+    .order("activity_date", { ascending: true })
     .order("created_at", { ascending: true })
     .returns<
       {
