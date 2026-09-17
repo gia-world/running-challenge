@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
 import { formatKoreanDate } from "@/lib/format";
+import { EmptyState } from "@/components/EmptyState";
 import { SeasonForm } from "./SeasonForm";
 
 export default async function AdminSeasonPage() {
@@ -31,9 +32,7 @@ export default async function AdminSeasonPage() {
       <section>
         <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">전체 시즌</h2>
         {allSeasons.length === 0 ? (
-          <p className="mt-2 rounded-xl border-2 border-dashed border-zinc-300 p-4 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-            아직 만든 시즌이 없어요.
-          </p>
+          <EmptyState className="mt-2">아직 만든 시즌이 없어요.</EmptyState>
         ) : (
           <ul className="mt-2 flex flex-col gap-2">
             {allSeasons.map((season) => {

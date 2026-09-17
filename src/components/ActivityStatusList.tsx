@@ -1,4 +1,5 @@
 import { formatKoreanDate } from "@/lib/format";
+import { EmptyState } from "./EmptyState";
 import type { ActivityStatus } from "@/lib/types";
 
 export const STATUS_BADGES = {
@@ -23,11 +24,7 @@ export function ActivityStatusList({
   emptyMessage: string;
 }) {
   if (activities.length === 0) {
-    return (
-      <p className="mt-3 rounded-xl border border-dashed border-zinc-300 px-4 py-6 text-center text-sm text-zinc-400 dark:border-zinc-700 dark:text-zinc-600">
-        {emptyMessage}
-      </p>
-    );
+    return <EmptyState className="mt-3">{emptyMessage}</EmptyState>;
   }
 
   return (

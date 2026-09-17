@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { ViewerContext } from "@/lib/viewer";
 import { formatKoreanDate } from "@/lib/format";
+import { EmptyState } from "./EmptyState";
 
 /**
  * Gates season-dependent content behind the two empty states every
@@ -41,12 +42,4 @@ export function SeasonGate({
   }
 
   return <>{children}</>;
-}
-
-function EmptyState({ children }: { children: ReactNode }) {
-  return (
-    <section className="rounded-2xl border-2 border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
-      {children}
-    </section>
-  );
 }
