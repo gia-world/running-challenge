@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
+import { FeedCardActions } from "@/components/FeedCardActions";
 import { PageHeader } from "@/components/PageHeader";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { formatKoreanDate } from "@/lib/format";
@@ -20,7 +21,7 @@ type FeedRow = {
 };
 
 export default async function FeedPage() {
-  const { viewer } = await requireTeamViewer();
+  const { user, viewer } = await requireTeamViewer();
 
   const supabase = await createClient();
   const { data: activities, error } = await supabase
@@ -39,25 +40,42 @@ export default async function FeedPage() {
 
   const rows = activities ?? [];
   const seasonIds = Array.from(new Set(rows.map((row) => row.season_id)));
+  const activityIds = rows.map((row) => row.id);
 
-  const [{ data: seasons }, { data: allApproved }] = await Promise.all([
-    seasonIds.length > 0
-      ? supabase.from("seasons").select("id, start_date").in("id", seasonIds)
-      : Promise.resolve({ data: [] as { id: string; start_date: string }[] }),
-    seasonIds.length > 0
-      ? supabase
-          .from("activities")
-          .select("user_id, season_id, activity_date")
-          .eq("status", "approved")
-          .in("season_id", seasonIds)
-      : Promise.resolve({
-          data: [] as {
-            user_id: string;
-            season_id: string;
-            activity_date: string;
-          }[],
-        }),
-  ]);
+  const [{ data: seasons }, { data: allApproved }, { data: likes }, { data: reviewRequests }] =
+    await Promise.all([
+      seasonIds.length > 0
+        ? supabase.from("seasons").select("id, start_date").in("id", seasonIds)
+        : Promise.resolve({ data: [] as { id: string; start_date: string }[] }),
+      seasonIds.length > 0
+        ? supabase
+            .from("activities")
+            .select("user_id, season_id, activity_date")
+            .eq("status", "approved")
+            .in("season_id", seasonIds)
+        : Promise.resolve({
+            data: [] as {
+              user_id: string;
+              season_id: string;
+              activity_date: string;
+            }[],
+          }),
+      activityIds.length > 0
+        ? supabase
+            .from("activity_likes")
+            .select("activity_id, user_id")
+            .in("activity_id", activityIds)
+        : Promise.resolve({ data: [] as { activity_id: string; user_id: string }[] }),
+      activityIds.length > 0
+        ? supabase
+            .from("activity_review_requests")
+            .select("activity_id, requested_by")
+            .eq("status", "pending")
+            .in("activity_id", activityIds)
+        : Promise.resolve({
+            data: [] as { activity_id: string; requested_by: string }[],
+          }),
+    ]);
 
   const seasonStartDates = new Map(
     (seasons ?? []).map((s) => [s.id, s.start_date]),
@@ -69,6 +87,24 @@ export default async function FeedPage() {
     dates.push(activity.activity_date);
     datesByUserSeason.set(key, dates);
   }
+
+  const likeCountByActivity = new Map<string, number>();
+  const likedByMe = new Set<string>();
+  for (const like of likes ?? []) {
+    likeCountByActivity.set(
+      like.activity_id,
+      (likeCountByActivity.get(like.activity_id) ?? 0) + 1,
+    );
+    if (like.user_id === user.id) {
+      likedByMe.add(like.activity_id);
+    }
+  }
+
+  const requestedByMe = new Set(
+    (reviewRequests ?? [])
+      .filter((request) => request.requested_by === user.id)
+      .map((request) => request.activity_id),
+  );
 
   const items = await Promise.all(
     rows.map(async (row) => {
@@ -87,6 +123,9 @@ export default async function FeedPage() {
         occurrenceLabel: occurrence
           ? `${occurrence.weekIndex + 1}주차 ${occurrence.ordinal}회`
           : null,
+        likeCount: likeCountByActivity.get(row.id) ?? 0,
+        likedByMe: likedByMe.has(row.id),
+        requestedByMe: requestedByMe.has(row.id),
       };
     }),
   );
@@ -132,6 +171,14 @@ export default async function FeedPage() {
                   </span>
                 </div>
               </div>
+              <FeedCardActions
+                activityId={item.id}
+                currentUserId={user.id}
+                isOwnActivity={item.user_id === user.id}
+                initialLiked={item.likedByMe}
+                initialLikeCount={item.likeCount}
+                initialRequested={item.requestedByMe}
+              />
             </article>
           ))
         )}

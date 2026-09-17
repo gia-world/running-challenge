@@ -32,7 +32,7 @@
 ### 1. Supabase 프로젝트 준비
 
 1. [supabase.com](https://supabase.com) 에서 프로젝트 생성
-2. `supabase/migrations/` 아래 `0001`~`0009`를 **번호 순서대로** SQL Editor에서 실행
+2. `supabase/migrations/` 아래 `0001`~`0011`을 **번호 순서대로** SQL Editor에서 실행
    - `0005_teams_and_seasons.sql`은 스키마를 크게 바꿉니다: `profiles.role`을 없애고
      `team_memberships.role`로 옮기고, `activities.photo_url`을 `activity_photos` 테이블로
      옮기고, 팀/시즌 테이블을 새로 만듭니다. 기존에 팀원·인증 데이터가 있어도 안전하게
@@ -56,6 +56,18 @@
      안 열어주기 위해)로 `security definer`로 만들었고, `anon`/`authenticated`
      둘 다 실행 권한을 줬어요. 팀 이름 외에는 아무것도 노출하지 않고, 잘못된 코드는
      에러 없이 `null`을 반환합니다.
+   - `0010_review_requests.sql`은 심사 방식 변경의 스키마 쪽입니다. 업로드는 이제
+     앱 코드에서 바로 `status: 'approved'`로 들어가고(스키마 변경 없음), 대신
+     팀원이 이미 승인된 인증에 재인증을 요청할 수 있도록 `activity_review_requests`
+     테이블을 새로 만들었어요. 본인 활동은 요청 불가, 한 사람당 같은 활동에
+     대기중인 요청은 1개까지(해결되면 다시 요청 가능), 요청 취소는 본인만,
+     승인 유지/반려 처리(요청의 `status`를 `resolved`로 바꾸는 것)는 팀 관리자만
+     가능하도록 RLS를 걸었습니다. 실제 인정/반려는 기존 `activities.status` /
+     `rejected_reason` 흐름을 그대로 씁니다.
+   - `0011_activity_likes.sql`은 피드 열람을 유도하기 위한 좋아요 기능입니다.
+     `activity_likes` 테이블 하나만 추가하고 주간 집계나 재인증 요청 로직과는
+     무관합니다. 같은 팀원끼리만 보고 누를 수 있고, 좋아요 취소는 본인만
+     가능합니다.
 3. [developers.kakao.com](https://developers.kakao.com) 에서 앱 등록 후 REST API 키 발급
 4. Supabase Dashboard → Authentication → Providers → Kakao 활성화, REST API 키(Client ID)와 Client Secret 입력
 5. Kakao 개발자 콘솔의 Redirect URI에 `https://<your-project>.supabase.co/auth/v1/callback` 등록

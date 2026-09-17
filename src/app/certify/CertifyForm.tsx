@@ -97,7 +97,7 @@ export function CertifyForm({
         season_id: seasonId,
         activity_date: activityDate,
         distance_km: distance,
-        status: "pending",
+        status: "approved",
       })
       .select("id")
       .single();
@@ -140,7 +140,8 @@ export function CertifyForm({
           인증샷을 올렸어요!
         </p>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          관리자 심사 후 이번 주 기록에 반영돼요.
+          바로 이번 주 기록에 반영돼요. 팀원이 이상하다고 느끼면
+          <br /> 재인증을 요청할 수 있어요.
         </p>
         <button
           type="button"

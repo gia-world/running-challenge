@@ -13,16 +13,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   const supabase = await createClient();
-  const { count: pendingCount } = await supabase
-    .from("activities")
-    .select("id, seasons!inner(team_id)", { count: "exact", head: true })
-    .eq("status", "pending")
-    .eq("seasons.team_id", viewer.teamId);
+  const { data: pendingRequests } = await supabase
+    .from("activity_review_requests")
+    .select("activity_id")
+    .eq("status", "pending");
+  const pendingCount = new Set((pendingRequests ?? []).map((r) => r.activity_id)).size;
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
       <PageHeader teamName={viewer.teamName} suffix="ADMIN">
-        <AdminTabs pendingCount={pendingCount ?? 0} />
+        <AdminTabs pendingCount={pendingCount} />
       </PageHeader>
 
       <main className="mx-auto w-full max-w-md flex-1 px-6 py-6">{children}</main>

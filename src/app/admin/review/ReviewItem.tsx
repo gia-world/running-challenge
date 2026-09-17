@@ -18,6 +18,19 @@ export function ReviewItem({ activityId }: { activityId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  async function resolveReviewRequests(adminId: string | undefined) {
+    const supabase = createClient();
+    await supabase
+      .from("activity_review_requests")
+      .update({
+        status: "resolved",
+        resolved_by: adminId,
+        resolved_at: new Date().toISOString(),
+      })
+      .eq("activity_id", activityId)
+      .eq("status", "pending");
+  }
+
   async function approve() {
     setIsSubmitting(true);
     setError(null);
@@ -36,6 +49,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
       setIsSubmitting(false);
       return;
     }
+    await resolveReviewRequests(user?.id);
     router.refresh();
   }
 
@@ -66,6 +80,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
       setIsSubmitting(false);
       return;
     }
+    await resolveReviewRequests(user?.id);
     router.refresh();
   }
 
@@ -132,7 +147,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
           disabled={isSubmitting}
           className="flex-1 rounded-lg bg-orange-500 py-2 text-sm font-semibold text-white disabled:opacity-60"
         >
-          인정
+          인정 유지
         </button>
         <button
           type="button"

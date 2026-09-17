@@ -4,52 +4,76 @@ import { getSignedPhotoUrls } from "@/lib/photos";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { ReviewItem } from "./ReviewItem";
 
-type PendingRow = {
-  id: string;
-  activity_date: string;
-  distance_km: number;
+type ReviewRequestRow = {
+  activity_id: string;
   profiles: { name: string } | null;
-  activity_photos: { storage_path: string; sort_order: number }[];
+  activities: {
+    activity_date: string;
+    distance_km: number;
+    profiles: { name: string } | null;
+    activity_photos: { storage_path: string; sort_order: number }[];
+  } | null;
 };
 
 export default async function AdminReviewPage() {
   const supabase = await createClient();
 
-  const { data: activities, error } = await supabase
-    .from("activities")
+  const { data: requests, error } = await supabase
+    .from("activity_review_requests")
     .select(
-      "id, activity_date, distance_km, profiles!user_id(name), activity_photos(storage_path, sort_order)",
+      "activity_id, profiles!requested_by(name), activities(activity_date, distance_km, profiles!user_id(name), activity_photos(storage_path, sort_order))",
     )
     .eq("status", "pending")
     .order("created_at", { ascending: true })
-    .returns<PendingRow[]>();
+    .returns<ReviewRequestRow[]>();
 
   if (error) {
-    console.error("[admin/review] failed to load pending activities:", error.message);
+    console.error("[admin/review] failed to load review requests:", error.message);
   }
 
-  const rows = activities ?? [];
+  const grouped = new Map<
+    string,
+    { activity: ReviewRequestRow["activities"]; requesterNames: string[] }
+  >();
+  for (const row of requests ?? []) {
+    if (!row.activities) continue;
+    const existing = grouped.get(row.activity_id);
+    const requesterName = row.profiles?.name ?? "팀원";
+    if (existing) {
+      existing.requesterNames.push(requesterName);
+    } else {
+      grouped.set(row.activity_id, {
+        activity: row.activities,
+        requesterNames: [requesterName],
+      });
+    }
+  }
+
   const items = await Promise.all(
-    rows.map(async (row) => ({
-      ...row,
-      photoUrls: await getSignedPhotoUrls(supabase, row.activity_photos),
+    Array.from(grouped.entries()).map(async ([activityId, { activity, requesterNames }]) => ({
+      activityId,
+      requesterNames,
+      activity_date: activity!.activity_date,
+      distance_km: activity!.distance_km,
+      ownerName: activity!.profiles?.name ?? "러너",
+      photoUrls: await getSignedPhotoUrls(supabase, activity!.activity_photos),
     })),
   );
 
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-        심사 대기 ({items.length})
+        재인증 요청함 ({items.length})
       </h1>
 
       {items.length === 0 ? (
         <p className="mt-10 text-center text-sm text-zinc-400 dark:text-zinc-600">
-          심사할 인증이 없어요.
+          재인증 요청이 없어요.
         </p>
       ) : (
         items.map((item) => (
           <div
-            key={item.id}
+            key={item.activityId}
             className="overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-zinc-900"
           >
             {item.photoUrls.length > 0 && (
@@ -58,13 +82,16 @@ export default async function AdminReviewPage() {
             <div className="px-4 py-3">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold text-zinc-900 dark:text-zinc-50">
-                  {item.profiles?.name ?? "러너"}
+                  {item.ownerName}
                 </span>
                 <span className="text-zinc-500 dark:text-zinc-400">
                   {formatKoreanDate(item.activity_date)} · {Number(item.distance_km).toFixed(1)}km
                 </span>
               </div>
-              <ReviewItem activityId={item.id} />
+              <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+                {item.requesterNames.join(", ")}님이 재인증을 요청했어요
+              </p>
+              <ReviewItem activityId={item.activityId} />
             </div>
           </div>
         ))
