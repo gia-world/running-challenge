@@ -5,7 +5,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 export default function Loading() {
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
-      <PageHeader>
+      <PageHeader eyebrowSkeleton>
         <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">현황판</h1>
       </PageHeader>
 
