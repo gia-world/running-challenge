@@ -1,4 +1,4 @@
-export type UserRole = "crew" | "admin";
+export type UserRole = "admin" | "user";
 export type ActivityStatus = "pending" | "approved" | "rejected";
 
 export type Profile = {

@@ -30,7 +30,7 @@ export default async function OnboardingPage() {
           이름을 확인해주세요
         </h1>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-          크루원들에게는 이 이름으로 보여요.
+          팀원들에게는 이 이름으로 보여요.
         </p>
 
         <div className="mt-8">

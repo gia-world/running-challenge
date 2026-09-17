@@ -1,6 +1,6 @@
 # 러닝 크루 인증 자동 집계 앱
 
-러닝 크루원이 주 3회 5km 러닝 인증샷을 올리면, 자동으로 주간 달성 여부를 보여주는 웹앱 (v0).
+러닝 팀원이 주 3회 5km 러닝 인증샷을 올리면, 자동으로 주간 달성 여부를 보여주는 웹앱 (v0).
 
 기획: [Notion 문서](https://app.notion.com/p/3dc951929c67819d8032e84d2410c60d)
 
@@ -10,7 +10,7 @@
 - [x] 최초 로그인 시 실명 확인 온보딩
 - [x] 팀 참여 (초대 코드 / 초대 링크)
 - [x] 홈 — 이번 주 인증 현황 (●●○) + 시즌 누적 성공 주차
-- [x] 피드 — 크루원 인증 타임라인 (여러 장 업로드 시 캐러셀)
+- [x] 피드 — 팀원 인증 타임라인 (여러 장 업로드 시 캐러셀)
 - [x] 인증 — 인증샷 수동 업로드 (여러 장 가능)
 - [x] 현황판 — 시즌 참여자 그리드 (주차별 달성, 셀 클릭 시 해당 주 사진 보기)
 - [x] 관리자 — 심사 대기 / 팀원 관리(관리자 지정·초대 코드) / 시즌 관리 / 시즌 참여자 관리
@@ -32,10 +32,10 @@
 ### 1. Supabase 프로젝트 준비
 
 1. [supabase.com](https://supabase.com) 에서 프로젝트 생성
-2. `supabase/migrations/` 아래 `0001`~`0007`을 **번호 순서대로** SQL Editor에서 실행
+2. `supabase/migrations/` 아래 `0001`~`0008`을 **번호 순서대로** SQL Editor에서 실행
    - `0005_teams_and_seasons.sql`은 스키마를 크게 바꿉니다: `profiles.role`을 없애고
      `team_memberships.role`로 옮기고, `activities.photo_url`을 `activity_photos` 테이블로
-     옮기고, 팀/시즌 테이블을 새로 만듭니다. 기존에 크루원·인증 데이터가 있어도 안전하게
+     옮기고, 팀/시즌 테이블을 새로 만듭니다. 기존에 팀원·인증 데이터가 있어도 안전하게
      마이그레이션되도록 만들었어요(팀 1개 자동 시딩, 기존 활동을 임시 시즌에 배정).
    - `0006_fix_team_membership_recursion.sql`은 `0005`가 심어둔 RLS 버그 하나를 고칩니다
      (`team_memberships`를 스스로 참조하는 정책이 "infinite recursion detected in policy"
@@ -45,6 +45,10 @@
      (`0005`가 잠깐 풀어놨던 것). 같은 날짜에 반려 아닌 건이 이미 있으면 새로 못 넣도록
      unique index를 만들고, 실행 전에 이미 같은 날 중복 건이 있으면 가장 먼저 올라온
      건만 남기고 나머지는 자동으로 반려 처리합니다(기록은 남되 무효 처리).
+   - `0008_rename_crew_role_to_user.sql`은 용어 정리용입니다: `user_role` enum의
+     `crew` 값을 `user`로 바꿉니다(코드/화면 문구가 "크루원"/"팀원"으로 섞여 있던 걸
+     정리하면서 역할 값도 `admin`/`user`로 통일). `ALTER TYPE ... RENAME VALUE`라서
+     기존 데이터는 자동으로 반영되고 별도 백필은 필요 없어요.
 3. [developers.kakao.com](https://developers.kakao.com) 에서 앱 등록 후 REST API 키 발급
 4. Supabase Dashboard → Authentication → Providers → Kakao 활성화, REST API 키(Client ID)와 Client Secret 입력
 5. Kakao 개발자 콘솔의 Redirect URI에 `https://<your-project>.supabase.co/auth/v1/callback` 등록

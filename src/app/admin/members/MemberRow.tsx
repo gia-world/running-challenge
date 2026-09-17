@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import type { UserRole } from "@/lib/types";
 
 export function MemberRow({
   membershipId,
@@ -11,7 +12,7 @@ export function MemberRow({
 }: {
   membershipId: string;
   name: string;
-  role: "admin" | "crew";
+  role: UserRole;
 }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,7 +48,7 @@ export function MemberRow({
         )}
       </div>
 
-      {role === "crew" && (
+      {role === "user" && (
         <div className="flex flex-col items-end gap-1">
           <button
             type="button"

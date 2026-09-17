@@ -1,11 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
+import type { UserRole } from "@/lib/types";
 import { InviteCodeCard } from "./InviteCodeCard";
 import { MemberRow } from "./MemberRow";
 
 type MembershipRow = {
   id: string;
-  role: "admin" | "crew";
+  role: UserRole;
   profiles: { id: string; name: string } | null;
 };
 
