@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const UNIQUE_VIOLATION = "23505";
@@ -41,6 +41,20 @@ export function FeedCardActions({
   );
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [pendingEmoji, setPendingEmoji] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isPickerOpen) return;
+
+    function handlePointerDown(e: PointerEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsPickerOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [isPickerOpen]);
 
   const [requested, setRequested] = useState(initialRequested);
   const [isRequesting, setIsRequesting] = useState(false);
@@ -120,7 +134,10 @@ export function FeedCardActions({
   const activeReactions = REACTION_EMOJIS.filter((emoji) => (reactions[emoji]?.count ?? 0) > 0);
 
   return (
-    <div className="flex flex-col gap-2 border-t border-zinc-100 px-4 py-2 text-xs dark:border-zinc-800">
+    <div
+      ref={containerRef}
+      className="flex flex-col gap-2 border-t border-zinc-100 px-4 py-2 text-xs dark:border-zinc-800"
+    >
       <div className="flex flex-wrap items-center gap-1.5">
         {activeReactions.map((emoji) => {
           const state = reactions[emoji]!;
@@ -148,7 +165,7 @@ export function FeedCardActions({
           className="flex items-center justify-center rounded-full border border-dashed border-zinc-300 px-2 py-1 text-zinc-400 dark:border-zinc-700 dark:text-zinc-500"
           aria-label="반응 추가"
         >
-          {isPickerOpen ? "닫기" : "+"}
+          {isPickerOpen ? "✕" : "+"}
         </button>
 
         {!isOwnActivity && (
