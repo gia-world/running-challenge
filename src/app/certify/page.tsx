@@ -1,24 +1,13 @@
-import { redirect } from "next/navigation";
-import { createClient, getAuthUser } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { SeasonGate } from "@/components/SeasonGate";
-import { loadViewerContext } from "@/lib/viewer";
+import { requireTeamViewer } from "@/lib/viewer";
 import { todayInSeoul } from "@/lib/week";
 import { CertifyForm } from "./CertifyForm";
 
 export default async function CertifyPage() {
-  const user = await getAuthUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const viewer = await loadViewerContext(user.id);
-
-  if (!viewer.teamId) {
-    redirect("/join");
-  }
+  const { user, viewer } = await requireTeamViewer();
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">

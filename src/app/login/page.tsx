@@ -1,19 +1,16 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/supabase/server";
 import { LoginButton } from "./LoginButton";
 import { KakaoInAppBrowserNotice } from "./KakaoInAppBrowserNotice";
 import { CrewEyebrow } from "@/components/CrewEyebrow";
+import { ErrorBanner } from "@/components/ErrorBanner";
 
 export default async function LoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string; reason?: string; code?: string }>;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getAuthUser();
   const { error, reason, code } = await searchParams;
 
   if (user) {
@@ -32,12 +29,12 @@ export default async function LoginPage({
         </p>
 
         {error && (
-          <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+          <ErrorBanner className="mt-4">
             로그인에 실패했어요. 다시 시도해 주세요.
             {reason && (
               <span className="mt-1 block text-xs opacity-80">({reason})</span>
             )}
-          </p>
+          </ErrorBanner>
         )}
 
         <div className="mt-8">

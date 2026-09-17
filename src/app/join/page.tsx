@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { CrewEyebrow } from "@/components/CrewEyebrow";
 import { JoinForm } from "./JoinForm";
 
@@ -8,14 +8,13 @@ export default async function JoinPage({
 }: {
   searchParams: Promise<{ code?: string }>;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
 
   if (!user) {
     redirect("/login");
   }
+
+  const supabase = await createClient();
 
   const { data: membership } = await supabase
     .from("team_memberships")

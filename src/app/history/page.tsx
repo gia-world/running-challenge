@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient, getAuthUser } from "@/lib/supabase/server";
-import { loadViewerContext } from "@/lib/viewer";
+import { createClient } from "@/lib/supabase/server";
+import { requireTeamViewer } from "@/lib/viewer";
 import { seasonWeekIndexForDate, SEASON_WEEKS } from "@/lib/season";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
@@ -9,17 +8,7 @@ import { SeasonGate } from "@/components/SeasonGate";
 import { ActivityStatusList, type ActivityListItem } from "@/components/ActivityStatusList";
 
 export default async function HistoryPage() {
-  const user = await getAuthUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const viewer = await loadViewerContext(user.id);
-
-  if (!viewer.teamId) {
-    redirect("/join");
-  }
+  const { user, viewer } = await requireTeamViewer();
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">

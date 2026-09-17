@@ -1,9 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatKoreanDate } from "@/lib/format";
+import { getSignedPhotoUrls } from "@/lib/photos";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { ReviewItem } from "./ReviewItem";
-
-const PHOTO_SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 type PendingRow = {
   id: string;
@@ -31,18 +30,10 @@ export default async function AdminReviewPage() {
 
   const rows = activities ?? [];
   const items = await Promise.all(
-    rows.map(async (row) => {
-      const sortedPhotos = [...row.activity_photos].sort((a, b) => a.sort_order - b.sort_order);
-      const signedUrls = await Promise.all(
-        sortedPhotos.map(async (photo) => {
-          const { data } = await supabase.storage
-            .from("certifications")
-            .createSignedUrl(photo.storage_path, PHOTO_SIGNED_URL_TTL_SECONDS);
-          return data?.signedUrl ?? null;
-        }),
-      );
-      return { ...row, photoUrls: signedUrls.filter((url): url is string => !!url) };
-    }),
+    rows.map(async (row) => ({
+      ...row,
+      photoUrls: await getSignedPhotoUrls(supabase, row.activity_photos),
+    })),
   );
 
   return (

@@ -1,5 +1,6 @@
+import { redirect } from "next/navigation";
 import { cache } from "react";
-import { createClient } from "./supabase/server";
+import { createClient, getAuthUser } from "./supabase/server";
 import { todayInSeoul } from "./week";
 import type { UserRole } from "./types";
 
@@ -66,3 +67,29 @@ export const loadViewerContext = cache(async (userId: string): Promise<ViewerCon
     isSeasonMember,
   };
 });
+
+/**
+ * Common guard for every team-scoped page: require a signed-in user who
+ * has joined a team, redirecting to /login or /join otherwise. This exact
+ * getAuthUser + loadViewerContext + redirect sequence was duplicated
+ * across home/certify/feed/status/history/admin — centralized here so
+ * there's one place to change if the gating logic ever needs to.
+ */
+export async function requireTeamViewer() {
+  const user = await getAuthUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const viewer = await loadViewerContext(user.id);
+
+  if (!viewer.teamId) {
+    redirect("/join");
+  }
+
+  // Narrowed for callers that need teamId as a plain string (e.g. passing
+  // it to a child component prop) — redirect() above guarantees this at
+  // runtime, TS just can't see through the extracted function boundary.
+  return { user, viewer: viewer as ViewerContext & { teamId: string } };
+}

@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient, getAuthUser } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { WEEKLY_GOAL, todayInSeoul } from "@/lib/week";
 import { seasonWeekIndexForDate, seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
-import { loadViewerContext } from "@/lib/viewer";
+import { requireTeamViewer } from "@/lib/viewer";
 import { WeeklyDots } from "@/components/WeeklyDots";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
@@ -13,17 +12,7 @@ import type { ActivityStatus } from "@/lib/types";
 import { SignOutButton } from "./SignOutButton";
 
 export default async function HomePage() {
-  const user = await getAuthUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const viewer = await loadViewerContext(user.id);
-
-  if (!viewer.teamId) {
-    redirect("/join");
-  }
+  const { user, viewer } = await requireTeamViewer();
 
   const supabase = await createClient();
   const { data: profile } = await supabase

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
+import { getSignedPhotoUrls } from "@/lib/photos";
 import type { WeekStat } from "@/lib/seasonStats";
 
 type Member = { id: string; name: string; weeks: WeekStat[] };
@@ -15,8 +16,6 @@ type ModalActivity = {
   distanceKm: number;
   photoUrls: string[];
 };
-
-const PHOTO_SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 function totalSuccess(member: Member) {
   return member.weeks.filter((w) => w.isSuccess).length;
@@ -87,26 +86,13 @@ export function StatusBoard({
       >();
 
     const modalActivities = await Promise.all(
-      (activities ?? []).map(async (activity, index) => {
-        const sortedPhotos = [...activity.activity_photos].sort(
-          (a, b) => a.sort_order - b.sort_order,
-        );
-        const signedUrls = await Promise.all(
-          sortedPhotos.map(async (photo) => {
-            const { data } = await supabase.storage
-              .from("certifications")
-              .createSignedUrl(photo.storage_path, PHOTO_SIGNED_URL_TTL_SECONDS);
-            return data?.signedUrl ?? null;
-          }),
-        );
-        return {
-          id: activity.id,
-          ordinal: index + 1,
-          activityDate: activity.activity_date,
-          distanceKm: Number(activity.distance_km),
-          photoUrls: signedUrls.filter((url): url is string => !!url),
-        };
-      }),
+      (activities ?? []).map(async (activity, index) => ({
+        id: activity.id,
+        ordinal: index + 1,
+        activityDate: activity.activity_date,
+        distanceKm: Number(activity.distance_km),
+        photoUrls: await getSignedPhotoUrls(supabase, activity.activity_photos),
+      })),
     );
 
     setModal({ name: member.name, weekIndex, activities: modalActivities });

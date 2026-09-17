@@ -1,13 +1,12 @@
-import { redirect } from "next/navigation";
-import { createClient, getAuthUser } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { formatKoreanDate } from "@/lib/format";
 import { describeSeasonOccurrence } from "@/lib/season";
-import { loadViewerContext } from "@/lib/viewer";
+import { getSignedPhotoUrls } from "@/lib/photos";
+import { requireTeamViewer } from "@/lib/viewer";
 
-const PHOTO_SIGNED_URL_TTL_SECONDS = 60 * 60;
 const FEED_LIMIT = 50;
 
 type FeedRow = {
@@ -21,17 +20,7 @@ type FeedRow = {
 };
 
 export default async function FeedPage() {
-  const user = await getAuthUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const viewer = await loadViewerContext(user.id);
-
-  if (!viewer.teamId) {
-    redirect("/join");
-  }
+  const { viewer } = await requireTeamViewer();
 
   const supabase = await createClient();
   const { data: activities, error } = await supabase
@@ -83,17 +72,7 @@ export default async function FeedPage() {
 
   const items = await Promise.all(
     rows.map(async (row) => {
-      const sortedPhotos = [...row.activity_photos].sort(
-        (a, b) => a.sort_order - b.sort_order,
-      );
-      const signedUrls = await Promise.all(
-        sortedPhotos.map(async (photo) => {
-          const { data } = await supabase.storage
-            .from("certifications")
-            .createSignedUrl(photo.storage_path, PHOTO_SIGNED_URL_TTL_SECONDS);
-          return data?.signedUrl ?? null;
-        }),
-      );
+      const photoUrls = await getSignedPhotoUrls(supabase, row.activity_photos);
 
       const seasonStart = seasonStartDates.get(row.season_id);
       const dates =
@@ -104,7 +83,7 @@ export default async function FeedPage() {
 
       return {
         ...row,
-        photoUrls: signedUrls.filter((url): url is string => !!url),
+        photoUrls,
         occurrenceLabel: occurrence
           ? `${occurrence.weekIndex + 1}주차 ${occurrence.ordinal}회`
           : null,

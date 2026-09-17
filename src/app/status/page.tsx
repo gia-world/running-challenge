@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
-import { createClient, getAuthUser } from "@/lib/supabase/server";
-import { loadViewerContext } from "@/lib/viewer";
+import { createClient } from "@/lib/supabase/server";
+import { requireTeamViewer } from "@/lib/viewer";
 import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
 import { seasonWeekIndexForDate } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
@@ -14,16 +13,7 @@ type MembershipRow = {
 };
 
 export default async function StatusPage() {
-  const user = await getAuthUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const viewer = await loadViewerContext(user.id);
-  if (!viewer.teamId) {
-    redirect("/join");
-  }
+  const { user, viewer } = await requireTeamViewer();
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">

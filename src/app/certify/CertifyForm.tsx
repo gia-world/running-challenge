@@ -4,7 +4,9 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { compressImage } from "@/lib/image";
+import { CERTIFICATIONS_BUCKET } from "@/lib/photos";
 import { todayInSeoul } from "@/lib/week";
+import { ErrorBanner } from "@/components/ErrorBanner";
 
 type PendingPhoto = { file: File; previewUrl: string };
 
@@ -77,7 +79,7 @@ export function CertifyForm({
     for (const [index, blob] of compressed.entries()) {
       const path = `${userId}/${activityDate}-${Date.now()}-${index}.jpg`;
       const { error: uploadError } = await supabase.storage
-        .from("certifications")
+        .from(CERTIFICATIONS_BUCKET)
         .upload(path, blob, { contentType: "image/jpeg" });
 
       if (uploadError) {
@@ -154,10 +156,10 @@ export function CertifyForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       {isBlocked && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+        <ErrorBanner>
           오늘은 이미 인증하셨어요.
           <br /> 다른 날짜를 선택하면 추가로 인증할 수 있어요.
-        </p>
+        </ErrorBanner>
       )}
 
       <label className="flex flex-col gap-2">
@@ -230,11 +232,7 @@ export function CertifyForm({
         />
       </label>
 
-      {error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
-          {error}
-        </p>
-      )}
+      {error && <ErrorBanner>{error}</ErrorBanner>}
 
       <button
         type="submit"

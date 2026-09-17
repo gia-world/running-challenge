@@ -1,21 +1,11 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient, getAuthUser } from "@/lib/supabase/server";
-import { loadViewerContext } from "@/lib/viewer";
+import { createClient } from "@/lib/supabase/server";
+import { requireTeamViewer } from "@/lib/viewer";
 import { formatKoreanDate } from "@/lib/format";
 import { SeasonForm } from "./SeasonForm";
 
 export default async function AdminSeasonPage() {
-  const user = await getAuthUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const viewer = await loadViewerContext(user.id);
-  if (!viewer.teamId) {
-    redirect("/join");
-  }
+  const { viewer } = await requireTeamViewer();
   const teamId = viewer.teamId;
 
   const supabase = await createClient();

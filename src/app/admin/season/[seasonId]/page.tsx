@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient, getAuthUser } from "@/lib/supabase/server";
-import { loadViewerContext } from "@/lib/viewer";
+import { createClient } from "@/lib/supabase/server";
+import { requireTeamViewer } from "@/lib/viewer";
 import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
 import { formatKoreanDate } from "@/lib/format";
 import { ParticipantToggle } from "./ParticipantToggle";
@@ -16,16 +16,7 @@ export default async function AdminSeasonDetailPage({
   params: Promise<{ seasonId: string }>;
 }) {
   const { seasonId } = await params;
-  const user = await getAuthUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const viewer = await loadViewerContext(user.id);
-  if (!viewer.teamId) {
-    redirect("/join");
-  }
+  const { viewer } = await requireTeamViewer();
 
   const supabase = await createClient();
   const { data: season } = await supabase
