@@ -43,7 +43,9 @@ export async function sendKakaoMemo(
   text: string,
   linkPath?: string,
 ): Promise<boolean> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+  // Trim a trailing slash so a base URL configured with one (e.g.
+  // "https://example.com/") doesn't double up with linkPath's leading "/".
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "");
   const templateObject = {
     object_type: "text",
     text,
