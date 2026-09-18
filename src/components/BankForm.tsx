@@ -7,10 +7,12 @@ export function BankForm({
   userId,
   initialBankName,
   initialAccountNumber,
+  onSaved,
 }: {
   userId: string;
   initialBankName: string;
   initialAccountNumber: string;
+  onSaved?: () => void;
 }) {
   const [bankName, setBankName] = useState(initialBankName);
   const [accountNumber, setAccountNumber] = useState(initialAccountNumber);
@@ -41,6 +43,7 @@ export function BankForm({
 
     setSaved(true);
     setIsSubmitting(false);
+    onSaved?.();
   }
 
   return (

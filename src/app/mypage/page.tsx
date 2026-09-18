@@ -5,8 +5,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { requireTeamViewer } from "@/lib/viewer";
 import { seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
-import { BankForm } from "./BankForm";
-import { RenewalToggle } from "./RenewalToggle";
+import { BankForm } from "@/components/BankForm";
+import { RenewalToggle } from "@/components/RenewalToggle";
 
 export default async function MyPage() {
   const user = await getAuthUser();
