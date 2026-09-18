@@ -83,8 +83,10 @@ export default async function MyPage() {
           <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300">
             계좌 정보
           </h2>
-          <p className="text-base text-zinc-500 dark:text-zinc-400">
-            참가비 정산(환급/상금)을 받으려면 계좌 등록이 필요해요.
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            {profile?.bank_account_number
+              ? "참가비 정산은 아래 계좌로 진행돼요."
+              : " 참가비 정산(환급/상금)을 받으려면 계좌 등록이 필요해요."}
           </p>
           <BankForm
             userId={user.id}
