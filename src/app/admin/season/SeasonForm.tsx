@@ -25,6 +25,8 @@ export function SeasonForm({
   const today = todayInSeoul();
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(defaultSeasonEndDate(today));
+  const [entryFee, setEntryFee] = useState("");
+  const [refundPerCertification, setRefundPerCertification] = useState("");
   const [copyPrevious, setCopyPrevious] = useState(true);
   const [needsOverlapConfirm, setNeedsOverlapConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,7 +45,13 @@ export function SeasonForm({
 
     const { data: season, error: insertError } = await supabase
       .from("seasons")
-      .insert({ team_id: teamId, start_date: startDate, end_date: endDate })
+      .insert({
+        team_id: teamId,
+        start_date: startDate,
+        end_date: endDate,
+        entry_fee: entryFee ? Number(entryFee) : null,
+        refund_per_certification: refundPerCertification ? Number(refundPerCertification) : null,
+      })
       .select("id")
       .single();
 
@@ -111,6 +119,38 @@ export function SeasonForm({
             setEndDate(e.target.value);
             setNeedsOverlapConfirm(false);
           }}
+          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1">
+        <span className="text-base text-zinc-500 dark:text-zinc-400">
+          참가비 (원, 선택)
+        </span>
+        <input
+          type="number"
+          min="0"
+          step="1000"
+          inputMode="numeric"
+          value={entryFee}
+          onChange={(e) => setEntryFee(e.target.value)}
+          placeholder="24000"
+          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1">
+        <span className="text-base text-zinc-500 dark:text-zinc-400">
+          인증 1회당 환급 단가 (원, 선택)
+        </span>
+        <input
+          type="number"
+          min="0"
+          step="500"
+          inputMode="numeric"
+          value={refundPerCertification}
+          onChange={(e) => setRefundPerCertification(e.target.value)}
+          placeholder="2000"
           className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
         />
       </label>

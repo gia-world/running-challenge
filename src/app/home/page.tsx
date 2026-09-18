@@ -26,7 +26,20 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
-      <PageHeader teamName={viewer.teamName} action={<SignOutButton />}>
+      <PageHeader
+        teamName={viewer.teamName}
+        action={
+          <div className="flex items-center gap-3">
+            <Link
+              href="/mypage"
+              className="text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+            >
+              마이페이지
+            </Link>
+            <SignOutButton />
+          </div>
+        }
+      >
         <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
           {displayName}님, 안녕하세요 👋
         </h1>
