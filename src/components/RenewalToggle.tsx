@@ -45,17 +45,25 @@ export function RenewalToggle({
 
   if (choice !== null) {
     return (
-      <div className="flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900">
-        <span className="text-base text-zinc-500 dark:text-zinc-400">
-          {choice
-            ? "다음 시즌 연장 선택 — 환급액이 다음 시즌 참가비로 이월돼요."
-            : "연장 안 함 — 환급액을 그대로 받아요."}
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-base text-zinc-600 dark:text-zinc-400">
+          {choice ? (
+            <>
+              <span>다음 시즌 연장 선택 완료</span>
+              <br />
+              <span className="text-sm text-zinc-500">
+                상금을 제외한 환급액이 다음 시즌 참가비로 이월돼요.
+              </span>
+            </>
+          ) : (
+            "연장 안 함 — 환급액을 그대로 받아요."
+          )}
         </span>
         <button
           type="button"
           onClick={() => setChoice(null)}
           disabled={isSubmitting}
-          className="shrink-0 text-sm font-medium text-orange-500"
+          className="rounded-lg bg-orange-500 px-3 py-2 font-semibold text-white disabled:opacity-60"
         >
           변경
         </button>
@@ -64,12 +72,14 @@ export function RenewalToggle({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl bg-white p-4 shadow-sm dark:bg-zinc-900">
+    <div className="flex flex-col gap-3">
       <p className="text-base text-zinc-500 dark:text-zinc-400">
         다음 시즌도 계속하시겠어요? 연장하면 이번 시즌 환급액은 다음 시즌
         참가비로 자동 이월돼요.
       </p>
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      )}
       <div className="flex gap-2">
         <button
           type="button"

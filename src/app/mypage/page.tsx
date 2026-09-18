@@ -26,7 +26,10 @@ export default async function MyPage() {
   // 노출 — 고정된 주차 번호가 아니라 종료일 기준으로 계산해야, 시즌 기간을
   // 4주가 아닌 다른 길이로 조정해도 정확한 마지막 주에 뜸.
   const lastWeekIndex = viewer.activeSeason
-    ? seasonWeekIndexForDate(viewer.activeSeason.start_date, viewer.activeSeason.end_date)
+    ? seasonWeekIndexForDate(
+        viewer.activeSeason.start_date,
+        viewer.activeSeason.end_date,
+      )
     : null;
   const lastWeekStart =
     viewer.activeSeason && lastWeekIndex !== null
@@ -57,16 +60,16 @@ export default async function MyPage() {
       </PageHeader>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-8">
-        <div>
+        {/* <div>
           <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
             {profile?.name ?? "러너"}
           </h2>
-        </div>
+        </div> */}
 
         {showRenewalPrompt && viewer.activeSeason && (
           <div className="flex flex-col gap-2">
-            <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
-              다음 시즌
+            <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300">
+              자동 연장
             </h2>
             <RenewalToggle
               seasonId={viewer.activeSeason.id}
@@ -77,7 +80,7 @@ export default async function MyPage() {
         )}
 
         <div className="flex flex-col gap-2">
-          <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
+          <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300">
             계좌 정보
           </h2>
           <p className="text-base text-zinc-500 dark:text-zinc-400">
