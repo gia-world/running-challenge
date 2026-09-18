@@ -60,6 +60,12 @@ export default async function MyPage() {
       </PageHeader>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-8">
+        <Link
+          href="/home"
+          className="text-sm font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+        >
+          ← 홈으로
+        </Link>
         {/* <div>
           <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
             {profile?.name ?? "러너"}
@@ -94,13 +100,6 @@ export default async function MyPage() {
             initialAccountNumber={profile?.bank_account_number ?? ""}
           />
         </div>
-
-        <Link
-          href="/home"
-          className="text-sm font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-        >
-          ← 홈으로
-        </Link>
       </main>
     </div>
   );
