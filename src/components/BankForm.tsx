@@ -47,10 +47,7 @@ export function BankForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-900"
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3 ">
       <label className="flex flex-col gap-1">
         <span className="text-base text-zinc-500 dark:text-zinc-400">은행</span>
         <input
@@ -66,7 +63,9 @@ export function BankForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-base text-zinc-500 dark:text-zinc-400">계좌번호</span>
+        <span className="text-base text-zinc-500 dark:text-zinc-400">
+          계좌번호
+        </span>
         <input
           type="text"
           inputMode="numeric"
@@ -80,9 +79,13 @@ export function BankForm({
         />
       </label>
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+      )}
       {saved && !error && (
-        <p className="text-sm text-green-600 dark:text-green-400">저장했어요.</p>
+        <p className="text-sm text-green-600 dark:text-green-400">
+          저장했어요.
+        </p>
       )}
 
       <button
