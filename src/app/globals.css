@@ -119,6 +119,16 @@ button {
   cursor: pointer;
 }
 
+/* iOS Safari auto-zooms in on focus for any input/select/textarea whose
+   computed font-size is under 16px, and the zoom sticks around after
+   blur — forcing 16px here (overriding whatever text-* utility class is
+   applied) stops the zoom from triggering at all. */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
 /* Certification success screen: a rubber-stamp "슬램" landing... */
 @keyframes stamp-in {
   0% {
