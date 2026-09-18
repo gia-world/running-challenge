@@ -55,7 +55,7 @@ export function BankForm({
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          className="rounded-lg bg-orange-500 px-3 py-2 font-semibold text-white"
+          className="rounded-xl bg-orange-500 px-3 py-2 font-semibold text-white"
         >
           변경
         </button>
@@ -72,7 +72,7 @@ export function BankForm({
           value={bankName}
           onChange={(e) => setBankName(e.target.value)}
           placeholder="국민은행"
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-800"
         />
       </label>
 
@@ -86,7 +86,7 @@ export function BankForm({
           value={accountNumber}
           onChange={(e) => setAccountNumber(e.target.value)}
           placeholder="123456-78-901234"
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-800"
         />
       </label>
 

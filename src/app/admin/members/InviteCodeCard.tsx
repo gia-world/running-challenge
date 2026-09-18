@@ -66,7 +66,7 @@ export function InviteCodeCard({
         <button
           type="button"
           onClick={() => copy(code, "code")}
-          className="rounded-lg bg-zinc-200 px-3 py-2 text-base font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+          className="rounded-xl bg-zinc-200 px-3 py-2 text-base font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
         >
           {copied === "code" ? "복사됨" : "복사"}
         </button>
@@ -76,7 +76,7 @@ export function InviteCodeCard({
         <button
           type="button"
           onClick={() => copy(inviteLink, "link")}
-          className="flex-1 rounded-lg bg-orange-500 px-3 py-2 text-base font-semibold text-white"
+          className="flex-1 rounded-xl bg-orange-500 px-3 py-2 text-base font-semibold text-white"
         >
           {copied === "link" ? "링크 복사됨" : "초대 링크 복사"}
         </button>
@@ -84,7 +84,7 @@ export function InviteCodeCard({
           type="button"
           onClick={regenerate}
           disabled={isRegenerating}
-          className="rounded-lg bg-zinc-200 px-3 py-2 text-base font-medium text-zinc-700 disabled:opacity-60 dark:bg-zinc-800 dark:text-zinc-300"
+          className="rounded-xl bg-zinc-200 px-3 py-2 text-base font-medium text-zinc-700 disabled:opacity-60 dark:bg-zinc-800 dark:text-zinc-300"
         >
           {isRegenerating ? "재발급 중..." : "재발급"}
         </button>

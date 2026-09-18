@@ -38,7 +38,7 @@ export function MemberRow({
   }
 
   return (
-    <li className="flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900">
+    <li className="flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900">
       <div className="flex items-center gap-2">
         <span className="font-semibold text-zinc-900 dark:text-zinc-50">{name}</span>
         {role === "admin" && (

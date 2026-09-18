@@ -41,7 +41,7 @@ export default async function AdminSeasonPage() {
                 <li key={season.id}>
                   <Link
                     href={`/admin/season/${season.id}`}
-                    className="flex items-center justify-between rounded-xl bg-white px-4 py-3 text-base shadow-sm dark:bg-zinc-900"
+                    className="flex items-center justify-between rounded-2xl bg-white px-4 py-3 text-base shadow-sm dark:bg-zinc-900"
                   >
                     <span className="text-zinc-900 dark:text-zinc-50">
                       {formatKoreanDate(season.start_date)} ~ {formatKoreanDate(season.end_date)}

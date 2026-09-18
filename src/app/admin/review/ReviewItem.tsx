@@ -118,7 +118,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="반려 사유 (직접 입력도 가능해요)"
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-800"
         />
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
         <div className="flex gap-2">
@@ -126,7 +126,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
             type="button"
             onClick={reject}
             disabled={isSubmitting}
-            className="flex-1 rounded-lg bg-red-500 py-2 text-base font-semibold text-white disabled:opacity-60"
+            className="flex-1 rounded-xl bg-red-500 py-2 text-base font-semibold text-white disabled:opacity-60"
           >
             반려 확정
           </button>
@@ -137,7 +137,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
               setError(null);
             }}
             disabled={isSubmitting}
-            className="flex-1 rounded-lg bg-zinc-200 py-2 text-base font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+            className="flex-1 rounded-xl bg-zinc-200 py-2 text-base font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
           >
             취소
           </button>
@@ -154,7 +154,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
           type="button"
           onClick={approve}
           disabled={isSubmitting}
-          className="flex-1 rounded-lg bg-orange-500 py-2 text-base font-semibold text-white disabled:opacity-60"
+          className="flex-1 rounded-xl bg-orange-500 py-2 text-base font-semibold text-white disabled:opacity-60"
         >
           인정 유지
         </button>
@@ -162,7 +162,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
           type="button"
           onClick={() => setIsShowingReject(true)}
           disabled={isSubmitting}
-          className="flex-1 rounded-lg bg-zinc-200 py-2 text-base font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+          className="flex-1 rounded-xl bg-zinc-200 py-2 text-base font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
         >
           반려
         </button>

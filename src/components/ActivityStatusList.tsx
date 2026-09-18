@@ -31,7 +31,7 @@ export function ActivityStatusList({
       {activities.map((activity) => (
         <li
           key={activity.id}
-          className="flex flex-col gap-1 rounded-xl bg-white px-4 py-3 text-base shadow-sm dark:bg-zinc-900"
+          className="flex flex-col gap-1 rounded-2xl bg-white px-4 py-3 text-base shadow-sm dark:bg-zinc-900"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

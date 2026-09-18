@@ -43,8 +43,8 @@ export function ParticipantToggle({
       disabled={isSubmitting}
       className={
         isParticipant
-          ? "shrink-0 rounded-lg bg-zinc-200 px-3 py-2 text-base font-medium text-zinc-700 disabled:opacity-60 dark:bg-zinc-800 dark:text-zinc-300"
-          : "shrink-0 rounded-lg bg-orange-500 px-3 py-2 text-base font-semibold text-white disabled:opacity-60"
+          ? "shrink-0 rounded-xl bg-zinc-200 px-3 py-2 text-base font-medium text-zinc-700 disabled:opacity-60 dark:bg-zinc-800 dark:text-zinc-300"
+          : "shrink-0 rounded-xl bg-orange-500 px-3 py-2 text-base font-semibold text-white disabled:opacity-60"
       }
     >
       {isParticipant ? "참여 취소" : "참여 추가"}

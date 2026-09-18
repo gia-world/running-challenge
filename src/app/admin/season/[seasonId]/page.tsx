@@ -156,7 +156,7 @@ export default async function AdminSeasonDetailPage({
           return (
             <li
               key={member.id}
-              className="flex flex-col gap-2 rounded-xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900"
+              className="flex flex-col gap-2 rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex flex-col gap-1">

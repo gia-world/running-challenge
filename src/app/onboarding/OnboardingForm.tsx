@@ -56,7 +56,7 @@ export function OnboardingForm({
           onChange={(e) => setName(e.target.value)}
           placeholder="실명을 입력해주세요"
           autoFocus
-          className="rounded-lg border border-zinc-300 px-3 py-3 text-center dark:border-zinc-700 dark:bg-zinc-900 text-lg"
+          className="rounded-xl border border-zinc-300 px-3 py-3 text-center text-lg focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-900"
         />
         {error && (
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
@@ -74,7 +74,7 @@ export function OnboardingForm({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="rounded-xl bg-white px-4 py-4 text-lg font-bold text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-50">
+      <p className="rounded-2xl bg-white px-4 py-4 text-lg font-bold text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-50">
         {currentName}
       </p>
       <p className="text-base text-zinc-500 dark:text-zinc-400 mt-4">

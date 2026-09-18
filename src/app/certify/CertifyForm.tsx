@@ -229,7 +229,7 @@ export function CertifyForm({
             ))}
           </div>
         ) : (
-          <div className="flex aspect-square w-full items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 px-4 text-center text-sm text-zinc-400 dark:border-zinc-700">
+          <div className="flex aspect-square w-full items-center justify-center rounded-2xl border-2 border-dashed border-zinc-300 px-4 text-center text-sm text-zinc-400 dark:border-zinc-700">
             날짜, 거리, 페이스가 보이는 스크린샷을 선택하세요
           </div>
         )}
@@ -252,7 +252,7 @@ export function CertifyForm({
           value={activityDate}
           max={maxActivityDate}
           onChange={(e) => setActivityDate(e.target.value)}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-900"
         />
       </label>
 
@@ -269,7 +269,7 @@ export function CertifyForm({
           onChange={(e) => setDistanceKm(e.target.value)}
           placeholder="5.0"
           disabled={isBlocked}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900"
+          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900"
         />
       </label>
 

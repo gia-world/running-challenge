@@ -31,7 +31,7 @@ export function SeasonFeeFields({
           value={entryFee}
           onChange={(e) => onEntryFeeChange(e.target.value)}
           placeholder={DEFAULT_ENTRY_FEE}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-800"
         />
       </label>
 
@@ -47,7 +47,7 @@ export function SeasonFeeFields({
           value={refundPerCertification}
           onChange={(e) => onRefundPerCertificationChange(e.target.value)}
           placeholder={DEFAULT_REFUND_PER_CERTIFICATION}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
+          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-800"
         />
       </label>
     </>

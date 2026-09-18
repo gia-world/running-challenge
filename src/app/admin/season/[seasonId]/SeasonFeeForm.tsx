@@ -62,7 +62,7 @@ export function SeasonFeeForm({
 
   if (!isEditing) {
     return (
-      <div className="flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900">
+      <div className="flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900">
         <span className="text-base text-zinc-500 dark:text-zinc-400">
           참가비 {initialEntryFee?.toLocaleString("ko-KR")}원 · 인증 1회당{" "}
           {initialRefundPerCertification?.toLocaleString("ko-KR")}원 환급
@@ -81,7 +81,7 @@ export function SeasonFeeForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-xl bg-white p-4 shadow-sm dark:bg-zinc-900"
+      className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-900"
     >
       <SeasonFeeFields
         entryFee={entryFee}
