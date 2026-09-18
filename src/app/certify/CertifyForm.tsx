@@ -7,6 +7,8 @@ import { compressImage } from "@/lib/image";
 import { CERTIFICATIONS_BUCKET } from "@/lib/photos";
 import { todayInSeoul } from "@/lib/week";
 import { ErrorBanner } from "@/components/ErrorBanner";
+import { BottomSheet } from "@/components/BottomSheet";
+import { RenewalToggle } from "@/components/RenewalToggle";
 
 type PendingPhoto = { file: File; previewUrl: string };
 
@@ -20,6 +22,7 @@ export function CertifyForm({
   achievedThisWeek,
   weeklyGoal,
   maxActivityDate,
+  showRenewalPrompt,
 }: {
   userId: string;
   seasonId: string;
@@ -27,6 +30,7 @@ export function CertifyForm({
   achievedThisWeek: number;
   weeklyGoal: number;
   maxActivityDate: string;
+  showRenewalPrompt: boolean;
 }) {
   const router = useRouter();
   const today = todayInSeoul();
@@ -37,6 +41,7 @@ export function CertifyForm({
   const [error, setError] = useState<string | null>(null);
   const [isDone, setIsDone] = useState(false);
   const [completedWeekGoal, setCompletedWeekGoal] = useState(false);
+  const [renewalSheetDismissed, setRenewalSheetDismissed] = useState(false);
 
   const isBlocked = activityDate === today && alreadyCertifiedToday;
 
@@ -174,6 +179,17 @@ export function CertifyForm({
         >
           홈으로 가기
         </button>
+
+        {activityDate === today && showRenewalPrompt && !renewalSheetDismissed && (
+          <BottomSheet onClose={() => setRenewalSheetDismissed(true)}>
+            <RenewalToggle
+              seasonId={seasonId}
+              userId={userId}
+              initialChoice={null}
+              onAnswered={() => setRenewalSheetDismissed(true)}
+            />
+          </BottomSheet>
+        )}
       </div>
     );
   }

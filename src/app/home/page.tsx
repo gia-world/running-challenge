@@ -9,6 +9,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { SeasonGate } from "@/components/SeasonGate";
 import { ActivityStatusList } from "@/components/ActivityStatusList";
+import { BankInfoSheet } from "@/components/BankInfoSheet";
 import type { ActivityStatus } from "@/lib/types";
 import { SignOutButton } from "./SignOutButton";
 
@@ -18,11 +19,13 @@ export default async function HomePage() {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("name")
+    .select("name, bank_name, bank_account_number")
     .eq("id", user.id)
     .single();
 
   const displayName = profile?.name ?? "러너";
+  const needsBankInfo =
+    viewer.isSeasonMember && (!profile?.bank_name || !profile?.bank_account_number);
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
@@ -59,6 +62,8 @@ export default async function HomePage() {
       </main>
 
       <BottomNav active="home" isAdmin={viewer.teamRole === "admin"} />
+
+      {needsBankInfo && <BankInfoSheet userId={user.id} />}
     </div>
   );
 }
@@ -74,6 +79,14 @@ async function SeasonProgress({
   const today = todayInSeoul();
   const currentWeekIndex = seasonWeekIndexForDate(season.start_date, today) ?? 0;
   const { start, end } = seasonWeekRange(season.start_date, currentWeekIndex);
+
+  const { data: seasonMembership } = await supabase
+    .from("season_memberships")
+    .select("renew_next_season")
+    .eq("season_id", season.id)
+    .eq("user_id", userId)
+    .maybeSingle();
+  const renewNextSeason = seasonMembership?.renew_next_season ?? null;
 
   // Fetched once (every status, not just approved — a crew member needs to
   // see their own pending/rejected submissions and why, not just what
@@ -138,6 +151,11 @@ async function SeasonProgress({
         <p className="mt-3 text-sm font-medium text-orange-500">
           이번 시즌 {successfulWeeks} / {SEASON_WEEKS}주 성공
         </p>
+        {renewNextSeason !== null && (
+          <p className="mt-1 text-sm text-zinc-400">
+            다음 시즌: {renewNextSeason ? "연장 예정 (참가비 자동 이월)" : "이번 시즌으로 마무리"}
+          </p>
+        )}
       </section>
 
       <section>

@@ -8,10 +8,12 @@ export function RenewalToggle({
   seasonId,
   userId,
   initialChoice,
+  onAnswered,
 }: {
   seasonId: string;
   userId: string;
   initialChoice: boolean | null;
+  onAnswered?: () => void;
 }) {
   const router = useRouter();
   const [choice, setChoice] = useState(initialChoice);
@@ -38,6 +40,7 @@ export function RenewalToggle({
     setChoice(value);
     setIsSubmitting(false);
     router.refresh();
+    onAnswered?.();
   }
 
   if (choice !== null) {
