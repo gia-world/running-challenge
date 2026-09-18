@@ -19,17 +19,19 @@ export function CertifyForm({
   alreadyCertifiedToday,
   achievedThisWeek,
   weeklyGoal,
+  maxActivityDate,
 }: {
   userId: string;
   seasonId: string;
   alreadyCertifiedToday: boolean;
   achievedThisWeek: number;
   weeklyGoal: number;
+  maxActivityDate: string;
 }) {
   const router = useRouter();
   const today = todayInSeoul();
   const [photos, setPhotos] = useState<PendingPhoto[]>([]);
-  const [activityDate, setActivityDate] = useState(today);
+  const [activityDate, setActivityDate] = useState(maxActivityDate);
   const [distanceKm, setDistanceKm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -232,7 +234,7 @@ export function CertifyForm({
         <input
           type="date"
           value={activityDate}
-          max={today}
+          max={maxActivityDate}
           onChange={(e) => setActivityDate(e.target.value)}
           className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
         />

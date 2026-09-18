@@ -23,6 +23,7 @@ export default async function CertifyPage() {
               userId={user.id}
               seasonId={viewer.activeSeason.id}
               seasonStartDate={viewer.activeSeason.start_date}
+              seasonEndDate={viewer.activeSeason.end_date}
             />
           )}
         </SeasonGate>
@@ -37,10 +38,12 @@ async function CertifyFormLoader({
   userId,
   seasonId,
   seasonStartDate,
+  seasonEndDate,
 }: {
   userId: string;
   seasonId: string;
   seasonStartDate: string;
+  seasonEndDate: string;
 }) {
   const supabase = await createClient();
   const today = todayInSeoul();
@@ -72,6 +75,12 @@ async function CertifyFormLoader({
 
   const achievedThisWeek = new Set((weekActivities ?? []).map((a) => a.activity_date)).size;
 
+  // During the grace period, "today" is the day after the season actually
+  // ended — cap the pickable date at the season's real end so a grace-period
+  // upload still backfills a day within the season, never one after it
+  // (a date past end_date wouldn't map to any week — see seasonWeekIndexForDate).
+  const maxActivityDate = seasonEndDate < today ? seasonEndDate : today;
+
   return (
     <CertifyForm
       userId={userId}
@@ -79,6 +88,7 @@ async function CertifyFormLoader({
       alreadyCertifiedToday={!!todaysActivity}
       achievedThisWeek={achievedThisWeek}
       weeklyGoal={WEEKLY_GOAL}
+      maxActivityDate={maxActivityDate}
     />
   );
 }
