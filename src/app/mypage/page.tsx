@@ -3,7 +3,10 @@ import { redirect } from "next/navigation";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/PageHeader";
 import { requireTeamViewer } from "@/lib/viewer";
+import { seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
+import { todayInSeoul } from "@/lib/week";
 import { BankForm } from "./BankForm";
+import { RenewalToggle } from "./RenewalToggle";
 
 export default async function MyPage() {
   const user = await getAuthUser();
@@ -19,6 +22,24 @@ export default async function MyPage() {
     .eq("id", user.id)
     .single();
 
+  // "다음 시즌 연장" 질문은 실제 운영 가이드라인대로 시즌 4주차부터 노출 —
+  // 그 전에는 아직 물어볼 시점이 아님.
+  const week4Start = viewer.activeSeason
+    ? seasonWeekRange(viewer.activeSeason.start_date, SEASON_WEEKS - 1).start
+    : null;
+  const showRenewalPrompt =
+    viewer.isSeasonMember && viewer.activeSeason && week4Start !== null && todayInSeoul() >= week4Start;
+
+  const { data: seasonMembership } =
+    showRenewalPrompt && viewer.activeSeason
+      ? await supabase
+          .from("season_memberships")
+          .select("renew_next_season")
+          .eq("season_id", viewer.activeSeason.id)
+          .eq("user_id", user.id)
+          .maybeSingle()
+      : { data: null };
+
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
       <PageHeader teamName={viewer.teamName}>
@@ -31,6 +52,17 @@ export default async function MyPage() {
             {profile?.name ?? "러너"}
           </h2>
         </div>
+
+        {showRenewalPrompt && viewer.activeSeason && (
+          <div className="flex flex-col gap-2">
+            <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">다음 시즌</h2>
+            <RenewalToggle
+              seasonId={viewer.activeSeason.id}
+              userId={user.id}
+              initialChoice={seasonMembership?.renew_next_season ?? null}
+            />
+          </div>
+        )}
 
         <div className="flex flex-col gap-2">
           <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">계좌 정보</h2>

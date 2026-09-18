@@ -47,11 +47,14 @@ export default async function AdminSeasonDetailPage({
 
   const { data: seasonMemberships } = await supabase
     .from("season_memberships")
-    .select("user_id")
+    .select("user_id, renew_next_season")
     .eq("season_id", season.id);
 
   const participantIds = new Set(
     (seasonMemberships ?? []).map((m) => m.user_id),
+  );
+  const renewalByUserId = new Map(
+    (seasonMemberships ?? []).map((m) => [m.user_id, m.renew_next_season as boolean | null]),
   );
   const weeklyStats = await computeSeasonWeeklyStats(
     supabase,
@@ -130,6 +133,14 @@ export default async function AdminSeasonDetailPage({
           const weeks = weeklyStats.get(member.id) ?? emptyWeekStats();
           const settlement = settlements.get(member.id);
           const total = settlement ? settlement.refund + (settlement.isCompleted ? prizeShare : 0) : 0;
+          const isRenewing = renewalByUserId.get(member.id) === true;
+          const amountToSend = settlement
+            ? isRenewing
+              ? settlement.isCompleted
+                ? prizeShare
+                : 0
+              : total
+            : 0;
           return (
             <li
               key={member.id}
@@ -167,7 +178,16 @@ export default async function AdminSeasonDetailPage({
 
               {settlement && (
                 <div className="flex flex-col gap-1 rounded-lg bg-zinc-50 px-3 py-2 text-base dark:bg-zinc-800">
-                  {settlement.isCompleted && prizeShare > 0 ? (
+                  {isRenewing ? (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-zinc-500 dark:text-zinc-400">
+                        다음 시즌 연장 (환급 {formatWon(settlement.refund)} 이월)
+                      </span>
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                        {amountToSend > 0 ? `상금 ${formatWon(amountToSend)} 송금` : "송금 없음"}
+                      </span>
+                    </div>
+                  ) : settlement.isCompleted && prizeShare > 0 ? (
                     <div className="flex items-center justify-between">
                       <span className="text-zinc-500 dark:text-zinc-400">
                         환급 {formatWon(settlement.refund)} + 상금 {formatWon(prizeShare)}

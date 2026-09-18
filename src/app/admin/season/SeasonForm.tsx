@@ -65,7 +65,8 @@ export function SeasonForm({
       const { data: previousMembers } = await supabase
         .from("season_memberships")
         .select("user_id")
-        .eq("season_id", previousSeasonId);
+        .eq("season_id", previousSeasonId)
+        .eq("renew_next_season", true);
 
       if (previousMembers && previousMembers.length > 0) {
         await supabase
@@ -162,7 +163,7 @@ export function SeasonForm({
             checked={copyPrevious}
             onChange={(e) => setCopyPrevious(e.target.checked)}
           />
-          지난 시즌 참여자 명단 그대로 가져오기
+          지난 시즌에서 연장 선택한 참여자만 자동 포함
         </label>
       )}
 
