@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/PageHeader";
 import { requireTeamViewer } from "@/lib/viewer";
-import { seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
+import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
 import { BankForm } from "@/components/BankForm";
 import { RenewalToggle } from "@/components/RenewalToggle";
@@ -22,13 +22,18 @@ export default async function MyPage() {
     .eq("id", user.id)
     .single();
 
-  // "다음 시즌 연장" 질문은 실제 운영 가이드라인대로 시즌 4주차부터 노출 —
-  // 그 전에는 아직 물어볼 시점이 아님.
-  const week4Start = viewer.activeSeason
-    ? seasonWeekRange(viewer.activeSeason.start_date, SEASON_WEEKS - 1).start
+  // "다음 시즌 연장" 질문은 시즌의 실제 마지막 주(종료일이 속한 주)부터
+  // 노출 — 고정된 주차 번호가 아니라 종료일 기준으로 계산해야, 시즌 기간을
+  // 4주가 아닌 다른 길이로 조정해도 정확한 마지막 주에 뜸.
+  const lastWeekIndex = viewer.activeSeason
+    ? seasonWeekIndexForDate(viewer.activeSeason.start_date, viewer.activeSeason.end_date)
     : null;
+  const lastWeekStart =
+    viewer.activeSeason && lastWeekIndex !== null
+      ? seasonWeekRange(viewer.activeSeason.start_date, lastWeekIndex).start
+      : null;
   const showRenewalPrompt =
-    viewer.isSeasonMember && viewer.activeSeason && week4Start !== null && todayInSeoul() >= week4Start;
+    viewer.isSeasonMember && viewer.activeSeason && lastWeekStart !== null && todayInSeoul() >= lastWeekStart;
 
   const { data: seasonMembership } =
     showRenewalPrompt && viewer.activeSeason

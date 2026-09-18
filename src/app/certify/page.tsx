@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { SeasonGate } from "@/components/SeasonGate";
 import { requireTeamViewer } from "@/lib/viewer";
 import { todayInSeoul, WEEKLY_GOAL } from "@/lib/week";
-import { seasonWeekIndexForDate, seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
+import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
 import { CertifyForm } from "./CertifyForm";
 
 export default async function CertifyPage() {
@@ -81,10 +81,15 @@ async function CertifyFormLoader({
     ]);
 
   const achievedThisWeek = new Set((weekActivities ?? []).map((a) => a.activity_date)).size;
-  // 4주차(마지막 주)에 아직 다음 시즌 연장 여부를 답하지 않았으면, 그 주에
-  // 인증할 때 바텀싯으로 물어봄 — 답하고 나면 다시 안 뜸.
+  // 시즌의 실제 마지막 주(종료일이 속한 주)에 아직 다음 시즌 연장 여부를
+  // 답하지 않았으면, 그 주에 인증할 때 바텀싯으로 물어봄 — 답하고 나면
+  // 다시 안 뜸. 고정된 주차 번호가 아니라 종료일 기준으로 계산해야, 관리자가
+  // 시즌 기간을 4주가 아닌 다른 길이로 조정해도 정확한 마지막 주에 뜸.
+  const lastWeekIndex = seasonWeekIndexForDate(seasonStartDate, seasonEndDate);
   const showRenewalPrompt =
-    currentWeekIndex === SEASON_WEEKS - 1 && seasonMembership?.renew_next_season == null;
+    currentWeekIndex !== null &&
+    currentWeekIndex === lastWeekIndex &&
+    seasonMembership?.renew_next_season == null;
 
   // During the grace period, "today" is the day after the season actually
   // ended — cap the pickable date at the season's real end so a grace-period
