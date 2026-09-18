@@ -5,6 +5,7 @@ import { requireTeamViewer } from "@/lib/viewer";
 import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
 import { computeParticipantSettlement, computePrizeShare } from "@/lib/settlement";
 import { formatKoreanDate, formatWon } from "@/lib/format";
+import { isBeforeNoonInSeoul, yesterdayInSeoul } from "@/lib/week";
 import { ParticipantToggle } from "./ParticipantToggle";
 import { SeasonFeeForm } from "./SeasonFeeForm";
 
@@ -58,6 +59,10 @@ export default async function AdminSeasonDetailPage({
     season.start_date,
   );
   const isActive = season.id === viewer.activeSeason?.id;
+  // Mirrors the grace-period rule in loadViewerContext: a season that ended
+  // yesterday still accepts certifications until noon KST today, so the
+  // settlement totals below can still shift until that window closes.
+  const isInGracePeriod = season.end_date === yesterdayInSeoul() && isBeforeNoonInSeoul();
 
   const members = (memberships ?? [])
     .map((m) => m.profiles)
@@ -105,6 +110,12 @@ export default async function AdminSeasonDetailPage({
           )}
         </div>
       </div>
+
+      {isInGracePeriod && (
+        <p className="rounded-lg bg-amber-50 px-3 py-2 text-base text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+          ⏰ 그레이스 기간 — 오늘 정오까지 인증하면 인정돼요. 정산 금액이 아직 바뀔 수 있어요.
+        </p>
+      )}
 
       <SeasonFeeForm
         seasonId={season.id}
@@ -156,17 +167,23 @@ export default async function AdminSeasonDetailPage({
 
               {settlement && (
                 <div className="flex flex-col gap-1 rounded-lg bg-zinc-50 px-3 py-2 text-base dark:bg-zinc-800">
-                  <div className="flex items-center justify-between">
-                    <span className="text-zinc-500 dark:text-zinc-400">
-                      환급 {formatWon(settlement.refund)}
-                      {settlement.isCompleted && prizeShare > 0 && (
-                        <> + 상금 {formatWon(prizeShare)}</>
-                      )}
-                    </span>
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-50">
-                      {formatWon(total)}
-                    </span>
-                  </div>
+                  {settlement.isCompleted && prizeShare > 0 ? (
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-500 dark:text-zinc-400">
+                        환급 {formatWon(settlement.refund)} + 상금 {formatWon(prizeShare)}
+                      </span>
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                        = {formatWon(total)}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-zinc-500 dark:text-zinc-400">총 환급액</span>
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                        {formatWon(total)}
+                      </span>
+                    </div>
+                  )}
                   <span className="text-zinc-500 dark:text-zinc-400">
                     {member.bank_name && member.bank_account_number
                       ? `${member.bank_name} ${member.bank_account_number}`

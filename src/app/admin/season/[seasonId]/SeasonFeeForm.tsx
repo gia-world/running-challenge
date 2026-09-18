@@ -24,15 +24,23 @@ export function SeasonFeeForm({
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setIsSubmitting(true);
     setError(null);
+
+    const entryFeeValue = Number(entryFee);
+    const refundValue = Number(refundPerCertification);
+    if (!entryFee || !refundPerCertification || entryFeeValue <= 0 || refundValue <= 0) {
+      setError("참가비와 환급 단가를 모두 입력해주세요.");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     const supabase = createClient();
     const { error: updateError } = await supabase
       .from("seasons")
       .update({
-        entry_fee: entryFee ? Number(entryFee) : null,
-        refund_per_certification: refundPerCertification ? Number(refundPerCertification) : null,
+        entry_fee: entryFeeValue,
+        refund_per_certification: refundValue,
       })
       .eq("id", seasonId);
 
