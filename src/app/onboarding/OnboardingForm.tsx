@@ -77,7 +77,7 @@ export function OnboardingForm({
       <p className="rounded-xl bg-white px-4 py-4 text-lg font-bold text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-50">
         {currentName}
       </p>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-4">
+      <p className="text-base text-zinc-500 dark:text-zinc-400 mt-4">
         본인의 실명이 맞나요?
       </p>
 

@@ -41,7 +41,7 @@ export default async function JoinPage({
         <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
           팀에 참여하세요
         </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-2 text-base text-zinc-500 dark:text-zinc-400">
           관리자에게 받은 초대 코드나 링크로 참여할 수 있어요.
         </p>
 

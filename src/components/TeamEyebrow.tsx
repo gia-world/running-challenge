@@ -15,8 +15,8 @@ export function TeamEyebrow({
     <p
       className={
         size === "lg"
-          ? "text-sm font-medium text-orange-500"
-          : "text-xs font-medium text-orange-500"
+          ? "text-base font-medium text-orange-500"
+          : "text-sm font-medium text-orange-500"
       }
     >
       {suffix ? `${name} · ${suffix}` : name}

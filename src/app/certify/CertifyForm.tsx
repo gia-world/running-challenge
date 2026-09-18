@@ -152,13 +152,13 @@ export function CertifyForm({
   if (isDone) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-        <div className="animate-stamp-in flex h-24 w-24 items-center justify-center rounded-full border-4 border-orange-500 text-sm font-extrabold text-orange-500">
+        <div className="animate-stamp-in flex h-24 w-24 items-center justify-center rounded-full border-4 border-orange-500 text-base font-extrabold text-orange-500">
           인증완료
         </div>
         <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
           인증샷을 올렸어요!
         </p>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="text-base text-zinc-500 dark:text-zinc-400">
           바로 이번 주 기록에 반영돼요. 팀원이 이상하다고 느끼면
           <br /> 재인증을 요청할 수 있어요.
         </p>
@@ -188,7 +188,7 @@ export function CertifyForm({
       )}
 
       <label className="flex flex-col gap-2">
-        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <span className="text-base font-medium text-zinc-700 dark:text-zinc-300">
           인증샷 (여러 장 가능)
         </span>
         {photos.length > 0 ? (
@@ -204,7 +204,7 @@ export function CertifyForm({
                 <button
                   type="button"
                   onClick={() => removePhoto(index)}
-                  className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-xs font-bold text-white"
+                  className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-sm font-bold text-white"
                   aria-label="사진 삭제"
                 >
                   ✕
@@ -213,7 +213,7 @@ export function CertifyForm({
             ))}
           </div>
         ) : (
-          <div className="flex aspect-square w-full items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 px-4 text-center text-sm text-zinc-400 dark:border-zinc-700">
+          <div className="flex aspect-square w-full items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 px-4 text-center text-base text-zinc-400 dark:border-zinc-700">
             날짜, 거리, 페이스가 보이는 스크린샷을 선택하세요
           </div>
         )}
@@ -228,7 +228,7 @@ export function CertifyForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <span className="text-base font-medium text-zinc-700 dark:text-zinc-300">
           날짜
         </span>
         <input
@@ -241,7 +241,7 @@ export function CertifyForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <span className="text-base font-medium text-zinc-700 dark:text-zinc-300">
           거리 (km)
         </span>
         <input

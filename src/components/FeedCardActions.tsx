@@ -144,7 +144,7 @@ export function FeedCardActions({
   return (
     <div
       ref={containerRef}
-      className="flex flex-col gap-2 border-t border-zinc-100 px-4 py-2 text-xs dark:border-zinc-800"
+      className="flex flex-col gap-2 border-t border-zinc-100 px-4 py-2 text-sm dark:border-zinc-800"
     >
       <div className="flex flex-wrap items-center gap-1.5">
         {activeReactions.map((emoji) => {

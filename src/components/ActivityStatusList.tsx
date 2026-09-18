@@ -31,7 +31,7 @@ export function ActivityStatusList({
       {activities.map((activity) => (
         <li
           key={activity.id}
-          className="flex flex-col gap-1 rounded-xl bg-white px-4 py-3 text-sm shadow-sm dark:bg-zinc-900"
+          className="flex flex-col gap-1 rounded-xl bg-white px-4 py-3 text-base shadow-sm dark:bg-zinc-900"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -40,7 +40,7 @@ export function ActivityStatusList({
               </span>
               {activity.status === "rejected" && (
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${REJECTED_BADGE.className}`}
+                  className={`rounded-full px-2 py-0.5 text-sm font-medium ${REJECTED_BADGE.className}`}
                 >
                   {REJECTED_BADGE.label}
                 </span>
@@ -51,7 +51,7 @@ export function ActivityStatusList({
             </span>
           </div>
           {activity.status === "rejected" && activity.rejected_reason && (
-            <p className="text-xs text-red-500 dark:text-red-400">
+            <p className="text-sm text-red-500 dark:text-red-400">
               반려 사유: {activity.rejected_reason}
             </p>
           )}

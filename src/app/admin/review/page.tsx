@@ -67,7 +67,7 @@ export default async function AdminReviewPage() {
       </h1>
 
       {items.length === 0 ? (
-        <p className="mt-10 text-center text-sm text-zinc-400 dark:text-zinc-600">
+        <p className="mt-10 text-center text-base text-zinc-400 dark:text-zinc-600">
           재인증 요청이 없어요.
         </p>
       ) : (
@@ -80,7 +80,7 @@ export default async function AdminReviewPage() {
               <PhotoCarousel photoUrls={item.photoUrls} alt="인증샷" />
             )}
             <div className="px-4 py-3">
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-base">
                 <span className="font-semibold text-zinc-900 dark:text-zinc-50">
                   {item.ownerName}
                 </span>
@@ -88,7 +88,7 @@ export default async function AdminReviewPage() {
                   {formatKoreanDate(item.activity_date)} · {Number(item.distance_km).toFixed(1)}km
                 </span>
               </div>
-              <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+              <p className="mt-1 text-sm text-zinc-400 dark:text-zinc-500">
                 {item.requesterNames.join(", ")}님이 재인증을 요청했어요
               </p>
               <ReviewItem activityId={item.activityId} />

@@ -23,7 +23,7 @@ function totalSuccess(member: Member) {
 
 function cellClassName(week: WeekStat, isCurrentWeek: boolean) {
   const base =
-    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold border border-zinc-200";
+    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-semibold border border-zinc-200";
   const ring = isCurrentWeek ? " ring-2 ring-orange-400 border-0" : "";
   if (week.isSuccess)
     return `${base} text-bold text-base! bg-white text-green-500 border-green-500${ring}`;
@@ -101,7 +101,7 @@ export function StatusBoard({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex justify-end gap-2 text-xs">
+      <div className="flex justify-end gap-2 text-sm">
         <button
           type="button"
           onClick={() => setSortKey("name")}
@@ -125,7 +125,7 @@ export function StatusBoard({
       <div className="overflow-x-auto rounded-2xl bg-white shadow-sm dark:bg-zinc-900">
         <table className="w-full min-w-90 border-collapse text-sm">
           <thead>
-            <tr className="text-xs text-zinc-400">
+            <tr className="text-sm text-zinc-400">
               <th className="px-3 py-2 text-left font-medium">이름</th>
               {Array.from({ length: SEASON_WEEKS }, (_, i) => (
                 <th
@@ -189,22 +189,22 @@ export function StatusBoard({
             className="w-full max-w-sm rounded-2xl bg-white p-4 dark:bg-zinc-900"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+            <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
               {modal.name} · {modal.weekIndex + 1}주차
             </p>
             {isLoadingPhotos ? (
-              <p className="mt-4 py-8 text-center text-sm text-zinc-400">
+              <p className="mt-4 py-8 text-center text-base text-zinc-400">
                 불러오는 중...
               </p>
             ) : modal.activities.length === 0 ? (
-              <p className="mt-4 py-8 text-center text-sm text-zinc-400">
+              <p className="mt-4 py-8 text-center text-base text-zinc-400">
                 사진이 없어요.
               </p>
             ) : (
               <div className="mt-3 flex max-h-[70vh] flex-col gap-4 overflow-y-auto">
                 {modal.activities.map((activity) => (
                   <div key={activity.id} className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center justify-between text-sm">
                       <span className="font-semibold text-orange-500">
                         {activity.ordinal}회째 · {formatKoreanDate(activity.activityDate)}
                       </span>
@@ -228,7 +228,7 @@ export function StatusBoard({
             <button
               type="button"
               onClick={() => setModal(null)}
-              className="mt-4 w-full rounded-xl bg-zinc-200 py-2.5 text-sm font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+              className="mt-4 w-full rounded-xl bg-zinc-200 py-2.5 text-base font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
             >
               닫기
             </button>

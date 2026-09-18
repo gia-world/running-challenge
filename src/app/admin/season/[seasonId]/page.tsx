@@ -60,7 +60,7 @@ export default async function AdminSeasonDetailPage({
       <div>
         <Link
           href="/admin/season"
-          className="text-xs font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          className="text-sm font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
         >
           ← 시즌 관리
         </Link>
@@ -70,7 +70,7 @@ export default async function AdminSeasonDetailPage({
             {formatKoreanDate(season.end_date)}
           </h1>
           {isActive && (
-            <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-600 dark:bg-orange-950 dark:text-orange-400">
+            <span className="rounded-full bg-orange-100 px-2 py-0.5 text-sm font-medium text-orange-600 dark:bg-orange-950 dark:text-orange-400">
               진행중
             </span>
           )}

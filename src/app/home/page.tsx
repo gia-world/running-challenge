@@ -108,7 +108,7 @@ async function SeasonProgress({
   return (
     <>
       <section className="rounded-2xl bg-white p-6 text-center shadow-sm dark:bg-zinc-900">
-        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+        <p className="text-base font-medium text-zinc-500 dark:text-zinc-400">
           이번 주 인증 현황 ({currentWeekIndex + 1}주차)
         </p>
         <div className="mt-4 flex justify-center">
@@ -117,24 +117,24 @@ async function SeasonProgress({
         <p className="mt-5 text-xl font-bold text-zinc-900 dark:text-zinc-50">
           {achieved} / {WEEKLY_GOAL}회 완료
         </p>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1 text-base text-zinc-500 dark:text-zinc-400">
           {remaining === 0
             ? "이번 주 목표를 다 채웠어요! 🎉"
             : `${remaining}회만 더 뛰면 이번 주 목표 달성이에요`}
         </p>
-        <p className="mt-3 text-xs font-medium text-orange-500">
+        <p className="mt-3 text-sm font-medium text-orange-500">
           이번 시즌 {successfulWeeks} / {SEASON_WEEKS}주 성공
         </p>
       </section>
 
       <section>
-        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+        <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
           이번 주 인증 기록 ({formatKoreanDate(start)}~{formatKoreanDate(end)})
         </h2>
         <ActivityStatusList activities={weekActivities} emptyMessage="아직 이번 주 인증 기록이 없어요." />
         <Link
           href="/history"
-          className="mt-3 block text-center text-xs font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          className="mt-3 block text-center text-sm font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
         >
           시즌 전체 기록 보기 →
         </Link>

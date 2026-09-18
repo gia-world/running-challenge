@@ -23,8 +23,8 @@ export function BottomNav({ active, isAdmin = false }: { active: ActiveTab; isAd
             href={item.href}
             className={
               isActive
-                ? "flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium text-orange-500"
-                : "flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium text-zinc-400"
+                ? "flex flex-1 flex-col items-center gap-1 py-3 text-sm font-medium text-orange-500"
+                : "flex flex-1 flex-col items-center gap-1 py-3 text-sm font-medium text-zinc-400"
             }
           >
             <span className="text-lg">{item.icon}</span>

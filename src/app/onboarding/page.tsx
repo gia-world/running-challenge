@@ -29,7 +29,7 @@ export default async function OnboardingPage() {
         <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
           이름을 확인해주세요
         </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-2 text-base text-zinc-500 dark:text-zinc-400">
           팀원들에게는 이 이름으로 보여요.
         </p>
 

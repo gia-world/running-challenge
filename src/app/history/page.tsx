@@ -17,7 +17,7 @@ export default async function HistoryPage() {
       <PageHeader teamName={viewer.teamName}>
         <Link
           href="/home"
-          className="text-xs font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          className="text-sm font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
         >
           ← 홈
         </Link>
@@ -71,7 +71,7 @@ async function SeasonHistory({
 
         return (
           <section key={index}>
-            <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+            <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
               {index + 1}주차 ({formatKoreanDate(start)}~{formatKoreanDate(end)})
             </h2>
             <ActivityStatusList

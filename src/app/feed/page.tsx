@@ -144,7 +144,7 @@ export default async function FeedPage() {
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-6">
         {items.length === 0 ? (
-          <p className="mt-10 text-center text-sm text-zinc-400 dark:text-zinc-600">
+          <p className="mt-10 text-center text-base text-zinc-400 dark:text-zinc-600">
             아직 인증된 기록이 없어요.
           </p>
         ) : (
@@ -156,14 +156,14 @@ export default async function FeedPage() {
               {item.photoUrls.length > 0 && (
                 <PhotoCarousel photoUrls={item.photoUrls} alt="인증샷" />
               )}
-              <div className="flex items-center justify-between px-4 py-3 text-sm">
+              <div className="flex items-center justify-between px-4 py-3 text-base">
                 <p>
                   <span className="font-semibold text-zinc-900 dark:text-zinc-50">
                     {item.profiles?.name ?? "러너"}
                   </span>
                   {" · "}
                   {item.occurrenceLabel && (
-                    <span className="text-xs font-medium text-orange-500">
+                    <span className="text-sm font-medium text-orange-500">
                       {item.occurrenceLabel}
                     </span>
                   )}

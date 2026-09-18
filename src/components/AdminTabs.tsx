@@ -28,7 +28,7 @@ export function AdminTabs({ pendingCount = 0 }: { pendingCount?: number }) {
           >
             {tab.label}
             {tab.href === "/admin/review" && pendingCount > 0 && (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white">
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-sm font-bold text-white">
                 {pendingCount}
               </span>
             )}

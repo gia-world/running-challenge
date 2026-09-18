@@ -88,10 +88,10 @@ export function SeasonForm({
       onSubmit={handleSubmit}
       className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-900"
     >
-      <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">새 시즌 만들기</h2>
+      <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">새 시즌 만들기</h2>
 
       <label className="flex flex-col gap-1">
-        <span className="text-xs text-zinc-500 dark:text-zinc-400">시작일</span>
+        <span className="text-base text-zinc-500 dark:text-zinc-400">시작일</span>
         <input
           type="date"
           value={startDate}
@@ -101,7 +101,7 @@ export function SeasonForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-xs text-zinc-500 dark:text-zinc-400">
+        <span className="text-base text-zinc-500 dark:text-zinc-400">
           종료일 (4주 후 자동 계산, 수정 가능)
         </span>
         <input
@@ -116,7 +116,7 @@ export function SeasonForm({
       </label>
 
       {previousSeasonId && (
-        <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300">
+        <label className="flex items-center gap-2 text-base text-zinc-600 dark:text-zinc-300">
           <input
             type="checkbox"
             checked={copyPrevious}
@@ -127,7 +127,7 @@ export function SeasonForm({
       )}
 
       {needsOverlapConfirm && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+        <p className="rounded-lg bg-amber-50 px-3 py-2 text-base text-amber-700 dark:bg-amber-950 dark:text-amber-400">
           기간이 겹치는 시즌이 있어요. 그래도 만들까요?
         </p>
       )}

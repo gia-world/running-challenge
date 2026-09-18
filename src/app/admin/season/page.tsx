@@ -30,7 +30,7 @@ export default async function AdminSeasonPage() {
       />
 
       <section>
-        <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">전체 시즌</h2>
+        <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">전체 시즌</h2>
         {allSeasons.length === 0 ? (
           <EmptyState className="mt-2">아직 만든 시즌이 없어요.</EmptyState>
         ) : (
@@ -41,13 +41,13 @@ export default async function AdminSeasonPage() {
                 <li key={season.id}>
                   <Link
                     href={`/admin/season/${season.id}`}
-                    className="flex items-center justify-between rounded-xl bg-white px-4 py-3 text-sm shadow-sm dark:bg-zinc-900"
+                    className="flex items-center justify-between rounded-xl bg-white px-4 py-3 text-base shadow-sm dark:bg-zinc-900"
                   >
                     <span className="text-zinc-900 dark:text-zinc-50">
                       {formatKoreanDate(season.start_date)} ~ {formatKoreanDate(season.end_date)}
                     </span>
                     {isActive && (
-                      <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-600 dark:bg-orange-950 dark:text-orange-400">
+                      <span className="rounded-full bg-orange-100 px-2 py-0.5 text-sm font-medium text-orange-600 dark:bg-orange-950 dark:text-orange-400">
                         진행중
                       </span>
                     )}

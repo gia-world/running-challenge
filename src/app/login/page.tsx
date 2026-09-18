@@ -44,7 +44,7 @@ export default async function LoginPage({
         <h1 className="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
           주 3회 러닝 인증 챌린지
         </h1>
-        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-2 text-base text-zinc-500 dark:text-zinc-400">
           카카오 계정으로 바로 시작하세요.
         </p>
 
@@ -52,7 +52,7 @@ export default async function LoginPage({
           <ErrorBanner className="mt-4">
             로그인에 실패했어요. 다시 시도해 주세요.
             {reason && (
-              <span className="mt-1 block text-xs opacity-80">({reason})</span>
+              <span className="mt-1 block text-sm opacity-80">({reason})</span>
             )}
           </ErrorBanner>
         )}

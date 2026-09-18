@@ -42,7 +42,7 @@ export function MemberRow({
       <div className="flex items-center gap-2">
         <span className="font-semibold text-zinc-900 dark:text-zinc-50">{name}</span>
         {role === "admin" && (
-          <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-600 dark:bg-orange-950 dark:text-orange-400">
+          <span className="rounded-full bg-orange-100 px-2 py-0.5 text-sm font-medium text-orange-600 dark:bg-orange-950 dark:text-orange-400">
             관리자
           </span>
         )}
@@ -54,11 +54,11 @@ export function MemberRow({
             type="button"
             onClick={promoteToAdmin}
             disabled={isSubmitting}
-            className="text-sm font-medium text-orange-500 disabled:opacity-60"
+            className="text-base font-medium text-orange-500 disabled:opacity-60"
           >
             {isSubmitting ? "처리 중..." : "관리자로 지정"}
           </button>
-          {error && <span className="text-xs text-red-600 dark:text-red-400">{error}</span>}
+          {error && <span className="text-sm text-red-600 dark:text-red-400">{error}</span>}
         </div>
       )}
     </li>
