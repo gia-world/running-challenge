@@ -3,7 +3,10 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
 import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
-import { computeParticipantSettlement, computePrizeShare } from "@/lib/settlement";
+import {
+  computeParticipantSettlement,
+  computePrizeShare,
+} from "@/lib/settlement";
 import { formatKoreanDate, formatWon } from "@/lib/format";
 import { isBeforeNoonInSeoul, yesterdayInSeoul } from "@/lib/week";
 import { ParticipantToggle } from "./ParticipantToggle";
@@ -54,7 +57,10 @@ export default async function AdminSeasonDetailPage({
     (seasonMemberships ?? []).map((m) => m.user_id),
   );
   const renewalByUserId = new Map(
-    (seasonMemberships ?? []).map((m) => [m.user_id, m.renew_next_season as boolean | null]),
+    (seasonMemberships ?? []).map((m) => [
+      m.user_id,
+      m.renew_next_season as boolean | null,
+    ]),
   );
   const weeklyStats = await computeSeasonWeeklyStats(
     supabase,
@@ -65,14 +71,16 @@ export default async function AdminSeasonDetailPage({
   // Mirrors the grace-period rule in loadViewerContext: a season that ended
   // yesterday still accepts certifications until noon KST today, so the
   // settlement totals below can still shift until that window closes.
-  const isInGracePeriod = season.end_date === yesterdayInSeoul() && isBeforeNoonInSeoul();
+  const isInGracePeriod =
+    season.end_date === yesterdayInSeoul() && isBeforeNoonInSeoul();
 
   const members = (memberships ?? [])
     .map((m) => m.profiles)
     .filter((p): p is Member => !!p)
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  const hasFees = season.entry_fee != null && season.refund_per_certification != null;
+  const hasFees =
+    season.entry_fee != null && season.refund_per_certification != null;
   const entryFee = Number(season.entry_fee);
   const refundPerCertification = Number(season.refund_per_certification);
 
@@ -90,7 +98,9 @@ export default async function AdminSeasonDetailPage({
           ]),
       )
     : new Map();
-  const prizeShare = hasFees ? computePrizeShare(Array.from(settlements.values()), entryFee) : 0;
+  const prizeShare = hasFees
+    ? computePrizeShare(Array.from(settlements.values()), entryFee)
+    : 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -116,7 +126,7 @@ export default async function AdminSeasonDetailPage({
 
       {isInGracePeriod && (
         <p className="rounded-lg bg-amber-50 px-3 py-2 text-base text-amber-700 dark:bg-amber-950 dark:text-amber-400">
-          ⏰ 그레이스 기간 — 오늘 정오까지 인증하면 인정돼요. 정산 금액이 아직 바뀔 수 있어요.
+          ⏰ 오늘 정오까지 인증하면 인정돼요. 정산 금액이 아직 바뀔 수 있어요.
         </p>
       )}
 
@@ -132,7 +142,9 @@ export default async function AdminSeasonDetailPage({
           const isParticipant = participantIds.has(member.id);
           const weeks = weeklyStats.get(member.id) ?? emptyWeekStats();
           const settlement = settlements.get(member.id);
-          const total = settlement ? settlement.refund + (settlement.isCompleted ? prizeShare : 0) : 0;
+          const total = settlement
+            ? settlement.refund + (settlement.isCompleted ? prizeShare : 0)
+            : 0;
           const isRenewing = renewalByUserId.get(member.id) === true;
           const amountToSend = settlement
             ? isRenewing
@@ -181,16 +193,20 @@ export default async function AdminSeasonDetailPage({
                   {isRenewing ? (
                     <div className="flex flex-col gap-0.5">
                       <span className="text-zinc-500 dark:text-zinc-400">
-                        다음 시즌 연장 (환급 {formatWon(settlement.refund)} 이월)
+                        다음 시즌 연장 (환급 {formatWon(settlement.refund)}{" "}
+                        이월)
                       </span>
                       <span className="font-semibold text-zinc-900 dark:text-zinc-50">
-                        {amountToSend > 0 ? `상금 ${formatWon(amountToSend)} 송금` : "송금 없음"}
+                        {amountToSend > 0
+                          ? `상금 ${formatWon(amountToSend)} 송금`
+                          : "송금 없음"}
                       </span>
                     </div>
                   ) : settlement.isCompleted && prizeShare > 0 ? (
                     <div className="flex items-center justify-between">
                       <span className="text-zinc-500 dark:text-zinc-400">
-                        환급 {formatWon(settlement.refund)} + 상금 {formatWon(prizeShare)}
+                        환급 {formatWon(settlement.refund)} + 상금{" "}
+                        {formatWon(prizeShare)}
                       </span>
                       <span className="font-semibold text-zinc-900 dark:text-zinc-50">
                         = {formatWon(total)}
@@ -198,7 +214,9 @@ export default async function AdminSeasonDetailPage({
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
-                      <span className="text-zinc-500 dark:text-zinc-400">총 환급액</span>
+                      <span className="text-zinc-500 dark:text-zinc-400">
+                        총 환급액
+                      </span>
                       <span className="font-semibold text-zinc-900 dark:text-zinc-50">
                         {formatWon(total)}
                       </span>
