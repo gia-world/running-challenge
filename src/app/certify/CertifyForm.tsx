@@ -213,7 +213,7 @@ export function CertifyForm({
             ))}
           </div>
         ) : (
-          <div className="flex aspect-square w-full items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 px-4 text-center text-base text-zinc-400 dark:border-zinc-700">
+          <div className="flex aspect-square w-full items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 px-4 text-center text-sm text-zinc-400 dark:border-zinc-700">
             날짜, 거리, 페이스가 보이는 스크린샷을 선택하세요
           </div>
         )}
@@ -223,7 +223,7 @@ export function CertifyForm({
           multiple
           disabled={isBlocked}
           onChange={handleFileChange}
-          className="text-sm"
+          className="sr-only"
         />
       </label>
 
