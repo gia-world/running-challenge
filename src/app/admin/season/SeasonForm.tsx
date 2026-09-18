@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { defaultSeasonEndDate } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
+import {
+  SeasonFeeFields,
+  DEFAULT_ENTRY_FEE,
+  DEFAULT_REFUND_PER_CERTIFICATION,
+} from "@/components/SeasonFeeFields";
 
 type ExistingSeason = { id: string; start_date: string; end_date: string };
 
@@ -30,8 +35,10 @@ export function SeasonForm({
   const today = todayInSeoul();
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(defaultSeasonEndDate(today));
-  const [entryFee, setEntryFee] = useState("");
-  const [refundPerCertification, setRefundPerCertification] = useState("");
+  const [entryFee, setEntryFee] = useState(DEFAULT_ENTRY_FEE);
+  const [refundPerCertification, setRefundPerCertification] = useState(
+    DEFAULT_REFUND_PER_CERTIFICATION,
+  );
   const [copyPrevious, setCopyPrevious] = useState(true);
   const [needsOverlapConfirm, setNeedsOverlapConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -140,37 +147,12 @@ export function SeasonForm({
         />
       </label>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-base text-zinc-500 dark:text-zinc-400">
-          참가비 (원, 선택)
-        </span>
-        <input
-          type="number"
-          min="0"
-          step="1000"
-          inputMode="numeric"
-          value={entryFee}
-          onChange={(e) => setEntryFee(e.target.value)}
-          placeholder="24000"
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
-        />
-      </label>
-
-      <label className="flex flex-col gap-1">
-        <span className="text-base text-zinc-500 dark:text-zinc-400">
-          인증 1회당 환급 단가 (원, 선택)
-        </span>
-        <input
-          type="number"
-          min="0"
-          step="500"
-          inputMode="numeric"
-          value={refundPerCertification}
-          onChange={(e) => setRefundPerCertification(e.target.value)}
-          placeholder="2000"
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
-        />
-      </label>
+      <SeasonFeeFields
+        entryFee={entryFee}
+        onEntryFeeChange={setEntryFee}
+        refundPerCertification={refundPerCertification}
+        onRefundPerCertificationChange={setRefundPerCertification}
+      />
 
       {previousSeasonId && (
         <label className="flex items-center gap-2 text-base text-zinc-600 dark:text-zinc-300">
