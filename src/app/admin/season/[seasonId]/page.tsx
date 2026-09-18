@@ -6,6 +6,7 @@ import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
 import { computeParticipantSettlement, computePrizeShare } from "@/lib/settlement";
 import { formatKoreanDate, formatWon } from "@/lib/format";
 import { ParticipantToggle } from "./ParticipantToggle";
+import { SeasonFeeForm } from "./SeasonFeeForm";
 
 type Member = {
   id: string;
@@ -104,6 +105,13 @@ export default async function AdminSeasonDetailPage({
           )}
         </div>
       </div>
+
+      <SeasonFeeForm
+        seasonId={season.id}
+        initialEntryFee={season.entry_fee}
+        initialRefundPerCertification={season.refund_per_certification}
+      />
+
       <h2 className=" text-zinc-500 dark:text-zinc-400 mt-2">참여자</h2>
       <ul className="flex flex-col gap-2">
         {members.map((member) => {
