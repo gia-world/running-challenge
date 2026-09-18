@@ -3,7 +3,8 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { SeasonGate } from "@/components/SeasonGate";
 import { requireTeamViewer } from "@/lib/viewer";
-import { todayInSeoul } from "@/lib/week";
+import { todayInSeoul, WEEKLY_GOAL } from "@/lib/week";
+import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
 import { CertifyForm } from "./CertifyForm";
 
 export default async function CertifyPage() {
@@ -18,7 +19,11 @@ export default async function CertifyPage() {
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-6 py-6">
         <SeasonGate viewer={viewer}>
           {viewer.activeSeason && (
-            <CertifyFormLoader userId={user.id} seasonId={viewer.activeSeason.id} />
+            <CertifyFormLoader
+              userId={user.id}
+              seasonId={viewer.activeSeason.id}
+              seasonStartDate={viewer.activeSeason.start_date}
+            />
           )}
         </SeasonGate>
       </main>
@@ -28,24 +33,52 @@ export default async function CertifyPage() {
   );
 }
 
-async function CertifyFormLoader({ userId, seasonId }: { userId: string; seasonId: string }) {
+async function CertifyFormLoader({
+  userId,
+  seasonId,
+  seasonStartDate,
+}: {
+  userId: string;
+  seasonId: string;
+  seasonStartDate: string;
+}) {
   const supabase = await createClient();
   const today = todayInSeoul();
 
-  const { data: todaysActivity } = await supabase
-    .from("activities")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("activity_date", today)
-    .neq("status", "rejected")
-    .limit(1)
-    .maybeSingle();
+  const currentWeekIndex = seasonWeekIndexForDate(seasonStartDate, today);
+  const { start, end } =
+    currentWeekIndex !== null
+      ? seasonWeekRange(seasonStartDate, currentWeekIndex)
+      : { start: today, end: today };
+
+  const [{ data: todaysActivity }, { data: weekActivities }] = await Promise.all([
+    supabase
+      .from("activities")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("activity_date", today)
+      .neq("status", "rejected")
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("activities")
+      .select("activity_date")
+      .eq("user_id", userId)
+      .eq("season_id", seasonId)
+      .eq("status", "approved")
+      .gte("activity_date", start)
+      .lte("activity_date", end),
+  ]);
+
+  const achievedThisWeek = new Set((weekActivities ?? []).map((a) => a.activity_date)).size;
 
   return (
     <CertifyForm
       userId={userId}
       seasonId={seasonId}
       alreadyCertifiedToday={!!todaysActivity}
+      achievedThisWeek={achievedThisWeek}
+      weeklyGoal={WEEKLY_GOAL}
     />
   );
 }

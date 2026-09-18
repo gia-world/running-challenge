@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { createClient, getAuthUser } from "./supabase/server";
-import { todayInSeoul } from "./week";
+import { isBeforeNoonInSeoul, todayInSeoul, yesterdayInSeoul } from "./week";
 import type { UserRole } from "./types";
 
 export type ActiveSeason = {
@@ -46,12 +46,16 @@ export const loadViewerContext = cache(async (userId: string): Promise<ViewerCon
   }
 
   const today = todayInSeoul();
+  // Grace period: a season that ended yesterday still counts as active
+  // until noon KST, mirroring the real crew's "종료 다음날 정오까지 인정"
+  // buffer so certification doesn't go dead the instant a season closes.
+  const seasonLookupFloor = isBeforeNoonInSeoul() ? yesterdayInSeoul() : today;
   const { data: season } = await supabase
     .from("seasons")
     .select("id, team_id, start_date, end_date")
     .eq("team_id", membership.team_id)
     .lte("start_date", today)
-    .gte("end_date", today)
+    .gte("end_date", seasonLookupFloor)
     .order("start_date", { ascending: false })
     .limit(1)
     .maybeSingle();

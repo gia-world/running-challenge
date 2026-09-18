@@ -118,3 +118,45 @@ body {
 button {
   cursor: pointer;
 }
+
+/* Certification success screen: a rubber-stamp "슬램" landing... */
+@keyframes stamp-in {
+  0% {
+    transform: scale(2.4) rotate(-24deg);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(0.92) rotate(-8deg);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(1.08) rotate(-13deg);
+  }
+  100% {
+    transform: scale(1) rotate(-10deg);
+  }
+}
+
+.animate-stamp-in {
+  animation: stamp-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ...followed a beat later by the weekly-goal badge popping in, when this
+   upload was the one that completed the week. */
+@keyframes badge-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-badge-pop {
+  animation: badge-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+}

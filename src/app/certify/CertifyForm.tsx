@@ -17,10 +17,14 @@ export function CertifyForm({
   userId,
   seasonId,
   alreadyCertifiedToday,
+  achievedThisWeek,
+  weeklyGoal,
 }: {
   userId: string;
   seasonId: string;
   alreadyCertifiedToday: boolean;
+  achievedThisWeek: number;
+  weeklyGoal: number;
 }) {
   const router = useRouter();
   const today = todayInSeoul();
@@ -30,6 +34,7 @@ export function CertifyForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDone, setIsDone] = useState(false);
+  const [completedWeekGoal, setCompletedWeekGoal] = useState(false);
 
   const isBlocked = activityDate === today && alreadyCertifiedToday;
 
@@ -128,6 +133,16 @@ export function CertifyForm({
       return;
     }
 
+    // Only today's upload counts toward this week's live goal tracking —
+    // a backfilled past date could belong to an already-settled week we
+    // have no cheap way to re-check here.
+    if (
+      activityDate === today &&
+      achievedThisWeek < weeklyGoal &&
+      achievedThisWeek + 1 >= weeklyGoal
+    ) {
+      setCompletedWeekGoal(true);
+    }
     setIsDone(true);
     setIsSubmitting(false);
   }
@@ -135,7 +150,9 @@ export function CertifyForm({
   if (isDone) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-        <p className="text-3xl">🎉</p>
+        <div className="animate-stamp-in flex h-24 w-24 items-center justify-center rounded-full border-4 border-orange-500 text-sm font-extrabold text-orange-500">
+          인증완료
+        </div>
         <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
           인증샷을 올렸어요!
         </p>
@@ -143,6 +160,11 @@ export function CertifyForm({
           바로 이번 주 기록에 반영돼요. 팀원이 이상하다고 느끼면
           <br /> 재인증을 요청할 수 있어요.
         </p>
+        {completedWeekGoal && (
+          <p className="animate-badge-pop rounded-full bg-orange-50 px-4 py-2 text-sm font-bold text-orange-600 dark:bg-orange-950 dark:text-orange-400">
+            🎉 이번 주 목표 {weeklyGoal}/{weeklyGoal} 달성!
+          </p>
+        )}
         <button
           type="button"
           onClick={() => router.push("/home")}
