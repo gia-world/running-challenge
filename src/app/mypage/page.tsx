@@ -28,7 +28,10 @@ export default async function MyPage() {
     ? seasonWeekRange(viewer.activeSeason.start_date, SEASON_WEEKS - 1).start
     : null;
   const showRenewalPrompt =
-    viewer.isSeasonMember && viewer.activeSeason && week4Start !== null && todayInSeoul() >= week4Start;
+    viewer.isSeasonMember &&
+    viewer.activeSeason &&
+    week4Start !== null &&
+    todayInSeoul() >= week4Start;
 
   const { data: seasonMembership } =
     showRenewalPrompt && viewer.activeSeason
@@ -43,7 +46,9 @@ export default async function MyPage() {
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
       <PageHeader teamName={viewer.teamName}>
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">마이페이지</h1>
+        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+          마이페이지
+        </h1>
       </PageHeader>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-8">
@@ -55,7 +60,9 @@ export default async function MyPage() {
 
         {showRenewalPrompt && viewer.activeSeason && (
           <div className="flex flex-col gap-2">
-            <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">다음 시즌</h2>
+            <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
+              다음 시즌
+            </h2>
             <RenewalToggle
               seasonId={viewer.activeSeason.id}
               userId={user.id}
@@ -65,9 +72,11 @@ export default async function MyPage() {
         )}
 
         <div className="flex flex-col gap-2">
-          <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">계좌 정보</h2>
+          <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
+            계좌 정보
+          </h2>
           <p className="text-base text-zinc-500 dark:text-zinc-400">
-            환급/상금을 받을 계좌를 등록해두면 담당자가 이체할 때 따로 물어보지 않아도 돼요.
+            참가비 정산(환급/상금)을 받으려면 계좌 등록이 필요해요.
           </p>
           <BankForm
             userId={user.id}
