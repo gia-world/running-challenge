@@ -42,7 +42,10 @@ export function FeedCardActions({
       ),
   );
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [pendingEmoji, setPendingEmoji] = useState<string | null>(null);
+  // A set, not a single value — multi-select means several emoji requests
+  // can be in flight at once, and each toggle must only block repeat taps
+  // on its own emoji, not on whichever one happened to be picked first.
+  const [pendingEmojis, setPendingEmojis] = useState<ReadonlySet<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,6 +58,10 @@ export function FeedCardActions({
     }
 
     document.addEventListener("pointerdown", handlePointerDown);
+    // Bring the picker fully into view as soon as it opens — it renders at
+    // the bottom of the card, which a card near the bottom of the feed can
+    // push past the viewport edge otherwise.
+    containerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [isPickerOpen]);
 
@@ -63,14 +70,8 @@ export function FeedCardActions({
   const [requestError, setRequestError] = useState<string | null>(null);
 
   async function toggleReaction(emoji: string) {
-    if (pendingEmoji) return;
-    setPendingEmoji(emoji);
-    // Close the picker immediately on pick — leaving it open let a post's
-    // first reaction grow the row (wrapping to a second line) while the
-    // picker was still expanded below it, so the outside-click listener
-    // then yanked the picker shut on the next touch (often a scroll),
-    // reading as if the tap itself had been undone.
-    setIsPickerOpen(false);
+    if (pendingEmojis.has(emoji)) return;
+    setPendingEmojis((prev) => new Set(prev).add(emoji));
 
     const current = reactions[emoji] ?? { count: 0, reactedByMe: false };
     const nextReactedByMe = !current.reactedByMe;
@@ -104,7 +105,11 @@ export function FeedCardActions({
         [emoji]: current,
       }));
     } finally {
-      setPendingEmoji(null);
+      setPendingEmojis((prev) => {
+        const next = new Set(prev);
+        next.delete(emoji);
+        return next;
+      });
     }
   }
 
@@ -155,25 +160,29 @@ export function FeedCardActions({
       className="flex flex-col gap-2 border-t border-border-subtle px-4 py-2 text-sm"
     >
       <div className="flex flex-wrap items-center gap-1.5">
-        {activeReactions.map((emoji) => {
-          const state = reactions[emoji]!;
-          return (
-            <button
-              key={emoji}
-              type="button"
-              onClick={() => toggleReaction(emoji)}
-              disabled={pendingEmoji === emoji}
-              className={
-                state.reactedByMe
-                  ? "flex items-center gap-1 rounded-full border border-primary-400 bg-primary-50 px-2 py-1 font-semibold text-primary-600"
-                  : "flex items-center gap-1 rounded-full border border-border px-2 py-1 text-ink-secondary"
-              }
-            >
-              <span>{emoji}</span>
-              <span>{state.count}</span>
-            </button>
-          );
-        })}
+        {/* Hidden while the picker's open so picking emojis (which changes
+            how many chips there are) never reflows this row mid-selection —
+            it only reappears once the picker closes. */}
+        {!isPickerOpen &&
+          activeReactions.map((emoji) => {
+            const state = reactions[emoji]!;
+            return (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => toggleReaction(emoji)}
+                disabled={pendingEmojis.has(emoji)}
+                className={
+                  state.reactedByMe
+                    ? "flex items-center gap-1 rounded-full border border-primary-400 bg-primary-50 px-2 py-1 font-semibold text-primary-600"
+                    : "flex items-center gap-1 rounded-full border border-border px-2 py-1 text-ink-secondary"
+                }
+              >
+                <span>{emoji}</span>
+                <span>{state.count}</span>
+              </button>
+            );
+          })}
 
         <button
           type="button"
@@ -209,7 +218,7 @@ export function FeedCardActions({
                 key={emoji}
                 type="button"
                 onClick={() => toggleReaction(emoji)}
-                disabled={pendingEmoji === emoji}
+                disabled={pendingEmojis.has(emoji)}
                 className={
                   reactedByMe
                     ? "flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-base ring-2 ring-primary-400"
