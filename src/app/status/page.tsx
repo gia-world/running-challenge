@@ -29,14 +29,39 @@ export default async function StatusPage() {
   // Lifetime history/badges don't depend on there being an active season —
   // computed unconditionally so the "전체 기록" tab always works, even
   // between seasons or for someone not in the current one. The season
-  // still in progress is excluded — badges/history are a record of
-  // seasons that have already ended.
+  // still in progress is excluded from completedCount/history — 완주 can
+  // only be known once a season actually ends.
   const { seasons, completedCountByUserId, participatedUserIds } = await computeTeamSeasonHistory(
     supabase,
     viewer.teamId,
     user.id,
     viewer.activeSeason?.id ?? null,
   );
+
+  let currentSeasonMembers: { id: string; name: string; weeks: ReturnType<typeof emptyWeekStats> }[] = [];
+  let currentWeekIndex = 0;
+  if (viewer.activeSeason) {
+    const season = viewer.activeSeason;
+    const { data: seasonMemberships } = await supabase
+      .from("season_memberships")
+      .select("user_id")
+      .eq("season_id", season.id);
+    const participantIds = new Set((seasonMemberships ?? []).map((m) => m.user_id));
+
+    // Unlike completedCount, "최초 참여" only needs to know someone has ever
+    // joined a season — that's true the moment they join, so the season
+    // still in progress counts here even though it's excluded above.
+    for (const id of participantIds) participatedUserIds.add(id);
+
+    if (viewer.isSeasonMember) {
+      const weeklyStats = await computeSeasonWeeklyStats(supabase, season.id, season.start_date);
+      currentSeasonMembers = allMembers
+        .filter((p) => participantIds.has(p.id))
+        .map((p) => ({ id: p.id, name: p.name, weeks: weeklyStats.get(p.id) ?? emptyWeekStats() }));
+      const effectiveDate = cappedTodayForSeason(season.end_date, todayInSeoul());
+      currentWeekIndex = seasonWeekIndexForDate(season.start_date, effectiveDate) ?? 0;
+    }
+  }
 
   const badgeMembers = allMembers
     .map((m) => ({
@@ -46,24 +71,6 @@ export default async function StatusPage() {
       hasParticipated: participatedUserIds.has(m.id),
     }))
     .sort((a, b) => b.completedCount - a.completedCount || a.name.localeCompare(b.name));
-
-  let currentSeasonMembers: { id: string; name: string; weeks: ReturnType<typeof emptyWeekStats> }[] = [];
-  let currentWeekIndex = 0;
-  if (viewer.activeSeason && viewer.isSeasonMember) {
-    const season = viewer.activeSeason;
-    const { data: seasonMemberships } = await supabase
-      .from("season_memberships")
-      .select("user_id")
-      .eq("season_id", season.id);
-    const participantIds = new Set((seasonMemberships ?? []).map((m) => m.user_id));
-    const weeklyStats = await computeSeasonWeeklyStats(supabase, season.id, season.start_date);
-
-    currentSeasonMembers = allMembers
-      .filter((p) => participantIds.has(p.id))
-      .map((p) => ({ id: p.id, name: p.name, weeks: weeklyStats.get(p.id) ?? emptyWeekStats() }));
-    const effectiveDate = cappedTodayForSeason(season.end_date, todayInSeoul());
-    currentWeekIndex = seasonWeekIndexForDate(season.start_date, effectiveDate) ?? 0;
-  }
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
