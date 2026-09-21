@@ -8,9 +8,11 @@ import {
   computePrizeShare,
 } from "@/lib/settlement";
 import { formatKoreanDate, formatWon } from "@/lib/format";
-import { isBeforeNoonInSeoul, yesterdayInSeoul } from "@/lib/week";
+import { isBeforeNoonInSeoul, todayInSeoul, yesterdayInSeoul } from "@/lib/week";
+import { computeSeasonStatus } from "@/lib/seasonStatus";
 import { ParticipantToggle } from "./ParticipantToggle";
 import { SeasonFeeForm } from "./SeasonFeeForm";
+import { SettleSeasonButton } from "./SettleSeasonButton";
 
 type Member = {
   id: string;
@@ -34,7 +36,9 @@ export default async function AdminSeasonDetailPage({
   const supabase = await createClient();
   const { data: season } = await supabase
     .from("seasons")
-    .select("id, start_date, end_date, entry_fee, refund_per_certification")
+    .select(
+      "id, start_date, end_date, entry_fee, refund_per_certification, settled_at",
+    )
     .eq("id", seasonId)
     .single();
 
@@ -67,7 +71,7 @@ export default async function AdminSeasonDetailPage({
     season.id,
     season.start_date,
   );
-  const isActive = season.id === viewer.activeSeason?.id;
+  const status = computeSeasonStatus(season, todayInSeoul());
   // Mirrors the grace-period rule in loadViewerContext: a season that ended
   // yesterday still accepts certifications until noon KST today, so the
   // settlement totals below can still shift until that window closes.
@@ -116,9 +120,19 @@ export default async function AdminSeasonDetailPage({
             {formatKoreanDate(season.start_date)} ~{" "}
             {formatKoreanDate(season.end_date)}
           </h1>
-          {isActive && (
+          {status === "active" && (
             <span className="rounded-full bg-orange-100 px-2 py-0.5 text-sm font-medium text-orange-600 dark:bg-orange-950 dark:text-orange-400">
               진행중
+            </span>
+          )}
+          {status === "settling" && (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-sm font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+              정산중
+            </span>
+          )}
+          {status === "closed" && (
+            <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-sm font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+              시즌 종료
             </span>
           )}
         </div>
@@ -129,6 +143,8 @@ export default async function AdminSeasonDetailPage({
           ⏰ 오늘 정오까지 인증하면 인정돼요. 정산 금액이 아직 바뀔 수 있어요.
         </p>
       )}
+
+      {status === "settling" && <SettleSeasonButton seasonId={season.id} />}
 
       <SeasonFeeForm
         seasonId={season.id}
@@ -181,11 +197,13 @@ export default async function AdminSeasonDetailPage({
                     </div>
                   )}
                 </div>
-                <ParticipantToggle
-                  seasonId={season.id}
-                  userId={member.id}
-                  initialIsParticipant={isParticipant}
-                />
+                {status === "active" && (
+                  <ParticipantToggle
+                    seasonId={season.id}
+                    userId={member.id}
+                    initialIsParticipant={isParticipant}
+                  />
+                )}
               </div>
 
               {settlement && (

@@ -24,12 +24,14 @@ export function FeedCardActions({
   activityId,
   currentUserId,
   isOwnActivity,
+  isSeasonSettled,
   initialReactions,
   initialRequested,
 }: {
   activityId: string;
   currentUserId: string;
   isOwnActivity: boolean;
+  isSeasonSettled: boolean;
   initialReactions: { emoji: string; count: number; reactedByMe: boolean }[];
   initialRequested: boolean;
 }) {
@@ -176,7 +178,7 @@ export function FeedCardActions({
           {isPickerOpen ? "✕" : "+"}
         </button>
 
-        {!isOwnActivity && (
+        {!isOwnActivity && !isSeasonSettled && (
           <button
             type="button"
             onClick={toggleRequest}

@@ -12,6 +12,7 @@ type ReviewRequestRow = {
     distance_km: number;
     profiles: { name: string } | null;
     activity_photos: { storage_path: string; sort_order: number }[];
+    seasons: { settled_at: string | null } | null;
   } | null;
 };
 
@@ -21,7 +22,7 @@ export default async function AdminReviewPage() {
   const { data: requests, error } = await supabase
     .from("activity_review_requests")
     .select(
-      "activity_id, profiles!requested_by(name), activities(activity_date, distance_km, profiles!user_id(name), activity_photos(storage_path, sort_order))",
+      "activity_id, profiles!requested_by(name), activities(activity_date, distance_km, profiles!user_id(name), activity_photos(storage_path, sort_order), seasons(settled_at))",
     )
     .eq("status", "pending")
     .order("created_at", { ascending: true })
@@ -37,6 +38,9 @@ export default async function AdminReviewPage() {
   >();
   for (const row of requests ?? []) {
     if (!row.activities) continue;
+    // A closed (settled) season no longer accepts review processing, so
+    // pending requests under it drop out of the queue entirely.
+    if (row.activities.seasons?.settled_at) continue;
     const existing = grouped.get(row.activity_id);
     const requesterName = row.profiles?.name ?? "팀원";
     if (existing) {

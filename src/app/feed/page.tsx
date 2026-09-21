@@ -45,8 +45,13 @@ export default async function FeedPage() {
   const [{ data: seasons }, { data: allApproved }, { data: reactions }, { data: reviewRequests }] =
     await Promise.all([
       seasonIds.length > 0
-        ? supabase.from("seasons").select("id, start_date").in("id", seasonIds)
-        : Promise.resolve({ data: [] as { id: string; start_date: string }[] }),
+        ? supabase
+            .from("seasons")
+            .select("id, start_date, settled_at")
+            .in("id", seasonIds)
+        : Promise.resolve({
+            data: [] as { id: string; start_date: string; settled_at: string | null }[],
+          }),
       seasonIds.length > 0
         ? supabase
             .from("activities")
@@ -81,6 +86,9 @@ export default async function FeedPage() {
 
   const seasonStartDates = new Map(
     (seasons ?? []).map((s) => [s.id, s.start_date]),
+  );
+  const settledSeasonIds = new Set(
+    (seasons ?? []).filter((s) => s.settled_at).map((s) => s.id),
   );
   const datesByUserSeason = new Map<string, string[]>();
   for (const activity of allApproved ?? []) {
@@ -130,6 +138,7 @@ export default async function FeedPage() {
           ([emoji, state]) => ({ emoji, ...state }),
         ),
         requestedByMe: requestedByMe.has(row.id),
+        isSeasonSettled: settledSeasonIds.has(row.season_id),
       };
     }),
   );
@@ -179,6 +188,7 @@ export default async function FeedPage() {
                 activityId={item.id}
                 currentUserId={user.id}
                 isOwnActivity={item.user_id === user.id}
+                isSeasonSettled={item.isSeasonSettled}
                 initialReactions={item.reactions}
                 initialRequested={item.requestedByMe}
               />

@@ -15,9 +15,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const supabase = await createClient();
   const { data: pendingRequests } = await supabase
     .from("activity_review_requests")
-    .select("activity_id")
-    .eq("status", "pending");
-  const pendingCount = new Set((pendingRequests ?? []).map((r) => r.activity_id)).size;
+    .select("activity_id, activities(seasons(settled_at))")
+    .eq("status", "pending")
+    .returns<
+      { activity_id: string; activities: { seasons: { settled_at: string | null } | null } | null }[]
+    >();
+  // A closed (settled) season no longer accepts review processing, so its
+  // pending requests shouldn't inflate the badge either.
+  const pendingCount = new Set(
+    (pendingRequests ?? [])
+      .filter((r) => !r.activities?.seasons?.settled_at)
+      .map((r) => r.activity_id),
+  ).size;
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
