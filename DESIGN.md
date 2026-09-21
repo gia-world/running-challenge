@@ -77,6 +77,35 @@ rounded-2xl border border-border bg-surface px-4 py-3
 
 `onClick`을 주면 버튼(같은 페이지 안 뷰 전환), `href`를 주면 `Link`(다른 라우트로 이동)로 렌더링 — 항목별로 섞어 써도 된다. 트랙은 `bg-muted`, 선택된 옵션만 `bg-surface` + `shadow-sm`로 알약처럼 떠 보이게 한다. 새로운 탭/세그먼트 UI가 필요하면 직접 마크업을 짜지 말고 이 컴포넌트에 항목을 추가하는 식으로 확장한다.
 
+## 페이지 레이아웃
+
+바텀 네비가 있는 모든 화면(홈/인증하기/피드/현황판/시즌 전체 기록/마이페이지/관리자)은 헤더+메인+바텀네비 뼈대를 직접 짜지 않고 `src/components/PageShell.tsx`를 쓴다:
+
+```tsx
+<PageShell
+  teamName={viewer.teamName}
+  header={<PageTitle>피드</PageTitle>}
+  bottomNav={{ active: "feed", isAdmin: viewer.teamRole === "admin" }}
+>
+  {/* 페이지 본문 */}
+</PageShell>
+```
+
+- `header`는 `PageHeader`의 children 슬롯 그대로 — 보통 `<PageTitle>`, 뒤로가기가 있는 화면은 `<BackLink>` + `<PageTitle className="mt-1">` 조합(`시즌 전체 기록`, 시즌 상세 페이지 참고), 로딩 화면은 스켈레톤 placeholder.
+- `bottomNav`를 생략하면(마이페이지처럼) 바텀 네비 없이, `pb-20` 없이 렌더링된다.
+- `main`의 기본 클래스는 `gap-4 py-6`(피드/현황판/인증하기/관리자와 동일) — 다른 간격이 필요하면(홈의 `gap-8 py-10`, 마이페이지/시즌 전체 기록의 `gap-6`) `mainClassName`으로 넘긴다.
+- 로그인/온보딩/참여하기처럼 헤더·바텀네비가 아예 없는 가운데 정렬 화면은 대신 `CenteredPage`를 쓴다.
+
+## 타이포 컴포넌트
+
+h1/h2를 페이지마다 직접 `className`으로 반복하지 않고 아래 두 컴포넌트로 통일한다:
+
+- **`PageTitle`** — 페이지 타이틀(h1). 기본(`size` 생략)은 인앱 화면의 `text-lg font-bold`, `size="lg"`는 로그인/온보딩/참여하기 같은 단독 화면의 `text-2xl font-bold`.
+- **`SectionTitle`** — 섹션 타이틀(h2). 기본은 리스트/섹션 라벨의 `text-base font-semibold`, `size="lg"`는 마이페이지의 "자동 연장"/"계좌 정보"처럼 하나의 화면 같은 비중을 가진 섹션의 `text-lg font-bold`.
+- **`BackLink`** — "← 홈", "← 시즌 관리"처럼 반복되는 뒤로가기 링크.
+
+새 화면에서 제목이 필요하면 이 세 컴포넌트를 조합해서 쓰고, 직접 `<h1 className="...">`/`<h2 className="...">`를 새로 쓰지 않는다.
+
 ## 그림자
 
 - 카드에는 그림자를 쓰지 않는다 (위 "카드" 항목 참고) — `shadow-sm`은 세그먼트 탭의 선택된 알약, 작은 원형 배지처럼 카드가 아닌 요소에만 남아 있다.

@@ -1,7 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
-import { PageHeader } from "@/components/PageHeader";
+import { PageShell } from "@/components/PageShell";
+import { PageTitle } from "@/components/PageTitle";
+import { SectionTitle } from "@/components/SectionTitle";
+import { BackLink } from "@/components/BackLink";
 import { requireTeamViewer } from "@/lib/viewer";
 import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
@@ -52,55 +54,37 @@ export default async function MyPage() {
       : { data: null };
 
   return (
-    <div className="flex flex-1 flex-col bg-canvas">
-      <PageHeader teamName={viewer.teamName}>
-        <h1 className="text-lg font-bold text-ink-strong">
-          마이페이지
-        </h1>
-      </PageHeader>
+    <PageShell
+      teamName={viewer.teamName}
+      header={<PageTitle>마이페이지</PageTitle>}
+      mainClassName="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-8"
+    >
+      <BackLink href="/home">← 홈으로</BackLink>
 
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-8">
-        <Link
-          href="/home"
-          className="text-sm font-medium text-ink-tertiary hover:text-ink"
-        >
-          ← 홈으로
-        </Link>
-        {/* <div>
-          <h2 className="text-base font-semibold text-ink">
-            {profile?.name ?? "러너"}
-          </h2>
-        </div> */}
-
-        {showRenewalPrompt && viewer.activeSeason && (
-          <div className="flex flex-col gap-2">
-            <h2 className="text-lg font-bold text-ink">
-              자동 연장
-            </h2>
-            <RenewalToggle
-              seasonId={viewer.activeSeason.id}
-              userId={user.id}
-              initialChoice={seasonMembership?.renew_next_season ?? null}
-            />
-          </div>
-        )}
-
+      {showRenewalPrompt && viewer.activeSeason && (
         <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-bold text-ink">
-            계좌 정보
-          </h2>
-          <p className="text-sm text-ink-secondary">
-            {profile?.bank_account_number
-              ? "참가비 정산은 아래 계좌로 진행돼요."
-              : " 참가비 정산(환급/상금)을 받으려면 계좌 등록이 필요해요."}
-          </p>
-          <BankForm
+          <SectionTitle size="lg">자동 연장</SectionTitle>
+          <RenewalToggle
+            seasonId={viewer.activeSeason.id}
             userId={user.id}
-            initialBankName={profile?.bank_name ?? ""}
-            initialAccountNumber={profile?.bank_account_number ?? ""}
+            initialChoice={seasonMembership?.renew_next_season ?? null}
           />
         </div>
-      </main>
-    </div>
+      )}
+
+      <div className="flex flex-col gap-2">
+        <SectionTitle size="lg">계좌 정보</SectionTitle>
+        <p className="text-sm text-ink-secondary">
+          {profile?.bank_account_number
+            ? "참가비 정산은 아래 계좌로 진행돼요."
+            : " 참가비 정산(환급/상금)을 받으려면 계좌 등록이 필요해요."}
+        </p>
+        <BankForm
+          userId={user.id}
+          initialBankName={profile?.bank_name ?? ""}
+          initialAccountNumber={profile?.bank_account_number ?? ""}
+        />
+      </div>
+    </PageShell>
   );
 }

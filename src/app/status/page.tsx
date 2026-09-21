@@ -4,8 +4,8 @@ import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
 import { computeTeamSeasonHistory } from "@/lib/seasonHistory";
 import { seasonWeekIndexForDate, cappedTodayForSeason, seasonWeekCount } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
-import { BottomNav } from "@/components/BottomNav";
-import { PageHeader } from "@/components/PageHeader";
+import { PageShell } from "@/components/PageShell";
+import { PageTitle } from "@/components/PageTitle";
 import { StatusBoard } from "./StatusBoard";
 
 type MembershipRow = {
@@ -80,32 +80,28 @@ export default async function StatusPage() {
     .sort((a, b) => b.completedCount - a.completedCount || a.name.localeCompare(b.name));
 
   return (
-    <div className="flex flex-1 flex-col bg-canvas pb-20">
-      <PageHeader teamName={viewer.teamName}>
-        <h1 className="text-lg font-bold text-ink-strong">현황판</h1>
-      </PageHeader>
-
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-6">
-        <StatusBoard
-          hasActiveSeason={!!viewer.activeSeason}
-          isSeasonMember={viewer.isSeasonMember}
-          activeSeasonRange={
-            viewer.activeSeason
-              ? { start: viewer.activeSeason.start_date, end: viewer.activeSeason.end_date }
-              : null
-          }
-          members={currentSeasonMembers}
-          currentWeekIndex={currentWeekIndex}
-          weekCount={weekCount}
-          currentUserId={user.id}
-          seasonId={viewer.activeSeason?.id ?? ""}
-          seasonStartDate={viewer.activeSeason?.start_date ?? ""}
-          history={seasons}
-          badgeMembers={badgeMembers}
-        />
-      </main>
-
-      <BottomNav active="status" isAdmin={viewer.teamRole === "admin"} />
-    </div>
+    <PageShell
+      teamName={viewer.teamName}
+      header={<PageTitle>현황판</PageTitle>}
+      bottomNav={{ active: "status", isAdmin: viewer.teamRole === "admin" }}
+    >
+      <StatusBoard
+        hasActiveSeason={!!viewer.activeSeason}
+        isSeasonMember={viewer.isSeasonMember}
+        activeSeasonRange={
+          viewer.activeSeason
+            ? { start: viewer.activeSeason.start_date, end: viewer.activeSeason.end_date }
+            : null
+        }
+        members={currentSeasonMembers}
+        currentWeekIndex={currentWeekIndex}
+        weekCount={weekCount}
+        currentUserId={user.id}
+        seasonId={viewer.activeSeason?.id ?? ""}
+        seasonStartDate={viewer.activeSeason?.start_date ?? ""}
+        history={seasons}
+        badgeMembers={badgeMembers}
+      />
+    </PageShell>
   );
 }

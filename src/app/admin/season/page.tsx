@@ -5,6 +5,8 @@ import { formatKoreanDate } from "@/lib/format";
 import { todayInSeoul } from "@/lib/week";
 import { computeSeasonStatus } from "@/lib/seasonStatus";
 import { EmptyState } from "@/components/EmptyState";
+import { PageTitle } from "@/components/PageTitle";
+import { SectionTitle } from "@/components/SectionTitle";
 import { SeasonForm } from "./SeasonForm";
 
 export default async function AdminSeasonPage() {
@@ -23,7 +25,7 @@ export default async function AdminSeasonPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-lg font-bold text-ink-strong">시즌 관리</h1>
+      <PageTitle>시즌 관리</PageTitle>
 
       <SeasonForm
         teamId={teamId}
@@ -32,7 +34,7 @@ export default async function AdminSeasonPage() {
       />
 
       <section>
-        <h2 className="text-base font-semibold text-ink">전체 시즌</h2>
+        <SectionTitle>전체 시즌</SectionTitle>
         {allSeasons.length === 0 ? (
           <EmptyState className="mt-2">아직 만든 시즌이 없어요.</EmptyState>
         ) : (

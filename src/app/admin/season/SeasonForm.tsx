@@ -10,6 +10,7 @@ import {
   DEFAULT_ENTRY_FEE,
   DEFAULT_REFUND_PER_CERTIFICATION,
 } from "@/components/SeasonFeeFields";
+import { SectionTitle } from "@/components/SectionTitle";
 
 type ExistingSeason = { id: string; start_date: string; end_date: string };
 
@@ -116,9 +117,7 @@ export function SeasonForm({
       onSubmit={handleSubmit}
       className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4"
     >
-      <h2 className="text-base font-semibold text-ink">
-        새 시즌 만들기
-      </h2>
+      <SectionTitle>새 시즌 만들기</SectionTitle>
 
       <label className="flex flex-col gap-1">
         <span className="text-base text-ink-secondary">

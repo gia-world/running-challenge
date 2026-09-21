@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatKoreanDate } from "@/lib/format";
 import { getSignedPhotoUrls } from "@/lib/photos";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
+import { PageTitle } from "@/components/PageTitle";
 import { ReviewItem } from "./ReviewItem";
 
 type ReviewRequestRow = {
@@ -66,9 +67,7 @@ export default async function AdminReviewPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-lg font-bold text-ink-strong">
-        재인증 요청함 ({items.length})
-      </h1>
+      <PageTitle>재인증 요청함 ({items.length})</PageTitle>
 
       {items.length === 0 ? (
         <p className="mt-10 text-center text-base text-ink-tertiary">

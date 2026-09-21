@@ -4,6 +4,8 @@ import { LoginButton } from "./LoginButton";
 import { KakaoInAppBrowserNotice } from "./KakaoInAppBrowserNotice";
 import { TeamEyebrow } from "@/components/TeamEyebrow";
 import { ErrorBanner } from "@/components/ErrorBanner";
+import { CenteredPage } from "@/components/CenteredPage";
+import { PageTitle } from "@/components/PageTitle";
 
 export default async function LoginPage({
   searchParams,
@@ -31,7 +33,7 @@ export default async function LoginPage({
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-canvas px-6">
+    <CenteredPage>
       <div className="w-full max-w-sm text-center">
         {teamName ? (
           <p className=" text-xl">
@@ -41,9 +43,9 @@ export default async function LoginPage({
         ) : (
           <TeamEyebrow teamName={teamName} size="lg" />
         )}
-        <h1 className="mt-2 text-2xl font-semibold text-ink-strong">
+        <PageTitle size="lg" className="mt-2">
           주 3회 러닝 인증 챌린지
-        </h1>
+        </PageTitle>
         <p className="mt-2 text-base text-ink-secondary">
           카카오 계정으로 바로 시작하세요.
         </p>
@@ -62,6 +64,6 @@ export default async function LoginPage({
           <LoginButton inviteCode={code} />
         </div>
       </div>
-    </div>
+    </CenteredPage>
   );
 }

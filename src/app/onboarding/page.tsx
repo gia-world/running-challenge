@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { TeamEyebrow } from "@/components/TeamEyebrow";
+import { CenteredPage } from "@/components/CenteredPage";
+import { PageTitle } from "@/components/PageTitle";
 import { OnboardingForm } from "./OnboardingForm";
 
 export default async function OnboardingPage() {
@@ -23,12 +25,12 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-canvas px-6">
+    <CenteredPage>
       <div className="w-full max-w-sm text-center">
         <TeamEyebrow size="lg" />
-        <h1 className="mt-2 text-2xl font-bold text-ink-strong">
+        <PageTitle size="lg" className="mt-2">
           이름을 확인해주세요
-        </h1>
+        </PageTitle>
         <p className="mt-2 text-base text-ink-secondary">
           팀원들에게는 이 이름으로 보여요.
         </p>
@@ -37,6 +39,6 @@ export default async function OnboardingPage() {
           <OnboardingForm userId={user.id} currentName={profile?.name ?? "러너"} />
         </div>
       </div>
-    </div>
+    </CenteredPage>
   );
 }

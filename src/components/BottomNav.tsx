@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-type ActiveTab = "home" | "feed" | "certify" | "status" | "admin";
+export type ActiveTab = "home" | "feed" | "certify" | "status" | "admin";
 
 const ITEMS = [
   { key: "home", href: "/home", label: "홈", icon: "🏠" },

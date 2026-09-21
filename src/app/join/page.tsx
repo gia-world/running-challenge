@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { TeamEyebrow } from "@/components/TeamEyebrow";
+import { CenteredPage } from "@/components/CenteredPage";
+import { PageTitle } from "@/components/PageTitle";
 import { JoinForm } from "./JoinForm";
 
 export default async function JoinPage({
@@ -35,12 +37,12 @@ export default async function JoinPage({
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-canvas px-6">
+    <CenteredPage>
       <div className="w-full max-w-sm text-center">
         <TeamEyebrow teamName={teamName} size="lg" />
-        <h1 className="mt-2 text-2xl font-bold text-ink-strong">
+        <PageTitle size="lg" className="mt-2">
           팀에 참여하세요
-        </h1>
+        </PageTitle>
         <p className="mt-2 text-base text-ink-secondary">
           관리자에게 받은 초대 코드나 링크로 참여할 수 있어요.
         </p>
@@ -49,6 +51,6 @@ export default async function JoinPage({
           <JoinForm initialCode={code} />
         </div>
       </div>
-    </div>
+    </CenteredPage>
   );
 }

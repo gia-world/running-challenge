@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
+import { PageTitle } from "@/components/PageTitle";
 import type { UserRole } from "@/lib/types";
 import { InviteCodeCard } from "./InviteCodeCard";
 import { MemberRow } from "./MemberRow";
@@ -32,11 +33,7 @@ export default async function AdminMembersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-lg font-bold text-ink-strong">
-          팀원 관리 ({members.length}명)
-        </h1>
-      </div>
+      <PageTitle>팀원 관리 ({members.length}명)</PageTitle>
 
       {team && <InviteCodeCard teamId={team.id} initialCode={team.invite_code} />}
 

@@ -1,9 +1,10 @@
+import { CenteredPage } from "@/components/CenteredPage";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 export default function Loading() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-canvas px-6">
+    <CenteredPage>
       <LoadingSpinner />
-    </div>
+    </CenteredPage>
   );
 }

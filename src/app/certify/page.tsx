@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { BottomNav } from "@/components/BottomNav";
-import { PageHeader } from "@/components/PageHeader";
+import { PageShell } from "@/components/PageShell";
+import { PageTitle } from "@/components/PageTitle";
 import { EmptyState } from "@/components/EmptyState";
 import { SegmentedTabs } from "@/components/SegmentedTabs";
 import { requireTeamViewer } from "@/lib/viewer";
@@ -29,68 +29,64 @@ export default async function CertifyPage({
   const isSelectedSeasonMember = useGrace ? viewer.isGraceSeasonMember : viewer.isSeasonMember;
 
   return (
-    <div className="flex flex-1 flex-col bg-canvas pb-20">
-      <PageHeader teamName={viewer.teamName}>
-        <h1 className="text-lg font-bold text-ink-strong">인증하기</h1>
-      </PageHeader>
-
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-6">
-        {hasOverlap && viewer.activeSeason && viewer.graceSeason && (
-          <div className="flex flex-col gap-2">
-            <SegmentedTabs
-              items={[
-                {
-                  key: "grace",
-                  label: `지난 시즌 (~${formatKoreanDate(viewer.graceSeason.end_date)})`,
-                  isActive: useGrace,
-                  href: "/certify?season=grace",
-                },
-                {
-                  key: "current",
-                  label: `새 시즌 (${formatKoreanDate(viewer.activeSeason.start_date)}~)`,
-                  isActive: !useGrace,
-                  href: "/certify?season=current",
-                },
-              ]}
-            />
-            {useGrace && (
-              <p className="rounded-lg bg-warning-subtle px-3 py-2 text-base text-warning">
-                ⏰ 지난 시즌은 오늘 정오까지만 인증할 수 있어요.
-              </p>
-            )}
-          </div>
-        )}
-
-        {!selectedSeason ? (
-          <EmptyState>
-            지금 진행 중인 시즌이 없어요.
-            <br />
-            관리자가 시즌을 만들면 시작할 수 있어요.
-          </EmptyState>
-        ) : !isSelectedSeasonMember ? (
-          <EmptyState>
-            <p className="text-sm text-ink-tertiary">
-              {formatKoreanDate(selectedSeason.start_date)} ~{" "}
-              {formatKoreanDate(selectedSeason.end_date)}
-            </p>
-            <p className="mt-2">
-              이 시즌에는 참여 중이 아니에요.
-              <br />
-              관리자에게 참여를 요청해주세요.
-            </p>
-          </EmptyState>
-        ) : (
-          <CertifyFormLoader
-            userId={user.id}
-            seasonId={selectedSeason.id}
-            seasonStartDate={selectedSeason.start_date}
-            seasonEndDate={selectedSeason.end_date}
+    <PageShell
+      teamName={viewer.teamName}
+      header={<PageTitle>인증하기</PageTitle>}
+      bottomNav={{ active: "certify", isAdmin: viewer.teamRole === "admin" }}
+    >
+      {hasOverlap && viewer.activeSeason && viewer.graceSeason && (
+        <div className="flex flex-col gap-2">
+          <SegmentedTabs
+            items={[
+              {
+                key: "grace",
+                label: `지난 시즌 (~${formatKoreanDate(viewer.graceSeason.end_date)})`,
+                isActive: useGrace,
+                href: "/certify?season=grace",
+              },
+              {
+                key: "current",
+                label: `새 시즌 (${formatKoreanDate(viewer.activeSeason.start_date)}~)`,
+                isActive: !useGrace,
+                href: "/certify?season=current",
+              },
+            ]}
           />
-        )}
-      </main>
+          {useGrace && (
+            <p className="rounded-lg bg-warning-subtle px-3 py-2 text-base text-warning">
+              ⏰ 지난 시즌은 오늘 정오까지만 인증할 수 있어요.
+            </p>
+          )}
+        </div>
+      )}
 
-      <BottomNav active="certify" isAdmin={viewer.teamRole === "admin"} />
-    </div>
+      {!selectedSeason ? (
+        <EmptyState>
+          지금 진행 중인 시즌이 없어요.
+          <br />
+          관리자가 시즌을 만들면 시작할 수 있어요.
+        </EmptyState>
+      ) : !isSelectedSeasonMember ? (
+        <EmptyState>
+          <p className="text-sm text-ink-tertiary">
+            {formatKoreanDate(selectedSeason.start_date)} ~{" "}
+            {formatKoreanDate(selectedSeason.end_date)}
+          </p>
+          <p className="mt-2">
+            이 시즌에는 참여 중이 아니에요.
+            <br />
+            관리자에게 참여를 요청해주세요.
+          </p>
+        </EmptyState>
+      ) : (
+        <CertifyFormLoader
+          userId={user.id}
+          seasonId={selectedSeason.id}
+          seasonStartDate={selectedSeason.start_date}
+          seasonEndDate={selectedSeason.end_date}
+        />
+      )}
+    </PageShell>
   );
 }
 

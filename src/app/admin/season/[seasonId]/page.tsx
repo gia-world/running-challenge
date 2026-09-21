@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
@@ -11,6 +10,9 @@ import { formatKoreanDate, formatWon } from "@/lib/format";
 import { isBeforeNoonInSeoul, todayInSeoul, yesterdayInSeoul } from "@/lib/week";
 import { seasonWeekCount } from "@/lib/season";
 import { computeSeasonStatus } from "@/lib/seasonStatus";
+import { PageTitle } from "@/components/PageTitle";
+import { SectionTitle } from "@/components/SectionTitle";
+import { BackLink } from "@/components/BackLink";
 import { ParticipantToggle } from "./ParticipantToggle";
 import { SeasonFeeForm } from "./SeasonFeeForm";
 import { SettleSeasonButton } from "./SettleSeasonButton";
@@ -130,17 +132,12 @@ export default async function AdminSeasonDetailPage({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <Link
-          href="/admin/season"
-          className="text-sm font-medium text-ink-tertiary hover:text-ink"
-        >
-          ← 시즌 관리
-        </Link>
+        <BackLink href="/admin/season">← 시즌 관리</BackLink>
         <div className="mt-1 flex items-center gap-2">
-          <h1 className="text-lg font-bold text-ink-strong">
+          <PageTitle>
             {formatKoreanDate(season.start_date)} ~{" "}
             {formatKoreanDate(season.end_date)}
-          </h1>
+          </PageTitle>
           {status === "active" && (
             <span className="rounded-full bg-success-subtle px-2 py-0.5 text-sm font-medium text-success">
               진행중
@@ -178,7 +175,7 @@ export default async function AdminSeasonDetailPage({
         initialRefundPerCertification={season.refund_per_certification}
       />
 
-      <h2 className=" text-ink-secondary mt-2">참여자</h2>
+      <SectionTitle className="mt-2">참여자</SectionTitle>
       <ul className="flex flex-col gap-2">
         {members.map((member) => {
           const isParticipant = participantIds.has(member.id);

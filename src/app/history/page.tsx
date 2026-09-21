@@ -1,11 +1,12 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
 import { seasonWeekIndexForDate, seasonWeekRange, seasonWeekCount } from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
 import { todayInSeoul } from "@/lib/week";
-import { BottomNav } from "@/components/BottomNav";
-import { PageHeader } from "@/components/PageHeader";
+import { PageShell } from "@/components/PageShell";
+import { PageTitle } from "@/components/PageTitle";
+import { SectionTitle } from "@/components/SectionTitle";
+import { BackLink } from "@/components/BackLink";
 import { SeasonGate } from "@/components/SeasonGate";
 import { ActivityStatusList, type ActivityListItem } from "@/components/ActivityStatusList";
 
@@ -13,25 +14,21 @@ export default async function HistoryPage() {
   const { user, viewer } = await requireTeamViewer();
 
   return (
-    <div className="flex flex-1 flex-col bg-canvas pb-20">
-      <PageHeader teamName={viewer.teamName}>
-        <Link
-          href="/home"
-          className="text-sm font-medium text-ink-tertiary hover:text-ink"
-        >
-          ← 홈
-        </Link>
-        <h1 className="mt-1 text-lg font-bold text-ink-strong">시즌 전체 기록</h1>
-      </PageHeader>
-
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-6">
-        <SeasonGate viewer={viewer}>
-          {viewer.activeSeason && <SeasonHistory userId={user.id} season={viewer.activeSeason} />}
-        </SeasonGate>
-      </main>
-
-      <BottomNav active="home" isAdmin={viewer.teamRole === "admin"} />
-    </div>
+    <PageShell
+      teamName={viewer.teamName}
+      header={
+        <>
+          <BackLink href="/home">← 홈</BackLink>
+          <PageTitle className="mt-1">시즌 전체 기록</PageTitle>
+        </>
+      }
+      mainClassName="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-6"
+      bottomNav={{ active: "home", isAdmin: viewer.teamRole === "admin" }}
+    >
+      <SeasonGate viewer={viewer}>
+        {viewer.activeSeason && <SeasonHistory userId={user.id} season={viewer.activeSeason} />}
+      </SeasonGate>
+    </PageShell>
   );
 }
 
@@ -72,9 +69,9 @@ async function SeasonHistory({
 
         return (
           <section key={index}>
-            <h2 className="text-base font-semibold text-ink">
+            <SectionTitle>
               {index + 1}주차 ({formatKoreanDate(start)}~{formatKoreanDate(end)})
-            </h2>
+            </SectionTitle>
             <ActivityStatusList
               activities={weekActivities}
               emptyMessage={isFutureWeek ? `${index + 1}주차도 화이팅!` : "이 주에는 인증 기록이 없어요."}

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { BottomNav } from "@/components/BottomNav";
 import { FeedCardActions } from "@/components/FeedCardActions";
-import { PageHeader } from "@/components/PageHeader";
+import { PageShell } from "@/components/PageShell";
+import { PageTitle } from "@/components/PageTitle";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { formatKoreanDate } from "@/lib/format";
 import { describeSeasonOccurrence } from "@/lib/season";
@@ -144,15 +144,12 @@ export default async function FeedPage() {
   );
 
   return (
-    <div className="flex flex-1 flex-col bg-canvas pb-20">
-      <PageHeader teamName={viewer.teamName}>
-        <h1 className="text-lg font-bold text-ink-strong">
-          피드
-        </h1>
-      </PageHeader>
-
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-6">
-        {items.length === 0 ? (
+    <PageShell
+      teamName={viewer.teamName}
+      header={<PageTitle>피드</PageTitle>}
+      bottomNav={{ active: "feed", isAdmin: viewer.teamRole === "admin" }}
+    >
+      {items.length === 0 ? (
           <p className="mt-10 text-center text-base text-ink-tertiary">
             아직 인증된 기록이 없어요.
           </p>
@@ -195,9 +192,6 @@ export default async function FeedPage() {
             </article>
           ))
         )}
-      </main>
-
-      <BottomNav active="feed" isAdmin={viewer.teamRole === "admin"} />
-    </div>
+    </PageShell>
   );
 }

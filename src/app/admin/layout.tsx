@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AdminTabs } from "@/components/AdminTabs";
-import { BottomNav } from "@/components/BottomNav";
-import { PageHeader } from "@/components/PageHeader";
+import { PageShell } from "@/components/PageShell";
+import { PageTitle } from "@/components/PageTitle";
 import { requireTeamViewer } from "@/lib/viewer";
 
 export default async function AdminLayout({
@@ -36,17 +36,13 @@ export default async function AdminLayout({
   ).size;
 
   return (
-    <div className="flex flex-1 flex-col bg-canvas pb-20">
-      <PageHeader teamName={viewer.teamName}>
-        <h1 className="text-lg font-bold text-ink-strong">ADMIN</h1>
-      </PageHeader>
-
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-6">
-        <AdminTabs pendingCount={pendingCount} />
-        {children}
-      </main>
-
-      <BottomNav active="admin" isAdmin />
-    </div>
+    <PageShell
+      teamName={viewer.teamName}
+      header={<PageTitle>ADMIN</PageTitle>}
+      bottomNav={{ active: "admin", isAdmin: true }}
+    >
+      <AdminTabs pendingCount={pendingCount} />
+      {children}
+    </PageShell>
   );
 }

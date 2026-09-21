@@ -9,6 +9,7 @@ import { earnedBadges, BADGE_CATALOG } from "@/lib/badges";
 import { EmptyState } from "@/components/EmptyState";
 import { BottomSheet } from "@/components/BottomSheet";
 import { SegmentedTabs } from "@/components/SegmentedTabs";
+import { SectionTitle } from "@/components/SectionTitle";
 import type { WeekStat } from "@/lib/seasonStats";
 import type { SeasonHistoryEntry } from "@/lib/seasonHistory";
 
@@ -260,9 +261,7 @@ export function StatusBoard({
           <section className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-1.5">
               <div className="flex items-center gap-1.5">
-                <h2 className="text-base font-semibold text-ink">
-                  시즌 성공 뱃지
-                </h2>
+                <SectionTitle>시즌 성공 뱃지</SectionTitle>
                 <button
                   type="button"
                   onClick={() => setShowBadgeInfo(true)}
@@ -329,9 +328,7 @@ export function StatusBoard({
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="text-base font-semibold text-ink">
-              시즌 이력
-            </h2>
+            <SectionTitle>시즌 이력</SectionTitle>
             {history.length === 0 ? (
               <EmptyState>아직 끝난 시즌이 없어요.</EmptyState>
             ) : (
@@ -432,9 +429,7 @@ export function StatusBoard({
       {showBadgeInfo && (
         <BottomSheet onClose={() => setShowBadgeInfo(false)}>
           <div className="flex flex-col gap-3">
-            <h2 className="text-lg font-bold text-ink-strong">
-              뱃지 기준
-            </h2>
+            <SectionTitle size="lg">뱃지 기준</SectionTitle>
             <ul className="flex flex-col gap-3">
               {BADGE_CATALOG.map((badge) => (
                 <li key={badge.emoji} className="flex items-center gap-3">
