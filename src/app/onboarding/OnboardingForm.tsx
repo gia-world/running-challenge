@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Input } from "@/components/Input";
 
 export function OnboardingForm({
   userId,
@@ -50,13 +51,13 @@ export function OnboardingForm({
   if (isEditing) {
     return (
       <form onSubmit={handleSubmitRealName} className="flex flex-col gap-4">
-        <input
+        <Input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="실명을 입력해주세요"
           autoFocus
-          className="rounded-xl border border-transparent bg-muted px-3 py-3 text-center text-lg focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="px-3 py-3 text-center text-lg"
         />
         {error && (
           <p className="text-sm text-danger">{error}</p>

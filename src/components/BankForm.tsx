@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Input } from "@/components/Input";
 
 export function BankForm({
   userId,
@@ -65,30 +66,24 @@ export function BankForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <label className="flex flex-col gap-1">
-        <span className="text-base text-ink-secondary">은행</span>
-        <input
-          type="text"
-          value={bankName}
-          onChange={(e) => setBankName(e.target.value)}
-          placeholder="국민은행"
-          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </label>
+      <Input
+        type="text"
+        label="은행"
+        value={bankName}
+        onChange={(e) => setBankName(e.target.value)}
+        placeholder="국민은행"
+        className="px-3 py-2.5 text-sm"
+      />
 
-      <label className="flex flex-col gap-1">
-        <span className="text-base text-ink-secondary">
-          계좌번호
-        </span>
-        <input
-          type="text"
-          inputMode="numeric"
-          value={accountNumber}
-          onChange={(e) => setAccountNumber(e.target.value)}
-          placeholder="123456-78-901234"
-          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </label>
+      <Input
+        type="text"
+        inputMode="numeric"
+        label="계좌번호"
+        value={accountNumber}
+        onChange={(e) => setAccountNumber(e.target.value)}
+        placeholder="123456-78-901234"
+        className="px-3 py-2.5 text-sm"
+      />
 
       {error && (
         <p className="text-sm text-danger">{error}</p>

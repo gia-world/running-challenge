@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Input } from "@/components/Input";
 
 export function JoinForm({ initialCode }: { initialCode?: string }) {
   const router = useRouter();
@@ -60,13 +61,13 @@ export function JoinForm({ initialCode }: { initialCode?: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <input
+      <Input
         type="text"
         value={code}
         onChange={(e) => setCode(e.target.value)}
         placeholder="초대 코드"
         autoFocus
-        className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-center text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        className="px-3 py-2.5 text-center text-sm"
       />
       {error && <p className="text-sm text-danger">{error}</p>}
       <button

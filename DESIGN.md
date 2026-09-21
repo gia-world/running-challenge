@@ -58,12 +58,25 @@ rounded-2xl border border-border bg-surface px-4 py-3
 
 ## 인풋
 
-- 기본: `rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm` — 원티드 레퍼런스의 filled 변형. outlined(흰 배경 + 보더)는 카드 보더와 톤이 겹쳐 촌스러워 보인다는 피드백으로 filled로 교체했다. 보더는 `border-transparent`로 항상 자리를 잡아둬서 포커스 때 보더가 생겨도 레이아웃이 밀리지 않는다.
-- **포커스 시 항상**: `focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary` — 브라우저 기본 포커스 아웃라인을 쓰지 않는다. 새 인풋을 추가할 때 절대 빠뜨리지 말 것.
+`src/components/Input.tsx` — 앱의 모든 텍스트 인풋이 쓰는 공통 컴포넌트. `label`을 주면 `<label>` + 라벨 `<span>` + `<input>`까지 통째로 그려주고, 안 주면 인풋만 렌더링한다(ReviewItem의 반려 사유, JoinForm/OnboardingForm처럼 라벨 없이 placeholder만 쓰는 필드).
+
+```tsx
+<Input
+  type="date"
+  label="시작일"
+  value={startDate}
+  onChange={(e) => handleStartDateChange(e.target.value)}
+  className="px-3 py-2.5 text-sm"
+/>
+```
+
+- 컴포넌트 내부 `BASE`는 필드마다 항상 같은 것만 담는다: `rounded-xl border border-transparent bg-muted text-ink-strong placeholder:text-ink-tertiary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-60` — 원티드 레퍼런스의 filled 변형이다. outlined(흰 배경 + 보더)는 카드 보더와 톤이 겹쳐 촌스러워 보인다는 피드백으로 filled로 교체했다. 보더는 `border-transparent`로 항상 자리를 잡아둬서 포커스 때 보더가 생겨도 레이아웃이 밀리지 않는다.
+- **포커스 시 항상**: `focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary` — 브라우저 기본 포커스 아웃라인을 쓰지 않는다. `BASE`에 이미 포함돼 있으니 `Input`을 쓰는 한 빠뜨릴 일이 없다.
+- padding/정렬/글자 크기(`px-3 py-2.5 text-sm`, `py-3 text-center text-lg` 등)는 필드마다 달라서 `BASE`엔 안 넣고 매번 `className`으로 넘긴다 — `BASE`가 그 속성들을 아예 선언하지 않으니 겹칠 일이 없다.
+- 라벨 텍스트 스타일은 기본이 `text-base text-ink-secondary`이고, 다르게 써야 하면(CertifyForm의 날짜/거리 필드는 `text-base font-medium text-ink`) `labelClassName`으로 넘긴다.
 - `font-size`는 16px 미만이면 iOS Safari가 자동 확대하므로, `globals.css`의 전역 규칙(`input, select, textarea { font-size: 16px; }`)이 항상 이긴다 — 개별 인풋에 `text-sm`을 줘도 실제 렌더링은 16px.
-- 라벨이 있는 필드는 `<label className="flex flex-col gap-1"><span className="text-base text-ink-secondary">라벨</span><input .../></label>` 패턴을 그대로 반복해서 쓴다 (버튼처럼 컴포넌트로 묶지 않음 — 필드마다 padding/정렬이 조금씩 달라서 클래스 문자열만 기준으로 삼는 게 더 유연함).
 - 여러 필드가 몰려 있는 화면에서 `bg-muted`(인풋 채움)가 다른 `bg-muted` 요소(세그먼트 탭 트랙, 칩)와 바로 붙으면 구분이 안 간다 — 인풋 옆/위에 놓이는 트랙·칩 종류는 전부 한 단계 진한 `bg-muted-strong`을 쓴다 (아래 세그먼트 탭 섹션 참고).
-- `src/components/Textarea.tsx` — 여러 줄 입력이 필요할 때 쓰는 filled 텍스트에어리어. 인풋과 같은 배경/보더/포커스 스타일이고, 추가로 내용에 따라 자동으로 높이가 늘어나고(`scrollHeight` 기반) `maxLength`를 주면 우측 하단에 `n/max` 카운터가 뜬다. 아직 실제로 쓰는 화면은 없음.
+- `src/components/Textarea.tsx` — 여러 줄 입력이 필요할 때 쓰는 filled 텍스트에어리어. `Input`과 같은 배경/보더/포커스 스타일이고, 추가로 내용에 따라 자동으로 높이가 늘어나고(`scrollHeight` 기반) `maxLength`를 주면 우측 하단에 `n/max` 카운터가 뜬다. 아직 실제로 쓰는 화면은 없음.
 
 ## 체크박스 / 라디오 / 토글
 

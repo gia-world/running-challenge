@@ -12,6 +12,7 @@ import {
 } from "@/components/SeasonFeeFields";
 import { SectionTitle } from "@/components/SectionTitle";
 import { Checkbox } from "@/components/Checkbox";
+import { Input } from "@/components/Input";
 
 type ExistingSeason = { id: string; start_date: string; end_date: string };
 
@@ -115,30 +116,24 @@ export function SeasonForm({
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <SectionTitle>새 시즌 만들기</SectionTitle>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-base text-ink-secondary">시작일</span>
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => handleStartDateChange(e.target.value)}
-          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </label>
+      <Input
+        type="date"
+        label="시작일"
+        value={startDate}
+        onChange={(e) => handleStartDateChange(e.target.value)}
+        className="px-3 py-2.5 text-sm"
+      />
 
-      <label className="flex flex-col gap-1">
-        <span className="text-base text-ink-secondary">
-          종료일 (4주 후 자동 계산, 수정 가능)
-        </span>
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => {
-            setEndDate(e.target.value);
-            setNeedsOverlapConfirm(false);
-          }}
-          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </label>
+      <Input
+        type="date"
+        label="종료일 (4주 후 자동 계산, 수정 가능)"
+        value={endDate}
+        onChange={(e) => {
+          setEndDate(e.target.value);
+          setNeedsOverlapConfirm(false);
+        }}
+        className="px-3 py-2.5 text-sm"
+      />
 
       <SeasonFeeFields
         entryFee={entryFee}

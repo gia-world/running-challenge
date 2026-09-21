@@ -1,5 +1,7 @@
 "use client";
 
+import { Input } from "./Input";
+
 export const DEFAULT_ENTRY_FEE = "24000";
 export const DEFAULT_REFUND_PER_CERTIFICATION = "2000";
 
@@ -19,37 +21,29 @@ export function SeasonFeeFields({
 }) {
   return (
     <>
-      <label className="flex flex-col gap-1">
-        <span className="text-base text-ink-secondary">
-          참가비 {required ? "(원)" : "(원, 선택)"}
-        </span>
-        <input
-          type="number"
-          min="0"
-          step="1000"
-          inputMode="numeric"
-          value={entryFee}
-          onChange={(e) => onEntryFeeChange(e.target.value)}
-          placeholder={DEFAULT_ENTRY_FEE}
-          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </label>
+      <Input
+        type="number"
+        min="0"
+        step="1000"
+        inputMode="numeric"
+        label={`참가비 ${required ? "(원)" : "(원, 선택)"}`}
+        value={entryFee}
+        onChange={(e) => onEntryFeeChange(e.target.value)}
+        placeholder={DEFAULT_ENTRY_FEE}
+        className="px-3 py-2.5 text-sm"
+      />
 
-      <label className="flex flex-col gap-1">
-        <span className="text-base text-ink-secondary">
-          인증 1회당 환급 단가 {required ? "(원)" : "(원, 선택)"}
-        </span>
-        <input
-          type="number"
-          min="0"
-          step="500"
-          inputMode="numeric"
-          value={refundPerCertification}
-          onChange={(e) => onRefundPerCertificationChange(e.target.value)}
-          placeholder={DEFAULT_REFUND_PER_CERTIFICATION}
-          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </label>
+      <Input
+        type="number"
+        min="0"
+        step="500"
+        inputMode="numeric"
+        label={`인증 1회당 환급 단가 ${required ? "(원)" : "(원, 선택)"}`}
+        value={refundPerCertification}
+        onChange={(e) => onRefundPerCertificationChange(e.target.value)}
+        placeholder={DEFAULT_REFUND_PER_CERTIFICATION}
+        className="px-3 py-2.5 text-sm"
+      />
     </>
   );
 }

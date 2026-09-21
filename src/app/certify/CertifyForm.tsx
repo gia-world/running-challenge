@@ -9,6 +9,7 @@ import { todayInSeoul } from "@/lib/week";
 import { ErrorBanner } from "@/components/ErrorBanner";
 import { BottomSheet } from "@/components/BottomSheet";
 import { RenewalToggle } from "@/components/RenewalToggle";
+import { Input } from "@/components/Input";
 
 type PendingPhoto = { file: File; previewUrl: string };
 
@@ -243,35 +244,29 @@ export function CertifyForm({
         />
       </label>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-base font-medium text-ink">
-          날짜
-        </span>
-        <input
-          type="date"
-          value={activityDate}
-          max={maxActivityDate}
-          onChange={(e) => setActivityDate(e.target.value)}
-          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </label>
+      <Input
+        type="date"
+        label="날짜"
+        labelClassName="text-base font-medium text-ink"
+        value={activityDate}
+        max={maxActivityDate}
+        onChange={(e) => setActivityDate(e.target.value)}
+        className="px-3 py-2.5 text-sm"
+      />
 
-      <label className="flex flex-col gap-1">
-        <span className="text-base font-medium text-ink">
-          거리 (km)
-        </span>
-        <input
-          type="number"
-          step="0.1"
-          min="5"
-          inputMode="decimal"
-          value={distanceKm}
-          onChange={(e) => setDistanceKm(e.target.value)}
-          placeholder="5.0"
-          disabled={isBlocked}
-          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-60"
-        />
-      </label>
+      <Input
+        type="number"
+        step="0.1"
+        min="5"
+        inputMode="decimal"
+        label="거리 (km)"
+        labelClassName="text-base font-medium text-ink"
+        value={distanceKm}
+        onChange={(e) => setDistanceKm(e.target.value)}
+        placeholder="5.0"
+        disabled={isBlocked}
+        className="px-3 py-2.5 text-sm"
+      />
 
       {error && <ErrorBanner>{error}</ErrorBanner>}
 
