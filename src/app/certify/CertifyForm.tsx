@@ -255,7 +255,7 @@ export function CertifyForm({
 
       <Input
         type="number"
-        step="0.1"
+        step="0.01"
         min="5"
         inputMode="decimal"
         label="거리 (km)"
