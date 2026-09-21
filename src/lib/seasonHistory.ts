@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { computeSeasonWeeklyStats, emptyWeekStats } from "./seasonStats";
-import { SEASON_WEEKS } from "./season";
+import { seasonWeekCount } from "./season";
 
 export type SeasonHistoryEntry = {
   id: string;
@@ -50,8 +50,9 @@ export async function computeTeamSeasonHistory(
     (seasonsRaw ?? []).map(async (season) => {
       const [{ data: seasonMemberships }, weeklyStats] = await Promise.all([
         supabase.from("season_memberships").select("user_id").eq("season_id", season.id),
-        computeSeasonWeeklyStats(supabase, season.id, season.start_date),
+        computeSeasonWeeklyStats(supabase, season.id, season.start_date, season.end_date),
       ]);
+      const weekCount = seasonWeekCount(season.start_date, season.end_date);
 
       const participantIds = (seasonMemberships ?? []).map((m) => m.user_id);
       let completedCount = 0;
@@ -59,8 +60,8 @@ export async function computeTeamSeasonHistory(
 
       for (const userId of participantIds) {
         participatedUserIds.add(userId);
-        const weeks = weeklyStats.get(userId) ?? emptyWeekStats();
-        const completed = weeks.length === SEASON_WEEKS && weeks.every((w) => w.isSuccess);
+        const weeks = weeklyStats.get(userId) ?? emptyWeekStats(weekCount);
+        const completed = weeks.every((w) => w.isSuccess);
         if (completed) {
           completedCount += 1;
           completedCountByUserId.set(userId, (completedCountByUserId.get(userId) ?? 0) + 1);

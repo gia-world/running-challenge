@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
+import { seasonWeekRange } from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
 import { getSignedPhotoUrls } from "@/lib/photos";
 import { earnedBadges, BADGE_CATALOG } from "@/lib/badges";
@@ -49,6 +49,7 @@ export function StatusBoard({
   activeSeasonRange,
   members,
   currentWeekIndex,
+  weekCount,
   currentUserId,
   seasonId,
   seasonStartDate,
@@ -60,6 +61,7 @@ export function StatusBoard({
   activeSeasonRange: { start: string; end: string } | null;
   members: Member[];
   currentWeekIndex: number;
+  weekCount: number;
   currentUserId: string;
   seasonId: string;
   seasonStartDate: string;
@@ -204,7 +206,7 @@ export function StatusBoard({
                 <thead>
                   <tr className="text-sm text-zinc-400">
                     <th className="px-3 py-2 text-left font-medium">이름</th>
-                    {Array.from({ length: SEASON_WEEKS }, (_, i) => (
+                    {Array.from({ length: weekCount }, (_, i) => (
                       <th
                         key={i}
                         className={

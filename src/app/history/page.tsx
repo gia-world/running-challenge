@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
-import { seasonWeekIndexForDate, seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
+import { seasonWeekIndexForDate, seasonWeekRange, seasonWeekCount } from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
 import { todayInSeoul } from "@/lib/week";
 import { BottomNav } from "@/components/BottomNav";
@@ -53,10 +53,11 @@ async function SeasonHistory({
     .returns<(ActivityListItem & { created_at: string })[]>();
 
   const activities = data ?? [];
-  const weeks: ActivityListItem[][] = Array.from({ length: SEASON_WEEKS }, () => []);
+  const weekCount = seasonWeekCount(season.start_date, season.end_date);
+  const weeks: ActivityListItem[][] = Array.from({ length: weekCount }, () => []);
   for (const activity of activities) {
     const weekIndex = seasonWeekIndexForDate(season.start_date, activity.activity_date);
-    if (weekIndex !== null) {
+    if (weekIndex !== null && weekIndex < weekCount) {
       weeks[weekIndex].push(activity);
     }
   }

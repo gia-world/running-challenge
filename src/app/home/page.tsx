@@ -4,8 +4,8 @@ import { WEEKLY_GOAL, todayInSeoul, isBeforeNoonInSeoul, yesterdayInSeoul } from
 import {
   seasonWeekIndexForDate,
   seasonWeekRange,
+  seasonWeekCount,
   cappedTodayForSeason,
-  SEASON_WEEKS,
 } from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
 import { requireTeamViewer } from "@/lib/viewer";
@@ -120,10 +120,11 @@ async function SeasonProgress({
   const seasonActivities = seasonActivitiesRaw ?? [];
   const approvedActivities = seasonActivities.filter((a) => a.status === "approved");
 
-  const datesByWeek: Set<string>[] = Array.from({ length: SEASON_WEEKS }, () => new Set());
+  const weekCount = seasonWeekCount(season.start_date, season.end_date);
+  const datesByWeek: Set<string>[] = Array.from({ length: weekCount }, () => new Set());
   for (const activity of approvedActivities) {
     const weekIndex = seasonWeekIndexForDate(season.start_date, activity.activity_date);
-    if (weekIndex !== null) {
+    if (weekIndex !== null && weekIndex < weekCount) {
       datesByWeek[weekIndex].add(activity.activity_date);
     }
   }
@@ -162,7 +163,7 @@ async function SeasonProgress({
             : `${remaining}회만 더 뛰면 이번 주 목표 달성이에요`}
         </p>
         <p className="mt-3 text-sm font-medium text-orange-500">
-          이번 시즌 {successfulWeeks} / {SEASON_WEEKS}주 성공
+          이번 시즌 {successfulWeeks} / {weekCount}주 성공
         </p>
         {renewNextSeason !== null && (
           <p className="mt-1 text-sm text-zinc-400">

@@ -17,6 +17,20 @@ export function defaultSeasonEndDate(startDate: string): string {
   return toISODate(start);
 }
 
+/**
+ * How many weeks a season actually spans, from its own start/end dates —
+ * not the fixed 4-week default. An admin can set a custom (shorter or
+ * longer) end date on SeasonForm, so anything rendering "one column/row
+ * per week" must size itself off this instead of SEASON_WEEKS, or a
+ * season shorter than 4 weeks still shows a 4-week grid.
+ */
+export function seasonWeekCount(startDate: string, endDate: string): number {
+  const start = parseISODate(startDate);
+  const end = parseISODate(endDate);
+  const totalDays = Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
+  return Math.max(1, Math.ceil(totalDays / 7));
+}
+
 /** [start, end] (both inclusive) for the given 0-indexed week of a season. */
 export function seasonWeekRange(
   seasonStartDate: string,

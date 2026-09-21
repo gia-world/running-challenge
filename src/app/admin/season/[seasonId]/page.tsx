@@ -9,6 +9,7 @@ import {
 } from "@/lib/settlement";
 import { formatKoreanDate, formatWon } from "@/lib/format";
 import { isBeforeNoonInSeoul, todayInSeoul, yesterdayInSeoul } from "@/lib/week";
+import { seasonWeekCount } from "@/lib/season";
 import { computeSeasonStatus } from "@/lib/seasonStatus";
 import { ParticipantToggle } from "./ParticipantToggle";
 import { SeasonFeeForm } from "./SeasonFeeForm";
@@ -70,7 +71,9 @@ export default async function AdminSeasonDetailPage({
     supabase,
     season.id,
     season.start_date,
+    season.end_date,
   );
+  const weekCount = seasonWeekCount(season.start_date, season.end_date);
   const status = computeSeasonStatus(season, todayInSeoul());
   // Mirrors the grace-period rule in loadViewerContext: a season that ended
   // yesterday still accepts certifications until noon KST today, so the
@@ -95,7 +98,7 @@ export default async function AdminSeasonDetailPage({
           .map((m) => [
             m.id,
             computeParticipantSettlement(
-              weeklyStats.get(m.id) ?? emptyWeekStats(),
+              weeklyStats.get(m.id) ?? emptyWeekStats(weekCount),
               entryFee,
               refundPerCertification,
             ),
@@ -156,7 +159,7 @@ export default async function AdminSeasonDetailPage({
       <ul className="flex flex-col gap-2">
         {members.map((member) => {
           const isParticipant = participantIds.has(member.id);
-          const weeks = weeklyStats.get(member.id) ?? emptyWeekStats();
+          const weeks = weeklyStats.get(member.id) ?? emptyWeekStats(weekCount);
           const settlement = settlements.get(member.id);
           const total = settlement
             ? settlement.refund + (settlement.isCompleted ? prizeShare : 0)

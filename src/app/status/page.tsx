@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
 import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
 import { computeTeamSeasonHistory } from "@/lib/seasonHistory";
-import { seasonWeekIndexForDate, cappedTodayForSeason } from "@/lib/season";
+import { seasonWeekIndexForDate, cappedTodayForSeason, seasonWeekCount } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
@@ -40,8 +40,10 @@ export default async function StatusPage() {
 
   let currentSeasonMembers: { id: string; name: string; weeks: ReturnType<typeof emptyWeekStats> }[] = [];
   let currentWeekIndex = 0;
+  let weekCount = 0;
   if (viewer.activeSeason) {
     const season = viewer.activeSeason;
+    weekCount = seasonWeekCount(season.start_date, season.end_date);
     const { data: seasonMemberships } = await supabase
       .from("season_memberships")
       .select("user_id")
@@ -54,10 +56,15 @@ export default async function StatusPage() {
     for (const id of participantIds) participatedUserIds.add(id);
 
     if (viewer.isSeasonMember) {
-      const weeklyStats = await computeSeasonWeeklyStats(supabase, season.id, season.start_date);
+      const weeklyStats = await computeSeasonWeeklyStats(
+        supabase,
+        season.id,
+        season.start_date,
+        season.end_date,
+      );
       currentSeasonMembers = allMembers
         .filter((p) => participantIds.has(p.id))
-        .map((p) => ({ id: p.id, name: p.name, weeks: weeklyStats.get(p.id) ?? emptyWeekStats() }));
+        .map((p) => ({ id: p.id, name: p.name, weeks: weeklyStats.get(p.id) ?? emptyWeekStats(weekCount) }));
       const effectiveDate = cappedTodayForSeason(season.end_date, todayInSeoul());
       currentWeekIndex = seasonWeekIndexForDate(season.start_date, effectiveDate) ?? 0;
     }
@@ -89,6 +96,7 @@ export default async function StatusPage() {
           }
           members={currentSeasonMembers}
           currentWeekIndex={currentWeekIndex}
+          weekCount={weekCount}
           currentUserId={user.id}
           seasonId={viewer.activeSeason?.id ?? ""}
           seasonStartDate={viewer.activeSeason?.start_date ?? ""}

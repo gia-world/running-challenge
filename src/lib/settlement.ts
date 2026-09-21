@@ -1,4 +1,3 @@
-import { SEASON_WEEKS } from "./season";
 import { WEEKLY_GOAL } from "./week";
 import type { WeekStat } from "./seasonStats";
 
@@ -21,7 +20,7 @@ export function computeParticipantSettlement(
     0,
   );
   const refund = Math.min(refundableCount * refundPerCertification, entryFee);
-  const isCompleted = weeks.length === SEASON_WEEKS && weeks.every((week) => week.isSuccess);
+  const isCompleted = weeks.every((week) => week.isSuccess);
   return { refundableCount, refund, isCompleted };
 }
 

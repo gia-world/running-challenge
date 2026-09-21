@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { seasonWeekIndexForDate, SEASON_WEEKS } from "./season";
+import { seasonWeekIndexForDate, seasonWeekCount } from "./season";
 import { WEEKLY_GOAL } from "./week";
 
 export type WeekStat = { achieved: number; isSuccess: boolean };
@@ -9,7 +9,9 @@ export async function computeSeasonWeeklyStats(
   supabase: SupabaseClient,
   seasonId: string,
   seasonStartDate: string,
+  seasonEndDate: string,
 ): Promise<Map<string, WeekStat[]>> {
+  const weekCount = seasonWeekCount(seasonStartDate, seasonEndDate);
   const { data: activities } = await supabase
     .from("activities")
     .select("user_id, activity_date")
@@ -19,11 +21,11 @@ export async function computeSeasonWeeklyStats(
   const datesByUserWeek = new Map<string, Set<string>[]>();
   for (const activity of activities ?? []) {
     const weekIndex = seasonWeekIndexForDate(seasonStartDate, activity.activity_date);
-    if (weekIndex === null) continue;
+    if (weekIndex === null || weekIndex >= weekCount) continue;
     if (!datesByUserWeek.has(activity.user_id)) {
       datesByUserWeek.set(
         activity.user_id,
-        Array.from({ length: SEASON_WEEKS }, () => new Set<string>()),
+        Array.from({ length: weekCount }, () => new Set<string>()),
       );
     }
     datesByUserWeek.get(activity.user_id)![weekIndex].add(activity.activity_date);
@@ -39,6 +41,6 @@ export async function computeSeasonWeeklyStats(
   return result;
 }
 
-export function emptyWeekStats(): WeekStat[] {
-  return Array.from({ length: SEASON_WEEKS }, () => ({ achieved: 0, isSuccess: false }));
+export function emptyWeekStats(weekCount: number): WeekStat[] {
+  return Array.from({ length: weekCount }, () => ({ achieved: 0, isSuccess: false }));
 }
