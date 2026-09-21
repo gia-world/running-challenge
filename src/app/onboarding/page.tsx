@@ -5,13 +5,18 @@ import { CenteredPage } from "@/components/CenteredPage";
 import { PageTitle } from "@/components/PageTitle";
 import { OnboardingForm } from "./OnboardingForm";
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string }>;
+}) {
   const user = await getAuthUser();
 
   if (!user) {
     redirect("/login");
   }
 
+  const { code } = await searchParams;
   const supabase = await createClient();
 
   const { data: profile } = await supabase
@@ -21,7 +26,7 @@ export default async function OnboardingPage() {
     .single();
 
   if (profile?.name_confirmed) {
-    redirect("/home");
+    redirect(code ? `/join?code=${encodeURIComponent(code)}` : "/home");
   }
 
   return (
@@ -36,7 +41,7 @@ export default async function OnboardingPage() {
         </p>
 
         <div className="mt-8">
-          <OnboardingForm userId={user.id} currentName={profile?.name ?? "러너"} />
+          <OnboardingForm userId={user.id} currentName={profile?.name ?? "러너"} inviteCode={code} />
         </div>
       </div>
     </CenteredPage>

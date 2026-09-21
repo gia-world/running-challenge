@@ -8,9 +8,12 @@ import { Input } from "@/components/Input";
 export function OnboardingForm({
   userId,
   currentName,
+  inviteCode,
 }: {
   userId: string;
   currentName: string;
+  /** Carried over from an invite link's ?code= so a first-time joiner doesn't lose it here and land back on a bare /join. */
+  inviteCode?: string;
 }) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
@@ -34,7 +37,7 @@ export function OnboardingForm({
       return;
     }
 
-    router.push("/home");
+    router.push(inviteCode ? `/join?code=${encodeURIComponent(inviteCode)}` : "/home");
     router.refresh();
   }
 
