@@ -41,7 +41,7 @@ export default async function AdminLayout({
         <h1 className="text-lg font-bold text-ink-strong">ADMIN</h1>
       </PageHeader>
 
-      <main className="mx-auto w-full max-w-md flex-1 px-6 py-6">
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-6">
         <AdminTabs pendingCount={pendingCount} />
         {children}
       </main>

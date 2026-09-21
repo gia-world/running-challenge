@@ -8,6 +8,7 @@ import { getSignedPhotoUrls } from "@/lib/photos";
 import { earnedBadges, BADGE_CATALOG } from "@/lib/badges";
 import { EmptyState } from "@/components/EmptyState";
 import { BottomSheet } from "@/components/BottomSheet";
+import { SegmentedTabs } from "@/components/SegmentedTabs";
 import type { WeekStat } from "@/lib/seasonStats";
 import type { SeasonHistoryEntry } from "@/lib/seasonHistory";
 
@@ -140,30 +141,12 @@ export function StatusBoard({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-1 rounded-xl bg-muted p-1 text-base">
-        <button
-          type="button"
-          onClick={() => setView("season")}
-          className={
-            view === "season"
-              ? "flex-1 rounded-lg bg-surface py-2 font-semibold text-ink-strong shadow-sm"
-              : "flex-1 rounded-lg py-2 font-medium text-ink-secondary"
-          }
-        >
-          이번 시즌
-        </button>
-        <button
-          type="button"
-          onClick={() => setView("history")}
-          className={
-            view === "history"
-              ? "flex-1 rounded-lg bg-surface py-2 font-semibold text-ink-strong shadow-sm"
-              : "flex-1 rounded-lg py-2 font-medium text-ink-secondary"
-          }
-        >
-          전체 기록
-        </button>
-      </div>
+      <SegmentedTabs
+        items={[
+          { key: "season", label: "이번 시즌", isActive: view === "season", onClick: () => setView("season") },
+          { key: "history", label: "전체 기록", isActive: view === "history", onClick: () => setView("history") },
+        ]}
+      />
 
       {view === "season" ? (
         !hasActiveSeason ? (

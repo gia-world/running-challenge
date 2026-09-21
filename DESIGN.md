@@ -62,18 +62,20 @@ rounded-2xl border border-border bg-surface px-4 py-3
 - **포커스 시 항상**: `focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary` — 브라우저 기본 포커스 아웃라인을 쓰지 않는다. 새 인풋을 추가할 때 절대 빠뜨리지 말 것.
 - `font-size`는 16px 미만이면 iOS Safari가 자동 확대하므로, `globals.css`의 전역 규칙(`input, select, textarea { font-size: 16px; }`)이 항상 이긴다 — 개별 인풋에 `text-sm`을 줘도 실제 렌더링은 16px.
 
-## 세그먼트 탭 (뷰 전환)
+## 세그먼트 탭 (뷰 전환·페이지 이동 공통)
 
-한 화면 안에서 상호배타적인 뷰를 전환할 때(현황판의 "이번 시즌"/"전체 기록", 인증하기의 "지난 시즌"/"새 시즌") 쓰는 패턴:
+상호배타적인 옵션 중 하나를 고르는 화면(같은 페이지 안 뷰 전환이든, 다른 라우트로 이동하는 nav든)은 전부 `src/components/SegmentedTabs.tsx`를 쓴다 — 현황판의 "이번 시즌"/"전체 기록", 인증하기의 "지난 시즌"/"새 시즌", 관리자 메뉴("재인증 요청함"/"팀원 관리"/"시즌 관리")까지 전부 이 컴포넌트 하나로 통일.
 
+```tsx
+<SegmentedTabs
+  items={[
+    { key: "season", label: "이번 시즌", isActive: view === "season", onClick: () => setView("season") },
+    { key: "history", label: "전체 기록", isActive: view === "history", onClick: () => setView("history") },
+  ]}
+/>
 ```
-<div className="flex gap-1 rounded-xl bg-muted p-1">
-  <button className="flex-1 rounded-lg bg-surface py-2 font-semibold text-ink-strong shadow-sm">선택됨</button>
-  <button className="flex-1 rounded-lg py-2 font-medium text-ink-secondary">선택 안됨</button>
-</div>
-```
 
-트랙은 `bg-muted`, 선택된 옵션만 `bg-surface` + `shadow-sm`로 알약처럼 떠 보이게 한다. 화면 간 이동(관리자 탭처럼 다른 페이지로 링크되는 nav)에는 이 패턴 대신 밑줄 강조(`border-b-2 border-primary`)를 쓴다 — `AdminTabs` 참고.
+`onClick`을 주면 버튼(같은 페이지 안 뷰 전환), `href`를 주면 `Link`(다른 라우트로 이동)로 렌더링 — 항목별로 섞어 써도 된다. 트랙은 `bg-muted`, 선택된 옵션만 `bg-surface` + `shadow-sm`로 알약처럼 떠 보이게 한다. 새로운 탭/세그먼트 UI가 필요하면 직접 마크업을 짜지 말고 이 컴포넌트에 항목을 추가하는 식으로 확장한다.
 
 ## 그림자
 
