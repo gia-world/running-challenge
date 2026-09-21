@@ -19,6 +19,7 @@ type BadgeMember = {
   hasParticipated: boolean;
 };
 type SortKey = "name" | "total";
+type BadgeSortKey = "name" | "count";
 type View = "season" | "history";
 type ModalActivity = {
   id: string;
@@ -70,6 +71,7 @@ export function StatusBoard({
 }) {
   const [view, setView] = useState<View>("season");
   const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [badgeSortKey, setBadgeSortKey] = useState<BadgeSortKey>("count");
   const [modal, setModal] = useState<{
     name: string;
     weekIndex: number;
@@ -82,6 +84,16 @@ export function StatusBoard({
     if (sortKey === "total") return totalSuccess(b) - totalSuccess(a);
     return a.name.localeCompare(b.name);
   });
+
+  const sortedBadgeMembers = badgeMembers
+    .map((member) => ({
+      ...member,
+      badges: earnedBadges(member.completedCount, member.hasParticipated),
+    }))
+    .sort((a, b) => {
+      if (badgeSortKey === "count") return b.badges.length - a.badges.length || a.name.localeCompare(b.name);
+      return a.name.localeCompare(b.name);
+    });
 
   async function openCell(member: Member, weekIndex: number) {
     if (member.weeks[weekIndex].achieved === 0) return;
@@ -263,25 +275,44 @@ export function StatusBoard({
       ) : (
         <div className="flex flex-col gap-6">
           <section className="flex flex-col gap-2">
-            <div className="flex items-center gap-1.5">
-              <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
-                시즌 성공 뱃지
-              </h2>
-              <button
-                type="button"
-                onClick={() => setShowBadgeInfo(true)}
-                aria-label="뱃지 기준 보기"
-                className="flex h-4 w-4 items-center justify-center rounded-full border text-sm border-zinc-500 text-zinc-500"
-              >
-                ?
-              </button>
+            <div className="flex items-center justify-between gap-1.5">
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
+                  시즌 성공 뱃지
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowBadgeInfo(true)}
+                  aria-label="뱃지 기준 보기"
+                  className="flex h-4 w-4 items-center justify-center rounded-full border text-sm border-zinc-500 text-zinc-500"
+                >
+                  ?
+                </button>
+              </div>
+              <div className="flex gap-2 text-sm">
+                <button
+                  type="button"
+                  onClick={() => setBadgeSortKey("name")}
+                  className={
+                    badgeSortKey === "name" ? "font-bold text-orange-500" : "text-zinc-400"
+                  }
+                >
+                  이름순
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBadgeSortKey("count")}
+                  className={
+                    badgeSortKey === "count" ? "font-bold text-orange-500" : "text-zinc-400"
+                  }
+                >
+                  뱃지 많은 순
+                </button>
+              </div>
             </div>
             <ul className="flex flex-col gap-2">
-              {badgeMembers.map((member) => {
-                const badges = earnedBadges(
-                  member.completedCount,
-                  member.hasParticipated,
-                );
+              {sortedBadgeMembers.map((member) => {
+                const { badges } = member;
                 return (
                   <li
                     key={member.id}
