@@ -65,6 +65,12 @@ export function FeedCardActions({
   async function toggleReaction(emoji: string) {
     if (pendingEmoji) return;
     setPendingEmoji(emoji);
+    // Close the picker immediately on pick — leaving it open let a post's
+    // first reaction grow the row (wrapping to a second line) while the
+    // picker was still expanded below it, so the outside-click listener
+    // then yanked the picker shut on the next touch (often a scroll),
+    // reading as if the tap itself had been undone.
+    setIsPickerOpen(false);
 
     const current = reactions[emoji] ?? { count: 0, reactedByMe: false };
     const nextReactedByMe = !current.reactedByMe;
