@@ -121,7 +121,7 @@ export function SeasonForm({
           type="date"
           value={startDate}
           onChange={(e) => handleStartDateChange(e.target.value)}
-          className="rounded-xl border border-border-strong px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </label>
 
@@ -136,7 +136,7 @@ export function SeasonForm({
             setEndDate(e.target.value);
             setNeedsOverlapConfirm(false);
           }}
-          className="rounded-xl border border-border-strong px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </label>
 

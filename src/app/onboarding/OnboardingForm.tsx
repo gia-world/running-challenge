@@ -56,7 +56,7 @@ export function OnboardingForm({
           onChange={(e) => setName(e.target.value)}
           placeholder="실명을 입력해주세요"
           autoFocus
-          className="rounded-xl border border-border-strong px-3 py-3 text-center text-lg focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="rounded-xl border border-transparent bg-muted px-3 py-3 text-center text-lg focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
         {error && (
           <p className="text-sm text-danger">{error}</p>

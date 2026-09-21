@@ -118,7 +118,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="반려 사유 (직접 입력도 가능해요)"
-          className="rounded-xl border border-border-strong px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
         {error && <p className="text-sm text-danger">{error}</p>}
         <div className="flex gap-2">

@@ -72,7 +72,7 @@ export function BankForm({
           value={bankName}
           onChange={(e) => setBankName(e.target.value)}
           placeholder="국민은행"
-          className="rounded-xl border border-border-strong px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </label>
 
@@ -86,7 +86,7 @@ export function BankForm({
           value={accountNumber}
           onChange={(e) => setAccountNumber(e.target.value)}
           placeholder="123456-78-901234"
-          className="rounded-xl border border-border-strong px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </label>
 

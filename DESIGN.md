@@ -58,7 +58,7 @@ rounded-2xl border border-border bg-surface px-4 py-3
 
 ## 인풋
 
-- 기본: `rounded-xl border border-border-strong px-3 py-2.5 text-sm` (원티드 레퍼런스의 outlined 인풋 기준 — 터치 영역 확보를 위해 `py-2`에서 `py-2.5`로 조정)
+- 기본: `rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm` — 원티드 레퍼런스의 filled 변형. outlined(흰 배경 + 보더)는 카드 보더와 톤이 겹쳐 촌스러워 보인다는 피드백으로 filled로 교체했다. 보더는 `border-transparent`로 항상 자리를 잡아둬서 포커스 때 보더가 생겨도 레이아웃이 밀리지 않는다.
 - **포커스 시 항상**: `focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary` — 브라우저 기본 포커스 아웃라인을 쓰지 않는다. 새 인풋을 추가할 때 절대 빠뜨리지 말 것.
 - `font-size`는 16px 미만이면 iOS Safari가 자동 확대하므로, `globals.css`의 전역 규칙(`input, select, textarea { font-size: 16px; }`)이 항상 이긴다 — 개별 인풋에 `text-sm`을 줘도 실제 렌더링은 16px.
 - 라벨이 있는 필드는 `<label className="flex flex-col gap-1"><span className="text-base text-ink-secondary">라벨</span><input .../></label>` 패턴을 그대로 반복해서 쓴다 (버튼처럼 컴포넌트로 묶지 않음 — 필드마다 padding/정렬이 조금씩 달라서 클래스 문자열만 기준으로 삼는 게 더 유연함).
