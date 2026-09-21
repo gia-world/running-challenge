@@ -106,7 +106,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
               className={
                 reason === presetReason
                   ? "rounded-full bg-danger px-3 py-1.5 text-sm font-medium text-white"
-                  : "rounded-full bg-muted px-3 py-1.5 text-sm font-medium text-ink"
+                  : "rounded-full bg-muted-strong px-3 py-1.5 text-sm font-medium text-ink"
               }
             >
               {presetReason}

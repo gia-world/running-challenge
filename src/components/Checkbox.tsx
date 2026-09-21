@@ -4,10 +4,10 @@ import type { ReactNode } from "react";
 
 /**
  * A native checkbox has no default look worth keeping, so this gives it the
- * app's own — a filled circle track inside a muted row, matching the
- * Wanted-reference checkbox/radio pattern. The native input stays in the
- * DOM (sr-only) so checking, keyboard focus, and screen readers all work
- * off the real control; the circle + check icon are purely visual.
+ * app's own — a bordered square box that fills solid when checked. The
+ * native input stays in the DOM (sr-only) so checking, keyboard focus, and
+ * screen readers all work off the real control; the box + check icon are
+ * purely visual.
  */
 export function Checkbox({
   checked,
@@ -22,7 +22,7 @@ export function Checkbox({
 }) {
   return (
     <label
-      className={`flex items-center gap-2 rounded-lg bg-muted p-3 text-base ${
+      className={`inline-flex items-center gap-2 text-sm ${
         disabled ? "text-ink-disabled" : "cursor-pointer text-ink"
       }`}
     >
@@ -35,25 +35,27 @@ export function Checkbox({
       />
       <span
         aria-hidden
-        className={`flex h-5 w-5 flex-none items-center justify-center rounded-full border-2 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 ${
+        className={`flex h-5 w-5 flex-none items-center justify-center rounded-md border-[1.5px] peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 ${
           checked
             ? "border-primary bg-primary"
             : disabled
-              ? "border-border bg-muted-strong"
-              : "border-border-strong"
+              ? "border-border-subtle bg-muted"
+              : "border-border-strong bg-surface"
         }`}
       >
-        {checked && (
-          <svg viewBox="0 0 12 12" className="h-3 w-3 text-white" fill="none">
-            <path
-              d="M2.5 6.5L5 9L9.5 3.5"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
+        <svg
+          viewBox="0 0 13 13"
+          className={`h-3 w-3 text-white ${checked ? "opacity-100" : "opacity-0"}`}
+          fill="none"
+        >
+          <path
+            d="M2.7 6.8L5.2 9.3L10.3 3.8"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </span>
       {children}
     </label>

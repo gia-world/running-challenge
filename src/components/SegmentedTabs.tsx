@@ -41,7 +41,7 @@ export function SegmentedTabs({
     <>
       {activeItem && <Heading srOnly>{activeItem.label}</Heading>}
 
-      <div className="flex gap-1 rounded-xl bg-muted p-1 text-sm">
+      <div className="flex gap-1 rounded-xl bg-muted-strong p-1 text-sm">
         {items.map((item) => {
           const className = item.isActive
             ? "flex-1 whitespace-nowrap rounded-lg bg-surface py-2 text-center font-semibold text-ink-strong shadow-sm"

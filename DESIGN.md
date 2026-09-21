@@ -62,18 +62,21 @@ rounded-2xl border border-border bg-surface px-4 py-3
 - **포커스 시 항상**: `focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary` — 브라우저 기본 포커스 아웃라인을 쓰지 않는다. 새 인풋을 추가할 때 절대 빠뜨리지 말 것.
 - `font-size`는 16px 미만이면 iOS Safari가 자동 확대하므로, `globals.css`의 전역 규칙(`input, select, textarea { font-size: 16px; }`)이 항상 이긴다 — 개별 인풋에 `text-sm`을 줘도 실제 렌더링은 16px.
 - 라벨이 있는 필드는 `<label className="flex flex-col gap-1"><span className="text-base text-ink-secondary">라벨</span><input .../></label>` 패턴을 그대로 반복해서 쓴다 (버튼처럼 컴포넌트로 묶지 않음 — 필드마다 padding/정렬이 조금씩 달라서 클래스 문자열만 기준으로 삼는 게 더 유연함).
+- 여러 필드가 몰려 있는 화면에서 `bg-muted`(인풋 채움)가 다른 `bg-muted` 요소(세그먼트 탭 트랙, 칩)와 바로 붙으면 구분이 안 간다 — 인풋 옆/위에 놓이는 트랙·칩 종류는 전부 한 단계 진한 `bg-muted-strong`을 쓴다 (아래 세그먼트 탭 섹션 참고).
+- `src/components/Textarea.tsx` — 여러 줄 입력이 필요할 때 쓰는 filled 텍스트에어리어. 인풋과 같은 배경/보더/포커스 스타일이고, 추가로 내용에 따라 자동으로 높이가 늘어나고(`scrollHeight` 기반) `maxLength`를 주면 우측 하단에 `n/max` 카운터가 뜬다. 아직 실제로 쓰는 화면은 없음.
 
-## 체크박스
+## 체크박스 / 라디오 / 토글
 
-`src/components/Checkbox.tsx` — 네이티브 체크박스는 기본 스타일이 없어서 그대로 쓰면 나머지 UI와 톤이 안 맞으니, 원티드 레퍼런스의 control-row 패턴(연한 배경의 행 + 원형 박스)으로 감싼 컴포넌트를 항상 쓴다. 네이티브 `<input type="checkbox">`는 `sr-only`로 실제 DOM에 남겨서 키보드/스크린리더 동작은 그대로 유지하고, 보이는 원형 박스만 체크 여부에 따라 `bg-primary`로 채워진다.
+세 컴포넌트 다 네이티브 입력을 `sr-only`로 DOM에 남겨서 키보드/스크린리더 동작은 그대로 유지하고, 보이는 부분은 순수 시각 요소(`aria-hidden`)로 따로 그린다. 배경이 있는 행으로 감싸지 않고, 체크박스/버튼 컴포넌트처럼 박스(또는 트랙) + 라벨 텍스트만 인라인으로 배치한다.
 
-```tsx
-<Checkbox checked={copyPrevious} onChange={setCopyPrevious}>
-  자동 연장 참여자 포함
-</Checkbox>
-```
-
-라디오 버튼은 아직 앱에서 쓰는 곳이 없어 별도 컴포넌트를 만들지 않았음 — 필요해지면 `Checkbox.tsx`와 같은 패턴(원형 박스, 체크 대신 점)으로 추가.
+- **`src/components/Checkbox.tsx`** — `border-border-strong` 사각 박스(`rounded-md`), 체크되면 `bg-primary`로 채워지고 흰 체크 아이콘이 나타난다.
+  ```tsx
+  <Checkbox checked={copyPrevious} onChange={setCopyPrevious}>
+    자동 연장 참여자 포함
+  </Checkbox>
+  ```
+- **`src/components/Radio.tsx`** — 원형 박스, 선택되면 보더가 `border-primary`로 바뀌고 안쪽에 `bg-primary` 점이 나타난다. 그룹 상태(어떤 옵션이 선택됐는지)는 호출부가 직접 관리 — 옵션마다 하나씩 렌더링. 아직 실제로 쓰는 화면은 없음.
+- **`src/components/Toggle.tsx`** — 트랙 + 슬라이딩 손잡이 스위치. 폼 필드가 아니라 "바로 적용되는 설정"에 쓴다(별도 저장 버튼 없이 토글 즉시 반영되는 경우). `role="switch"`로 접근성 시맨틱을 맞춘다. 아직 실제로 쓰는 화면은 없음 — 마이페이지의 "자동 연장"은 두 버튼 중 하나를 고르는 `RenewalToggle`이라 이름은 비슷하지만 별개 컴포넌트/패턴.
 
 ## 세그먼트 탭 (뷰 전환·페이지 이동 공통)
 
