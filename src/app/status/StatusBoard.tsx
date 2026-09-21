@@ -397,7 +397,7 @@ export function StatusBoard({
                         {formatKoreanDate(activity.activityDate)}
                       </span>
                       <span className="text-ink-tertiary">
-                        {activity.distanceKm.toFixed(1)}km
+                        {activity.distanceKm.toFixed(2)}km
                       </span>
                     </div>
                     <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto">

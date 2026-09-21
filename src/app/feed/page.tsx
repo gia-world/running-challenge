@@ -177,7 +177,7 @@ export default async function FeedPage() {
                 <div className="flex flex-col items-end gap-0.5">
                   <span className="text-ink-secondary">
                     {formatKoreanDate(item.activity_date)} ·{" "}
-                    {Number(item.distance_km).toFixed(1)}km
+                    {Number(item.distance_km).toFixed(2)}km
                   </span>
                 </div>
               </div>

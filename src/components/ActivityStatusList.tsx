@@ -47,7 +47,7 @@ export function ActivityStatusList({
               )}
             </div>
             <span className="font-semibold text-ink-strong">
-              {Number(activity.distance_km).toFixed(1)}km
+              {Number(activity.distance_km).toFixed(2)}km
             </span>
           </div>
           {activity.status === "rejected" && activity.rejected_reason && (

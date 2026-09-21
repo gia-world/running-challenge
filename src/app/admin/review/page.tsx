@@ -94,7 +94,7 @@ export default async function AdminReviewPage() {
                 </span>
                 <span className="text-ink-secondary">
                   {formatKoreanDate(item.activity_date)} ·{" "}
-                  {Number(item.distance_km).toFixed(1)}km
+                  {Number(item.distance_km).toFixed(2)}km
                 </span>
               </div>
               <p className="mt-1 text-sm text-ink-tertiary">
