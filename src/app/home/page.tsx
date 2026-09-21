@@ -54,6 +54,15 @@ export default async function HomePage() {
       </PageHeader>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10">
+        {viewer.graceSeason && viewer.isGraceSeasonMember && (
+          <Link
+            href="/certify?season=grace"
+            className="rounded-lg bg-amber-50 px-3 py-2 text-base text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+          >
+            ⏰ 새 시즌이 시작됐지만, 지난 시즌은 오늘 정오까지 인증할 수 있어요 →
+          </Link>
+        )}
+
         <SeasonGate viewer={viewer}>
           {viewer.activeSeason && <SeasonProgress userId={user.id} season={viewer.activeSeason} />}
         </SeasonGate>

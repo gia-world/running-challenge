@@ -17,6 +17,16 @@ export type ViewerContext = {
   teamRole: UserRole | null;
   activeSeason: ActiveSeason | null;
   isSeasonMember: boolean;
+  /**
+   * Set only when a just-ended season's grace window is still open AND a
+   * different, newer season has already started — the "back-to-back
+   * seasons" overlap. `activeSeason` above always wins that case (it picks
+   * whichever season started most recently), so this is the one place a
+   * caller can still reach the older season to let the viewer choose which
+   * one to certify into. Never equal to activeSeason.id.
+   */
+  graceSeason: ActiveSeason | null;
+  isGraceSeasonMember: boolean;
 };
 
 /**
@@ -42,6 +52,8 @@ export const loadViewerContext = cache(async (userId: string): Promise<ViewerCon
       teamRole: null,
       activeSeason: null,
       isSeasonMember: false,
+      graceSeason: null,
+      isGraceSeasonMember: false,
     };
   }
 
@@ -49,6 +61,10 @@ export const loadViewerContext = cache(async (userId: string): Promise<ViewerCon
   // Grace period: a season that ended yesterday still counts as active
   // until noon KST, mirroring the real crew's "종료 다음날 정오까지 인정"
   // buffer so certification doesn't go dead the instant a season closes.
+  // Ordering by start_date picks whichever season started most recently,
+  // so if a new season has already begun back-to-back with the old one's
+  // grace window still open, this query returns the NEW one — the old
+  // one is recovered separately below.
   const seasonLookupFloor = isBeforeNoonInSeoul() ? yesterdayInSeoul() : today;
   const { data: season } = await supabase
     .from("seasons")
@@ -60,16 +76,28 @@ export const loadViewerContext = cache(async (userId: string): Promise<ViewerCon
     .limit(1)
     .maybeSingle();
 
-  let isSeasonMember = false;
-  if (season) {
-    const { data: seasonMembership } = await supabase
-      .from("season_memberships")
-      .select("id")
-      .eq("season_id", season.id)
-      .eq("user_id", userId)
+  // A season whose grace window is open right now, independent of which
+  // season the query above landed on. Only meaningful (and only ever
+  // different from `season`) when a new season already started during
+  // the previous one's grace period.
+  let graceSeason: ActiveSeason | null = null;
+  if (isBeforeNoonInSeoul()) {
+    const yesterday = yesterdayInSeoul();
+    const { data: gracing } = await supabase
+      .from("seasons")
+      .select("id, team_id, start_date, end_date")
+      .eq("team_id", membership.team_id)
+      .eq("end_date", yesterday)
       .maybeSingle();
-    isSeasonMember = !!seasonMembership;
+    if (gracing && gracing.id !== season?.id) {
+      graceSeason = gracing;
+    }
   }
+
+  const [isSeasonMember, isGraceSeasonMember] = await Promise.all([
+    isMemberOfSeason(supabase, season?.id ?? null, userId),
+    isMemberOfSeason(supabase, graceSeason?.id ?? null, userId),
+  ]);
 
   return {
     teamId: membership.team_id,
@@ -77,8 +105,25 @@ export const loadViewerContext = cache(async (userId: string): Promise<ViewerCon
     teamRole: membership.role,
     activeSeason: season ?? null,
     isSeasonMember,
+    graceSeason,
+    isGraceSeasonMember,
   };
 });
+
+async function isMemberOfSeason(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  seasonId: string | null,
+  userId: string,
+): Promise<boolean> {
+  if (!seasonId) return false;
+  const { data } = await supabase
+    .from("season_memberships")
+    .select("id")
+    .eq("season_id", seasonId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  return !!data;
+}
 
 /**
  * Common guard for every team-scoped page: require a signed-in user who
