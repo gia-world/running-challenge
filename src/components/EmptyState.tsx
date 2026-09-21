@@ -9,7 +9,7 @@ export function EmptyState({
 }) {
   return (
     <section
-      className={`rounded-2xl border-2 border-dashed border-zinc-300 p-6 text-center text-base text-zinc-500 dark:border-zinc-700 dark:text-zinc-400 ${className}`}
+      className={`rounded-2xl border-2 border-dashed border-border-strong p-6 text-center text-base text-ink-secondary ${className}`}
     >
       {children}
     </section>

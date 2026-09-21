@@ -144,41 +144,41 @@ export default async function FeedPage() {
   );
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
+    <div className="flex flex-1 flex-col bg-canvas pb-20">
       <PageHeader teamName={viewer.teamName}>
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+        <h1 className="text-lg font-bold text-ink-strong">
           피드
         </h1>
       </PageHeader>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-6">
         {items.length === 0 ? (
-          <p className="mt-10 text-center text-base text-zinc-400 dark:text-zinc-600">
+          <p className="mt-10 text-center text-base text-ink-tertiary">
             아직 인증된 기록이 없어요.
           </p>
         ) : (
           items.map((item) => (
             <article
               key={item.id}
-              className="overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-zinc-900"
+              className="overflow-hidden rounded-2xl border border-border bg-surface"
             >
               {item.photoUrls.length > 0 && (
                 <PhotoCarousel photoUrls={item.photoUrls} alt="인증샷" />
               )}
               <div className="flex items-center justify-between px-4 py-3 text-base">
                 <p>
-                  <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                  <span className="font-semibold text-ink-strong">
                     {item.profiles?.name ?? "러너"}
                   </span>
                   {" · "}
                   {item.occurrenceLabel && (
-                    <span className="text-sm font-medium text-orange-500">
+                    <span className="text-sm font-medium text-primary">
                       {item.occurrenceLabel}
                     </span>
                   )}
                 </p>
                 <div className="flex flex-col items-end gap-0.5">
-                  <span className="text-zinc-500 dark:text-zinc-400">
+                  <span className="text-ink-secondary">
                     {formatKoreanDate(item.activity_date)} ·{" "}
                     {Number(item.distance_km).toFixed(1)}km
                   </span>

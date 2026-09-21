@@ -62,15 +62,15 @@ export function SeasonFeeForm({
 
   if (!isEditing) {
     return (
-      <div className="flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900">
-        <span className="text-base text-zinc-500 dark:text-zinc-400">
+      <div className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3">
+        <span className="text-base text-ink-secondary">
           참가비 {initialEntryFee?.toLocaleString("ko-KR")}원 · 인증 1회당{" "}
           {initialRefundPerCertification?.toLocaleString("ko-KR")}원 환급
         </span>
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          className="shrink-0 text-sm font-medium text-orange-500"
+          className="shrink-0 text-sm font-medium text-primary"
         >
           수정
         </button>
@@ -81,7 +81,7 @@ export function SeasonFeeForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-900"
+      className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4"
     >
       <SeasonFeeFields
         entryFee={entryFee}
@@ -91,12 +91,12 @@ export function SeasonFeeForm({
         required
       />
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-xl bg-orange-500 px-5 py-2.5 font-semibold text-white disabled:opacity-60"
+        className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-white disabled:opacity-60"
       >
         {isSubmitting ? "저장 중..." : "저장하기"}
       </button>

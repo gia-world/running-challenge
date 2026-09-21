@@ -57,16 +57,16 @@ export function InviteCodeCard({
   }
 
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-zinc-900">
-      <p className="text-base font-medium text-zinc-500 dark:text-zinc-400">초대 코드</p>
+    <div className="rounded-2xl border border-border bg-surface p-4">
+      <p className="text-base font-medium text-ink-secondary">초대 코드</p>
       <div className="mt-2 flex items-center gap-2">
-        <p className="flex-1 rounded-lg bg-zinc-100 px-3 py-2 text-center font-mono text-lg font-bold tracking-widest text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50">
+        <p className="flex-1 rounded-lg bg-muted px-3 py-2 text-center font-mono text-lg font-bold tracking-widest text-ink-strong">
           {code}
         </p>
         <button
           type="button"
           onClick={() => copy(code, "code")}
-          className="rounded-xl bg-zinc-200 px-3 py-2 text-base font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+          className="rounded-xl bg-muted-strong px-3 py-2 text-base font-medium text-ink"
         >
           {copied === "code" ? "복사됨" : "복사"}
         </button>
@@ -76,7 +76,7 @@ export function InviteCodeCard({
         <button
           type="button"
           onClick={() => copy(inviteLink, "link")}
-          className="flex-1 rounded-xl bg-orange-500 px-3 py-2 text-base font-semibold text-white"
+          className="flex-1 rounded-xl bg-primary px-3 py-2 text-base font-semibold text-white"
         >
           {copied === "link" ? "링크 복사됨" : "초대 링크 복사"}
         </button>
@@ -84,13 +84,13 @@ export function InviteCodeCard({
           type="button"
           onClick={regenerate}
           disabled={isRegenerating}
-          className="rounded-xl bg-zinc-200 px-3 py-2 text-base font-medium text-zinc-700 disabled:opacity-60 dark:bg-zinc-800 dark:text-zinc-300"
+          className="rounded-xl bg-muted-strong px-3 py-2 text-base font-medium text-ink disabled:opacity-60"
         >
           {isRegenerating ? "재발급 중..." : "재발급"}
         </button>
       </div>
 
-      {error && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="mt-2 text-sm text-danger">{error}</p>}
     </div>
   );
 }

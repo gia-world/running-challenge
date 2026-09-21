@@ -18,8 +18,8 @@ export function WeeklyDots({
           key={i}
           className={
             i < filled
-              ? "flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-lg text-white shadow-sm"
-              : "flex h-10 w-10 items-center justify-center rounded-full border-2 border-dashed border-zinc-300 text-lg text-zinc-300 dark:border-zinc-700 dark:text-zinc-700"
+              ? "flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg text-white shadow-sm"
+              : "flex h-10 w-10 items-center justify-center rounded-full border-2 border-dashed border-border-strong text-lg text-ink-disabled"
           }
         >
           {i + 1}

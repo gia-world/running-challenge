@@ -13,15 +13,15 @@ export default async function HistoryPage() {
   const { user, viewer } = await requireTeamViewer();
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
+    <div className="flex flex-1 flex-col bg-canvas pb-20">
       <PageHeader teamName={viewer.teamName}>
         <Link
           href="/home"
-          className="text-sm font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          className="text-sm font-medium text-ink-tertiary hover:text-ink"
         >
           ← 홈
         </Link>
-        <h1 className="mt-1 text-lg font-bold text-zinc-900 dark:text-zinc-50">시즌 전체 기록</h1>
+        <h1 className="mt-1 text-lg font-bold text-ink-strong">시즌 전체 기록</h1>
       </PageHeader>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-6">
@@ -72,7 +72,7 @@ async function SeasonHistory({
 
         return (
           <section key={index}>
-            <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
+            <h2 className="text-base font-semibold text-ink">
               {index + 1}주차 ({formatKoreanDate(start)}~{formatKoreanDate(end)})
             </h2>
             <ActivityStatusList

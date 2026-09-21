@@ -1,20 +1,36 @@
 # 디자인 규칙
 
-토스 디자인 시스템(TDS)의 톤을 참고해 테일윈드 기반으로 정리한 규칙. 메인 컬러는 토스 블루 대신 오렌지를 그대로 쓰고, 나머지(라운드/타이포/그림자/포커스 상태)는 토스의 구조를 따라간다. 새 화면/컴포넌트를 만들 때 여기 규칙을 기본값으로 쓰고, 벗어날 이유가 있으면 그 이유를 남길 것.
+원티드(Wanted) 디자인 시스템의 톤 — 흰 캔버스 위에 헤어라인 보더로 구조를 만들고, 그림자는 진짜 떠 있는 요소에만 쓴다 — 을 참고해 테일윈드 기반으로 정리한 규칙. 메인 컬러는 오렌지를 그대로 쓰고 `primary` 디자인 토큰으로 등록했다. 다크 모드는 없음 — 항상 흰 캔버스 하나만 지원한다. 새 화면/컴포넌트를 만들 때 여기 규칙을 기본값으로 쓰고, 벗어날 이유가 있으면 그 이유를 남길 것.
 
-## 색상
+## 색상 토큰 (`globals.css`의 `@theme`)
 
-- **브랜드**: `orange-500` (배경), 텍스트로 쓸 땐 `text-orange-500`. 화면당 가장 중요한 액션 하나에만 쓴다.
-- **브랜드 약한 배경**: `orange-50`/`orange-100` — 활성 배지, 안내 칩 등 브랜드색을 옅게 쓸 때.
-- **중립(그레이스케일)**: `zinc-*` 스케일을 그대로 쓴다. 별도 커스텀 그레이 팔레트를 만들지 않음.
-  - 본문 텍스트: `text-zinc-900` (라이트) / `dark:text-zinc-50`
-  - 보조 텍스트: `text-zinc-500` / `dark:text-zinc-400`
-  - 구조적 구분선(헤더, 하단 네비 등): `border-zinc-200` / `dark:border-zinc-800`
-  - 폼 컨트롤 보더: `border-zinc-300` / `dark:border-zinc-700` (구조 구분선보다 한 단계 진하게 — 인풋이 눈에 띄어야 함)
-  - 카드/섹션 배경: 라이트 `bg-white`, 다크 `dark:bg-zinc-900`
-  - 페이지 배경: 라이트 `bg-zinc-50`, 다크 `dark:bg-black`
-  - 인풋 배경(카드 안): `dark:bg-zinc-800` / 인풋 배경(카드 밖, 페이지 배경 위): `dark:bg-zinc-900`
-- **시맨틱**: 성공 `green-500`, 위험/반려 `red-500`(배경은 `red-50`/`dark:bg-red-950`), 경고/그레이스 기간 `amber-*`. 카카오 로그인 버튼만 예외로 카카오 고유 컬러(`#FEE500`) 유지.
+색을 쓸 때는 항상 아래 토큰으로 — `zinc-500`, `orange-500` 같은 테일윈드 원색 클래스를 직접 쓰지 않는다. 토큰은 전부 `src/app/globals.css`의 `@theme` 블록에 정의돼 있다.
+
+- **브랜드 (`primary`)**: `bg-primary`/`text-primary` (오렌지 500). 옅은 배경은 `bg-primary-50`/`bg-primary-100`, hover/강조 텍스트는 `text-primary-600`, 보더 강조는 `border-primary`/`border-primary-400`. 화면당 가장 중요한 액션 하나에만 채움(solid)으로 쓴다.
+- **텍스트 (`ink` 스케일, 5단계)**:
+  - `text-ink-strong` — 페이지/카드 타이틀, 가장 강한 강조
+  - `text-ink` — 본문 텍스트 기본값
+  - `text-ink-secondary` — 보조 설명, 메타 정보
+  - `text-ink-tertiary` — 플레이스홀더, 타임스탬프처럼 가장 약한 텍스트
+  - `text-ink-disabled` — 비활성 상태 텍스트
+- **표면 (surface)**:
+  - `bg-canvas` — 페이지 배경 (흰색)
+  - `bg-surface` — 카드/리스트 아이템 배경 (흰색 — canvas와 같은 색이지만 의미가 다름. 카드는 배경색이 아니라 **보더로** canvas와 구분한다)
+  - `bg-subtle` — 카드 안에 중첩된 옅은 블록(정산 요약 박스 등)
+  - `bg-muted` / `bg-muted-strong` — 세그먼트 트랙, 비활성 인풋, 보조 버튼 배경처럼 톤을 낮춘 채움이 필요할 때 (muted-strong이 한 단계 더 진함)
+  - `bg-inverse` — 검정 계열 강조 버튼(정산완료의 "그래도 진행" 단계처럼 되돌리기 무거운 액션)
+- **보더 (border)**: `border-border-subtle` (헤어라인, 가장 옅음) / `border-border` (카드 기본 보더) / `border-border-strong` (폼 인풋 — 카드보다 한 단계 진하게, 눈에 띄어야 함)
+- **시맨틱**: 성공 `text-success`/`bg-success-subtle`, 위험/반려 `text-danger`/`bg-danger`/`bg-danger-subtle`, 경고/그레이스 기간 `text-warning`/`bg-warning-subtle`. 카카오 로그인 버튼만 예외로 카카오 고유 컬러(`#FEE500`) 유지.
+
+## 카드 = 헤어라인 보더, 그림자 없음
+
+캔버스와 카드가 둘 다 흰색이므로(`bg-canvas` == `bg-surface`), 카드는 그림자가 아니라 **보더로 구분**한다.
+
+```
+rounded-2xl border border-border bg-surface px-4 py-3
+```
+
+`shadow-sm`으로 카드를 띄우던 이전 방식은 쓰지 않는다 — 그림자는 진짜로 화면 위에 떠 있는 요소(바텀시트, 포토 모달)에만 남겨둔다.
 
 ## 라운드 (역할별로 고정)
 
@@ -23,6 +39,7 @@
 | 텍스트 인풋/셀렉트 | `rounded-xl` (12px) | 날짜, 참가비, 계좌번호 입력 |
 | 버튼 (크기 무관 통일) | `rounded-xl` (12px) | Primary/Secondary/작은 "변경" 버튼 전부 |
 | 카드/리스트 아이템/섹션 박스 | `rounded-2xl` (16px) | 참여자 카드, 초대코드 카드, 활동 기록 카드 |
+| 세그먼트 탭 트랙 / 트랙 안 알약 | `rounded-xl` 트랙 / `rounded-lg` 안쪽 버튼 | "이번 시즌"·"전체 기록" 탭 |
 | 배지/칩/필 | `rounded-full` | "진행중" 배지, 반려 사유 칩 |
 | 인라인 배너/경고 메시지 | `rounded-lg` (8px) | 그레이스 기간 안내, 에러 배너 — 카드보다 한 단계 작게 둬서 시각적으로 구분 |
 | 카드 안에 중첩된 서브 블록 | `rounded-lg` (8px) | 정산 요약 박스, 초대 코드 표시 박스 — 바깥 카드(`rounded-2xl`)보다 항상 작게 |
@@ -32,22 +49,36 @@
 
 ## 버튼
 
-- **Primary**: `bg-orange-500 text-white font-semibold`, 화면당 하나만.
-- **Secondary**: `bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300`.
-- **Danger**: `bg-red-500 text-white` — 반려 확정처럼 되돌리기 어려운 액션만.
-- **Ghost**: 배경 없음, `text-orange-500 text-sm font-medium` — "수정", "변경" 같은 가벼운 인라인 액션.
+- **Primary**: `bg-primary text-white font-semibold`, 화면당 하나만.
+- **Secondary**: `bg-muted-strong text-ink`.
+- **Inverse (강한 확인/2단계 액션)**: `bg-inverse text-white` — 정산완료의 "그래도 진행" 버튼처럼, 색은 danger가 아니지만 되돌리기 무거운 액션.
+- **Danger**: `bg-danger text-white` — 반려 확정처럼 진짜 파괴적인 액션만.
+- **Ghost**: 배경 없음, `text-primary text-sm font-medium` — "수정", "변경" 같은 가벼운 인라인 액션.
 - 모든 버튼 `disabled:opacity-60`으로 통일 (부분적으로 회색 처리하지 않음).
 
 ## 인풋
 
-- 기본: `rounded-xl border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700`
-- **포커스 시 항상**: `focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500` — 브라우저 기본 포커스 아웃라인을 쓰지 않는다. 새 인풋을 추가할 때 절대 빠뜨리지 말 것.
+- 기본: `rounded-xl border border-border-strong px-3 py-2 text-sm`
+- **포커스 시 항상**: `focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary` — 브라우저 기본 포커스 아웃라인을 쓰지 않는다. 새 인풋을 추가할 때 절대 빠뜨리지 말 것.
 - `font-size`는 16px 미만이면 iOS Safari가 자동 확대하므로, `globals.css`의 전역 규칙(`input, select, textarea { font-size: 16px; }`)이 항상 이긴다 — 개별 인풋에 `text-sm`을 줘도 실제 렌더링은 16px.
+
+## 세그먼트 탭 (뷰 전환)
+
+한 화면 안에서 상호배타적인 뷰를 전환할 때(현황판의 "이번 시즌"/"전체 기록", 인증하기의 "지난 시즌"/"새 시즌") 쓰는 패턴:
+
+```
+<div className="flex gap-1 rounded-xl bg-muted p-1">
+  <button className="flex-1 rounded-lg bg-surface py-2 font-semibold text-ink-strong shadow-sm">선택됨</button>
+  <button className="flex-1 rounded-lg py-2 font-medium text-ink-secondary">선택 안됨</button>
+</div>
+```
+
+트랙은 `bg-muted`, 선택된 옵션만 `bg-surface` + `shadow-sm`로 알약처럼 떠 보이게 한다. 화면 간 이동(관리자 탭처럼 다른 페이지로 링크되는 nav)에는 이 패턴 대신 밑줄 강조(`border-b-2 border-primary`)를 쓴다 — `AdminTabs` 참고.
 
 ## 그림자
 
-- `shadow-sm` 하나로 통일 — 카드가 배경에서 살짜기 뜬 정도만 표현. 토스도 그림자를 짙게 쓰지 않으므로 새로 단계를 늘리지 않는다.
-- 예외: 바텀시트(`BottomSheet`)만 `shadow-lg` — 화면을 덮는 오버레이라 카드보다 한 단계 강한 그림자가 필요.
+- 카드에는 그림자를 쓰지 않는다 (위 "카드" 항목 참고) — `shadow-sm`은 세그먼트 탭의 선택된 알약, 작은 원형 배지처럼 카드가 아닌 요소에만 남아 있다.
+- 진짜로 화면 위에 떠 있는 요소만 `shadow-lg`: 바텀시트(`BottomSheet`), 포토 뷰어 모달.
 
 ## 타이포그래피
 
@@ -58,8 +89,8 @@
 ## 바텀시트
 
 - 새로운 정보 입력/확인이 "지금 이 화면에서 필요해진 순간"에만 쓴다 (계좌 등록, 자동연장 응답처럼). 마이페이지 같은 별도 설정 화면을 만들어 몰아두지 않는다.
-- 배경 딤 `bg-black/40` + 카드 `rounded-t-2xl bg-white dark:bg-zinc-900 shadow-lg`, 하단에서 슬라이드업(`animate-sheet-up`, `globals.css`).
-- 필수 입력(계좌 등록처럼 정산에 꼭 필요한 값)은 "나중에"로 닫아도 값이 채워지기 전까지 다음 방문마다 다시 뜨게 한다 —로컬스토리지 등으로 영구 스킵시키지 않는다.
+- 배경 딤 `bg-black/40` + 카드 `rounded-t-2xl bg-surface shadow-lg`, 하단에서 슬라이드업(`animate-sheet-up`, `globals.css`).
+- 필수 입력(계좌 등록처럼 정산에 꼭 필요한 값)은 "나중에"로 닫아도 값이 채워지기 전까지 다음 방문마다 다시 뜨게 한다 — 로컬스토리지 등으로 영구 스킵시키지 않는다.
 
 ## 공통 컴포넌트로 뽑는 기준
 

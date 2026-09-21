@@ -35,13 +35,13 @@ function totalSuccess(member: Member) {
 
 function cellClassName(week: WeekStat, isCurrentWeek: boolean) {
   const base =
-    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-semibold border border-zinc-200";
-  const ring = isCurrentWeek ? " ring-2 ring-orange-400 border-0" : "";
+    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-semibold border border-border";
+  const ring = isCurrentWeek ? " ring-2 ring-primary-400 border-0" : "";
   if (week.isSuccess)
-    return `${base} text-bold text-base! bg-white text-green-500 border-green-500${ring}`;
+    return `${base} text-bold text-base! bg-surface text-success border-success${ring}`;
   if (week.achieved > 0)
-    return `${base} bg-zinc-100 text-zinc-700 dark:bg-zinc-600 dark:text-zinc-100${ring}`;
-  return `${base} bg-zinc-100 text-zinc-300 dark:bg-zinc-800 dark:text-zinc-600${ring}`;
+    return `${base} bg-muted text-ink${ring}`;
+  return `${base} bg-muted text-ink-disabled${ring}`;
 }
 
 export function StatusBoard({
@@ -140,14 +140,14 @@ export function StatusBoard({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-2 text-base">
+      <div className="flex gap-1 rounded-xl bg-muted p-1 text-base">
         <button
           type="button"
           onClick={() => setView("season")}
           className={
             view === "season"
-              ? "flex-1 rounded-xl bg-orange-500 py-2 font-semibold text-white"
-              : "flex-1 rounded-xl bg-zinc-100 py-2 font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+              ? "flex-1 rounded-lg bg-surface py-2 font-semibold text-ink-strong shadow-sm"
+              : "flex-1 rounded-lg py-2 font-medium text-ink-secondary"
           }
         >
           이번 시즌
@@ -157,8 +157,8 @@ export function StatusBoard({
           onClick={() => setView("history")}
           className={
             view === "history"
-              ? "flex-1 rounded-xl bg-orange-500 py-2 font-semibold text-white"
-              : "flex-1 rounded-xl bg-zinc-100 py-2 font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+              ? "flex-1 rounded-lg bg-surface py-2 font-semibold text-ink-strong shadow-sm"
+              : "flex-1 rounded-lg py-2 font-medium text-ink-secondary"
           }
         >
           전체 기록
@@ -175,7 +175,7 @@ export function StatusBoard({
         ) : !isSeasonMember ? (
           <EmptyState>
             {activeSeasonRange && (
-              <p className="text-sm text-zinc-400 dark:text-zinc-500">
+              <p className="text-sm text-ink-tertiary">
                 {formatKoreanDate(activeSeasonRange.start)} ~{" "}
                 {formatKoreanDate(activeSeasonRange.end)}
               </p>
@@ -194,8 +194,8 @@ export function StatusBoard({
                 onClick={() => setSortKey("name")}
                 className={
                   sortKey === "name"
-                    ? "font-bold text-orange-500"
-                    : "text-zinc-400"
+                    ? "font-bold text-primary"
+                    : "text-ink-tertiary"
                 }
               >
                 이름순
@@ -205,25 +205,25 @@ export function StatusBoard({
                 onClick={() => setSortKey("total")}
                 className={
                   sortKey === "total"
-                    ? "font-bold text-orange-500"
-                    : "text-zinc-400"
+                    ? "font-bold text-primary"
+                    : "text-ink-tertiary"
                 }
               >
                 성공횟수순
               </button>
             </div>
 
-            <div className="overflow-x-auto rounded-2xl bg-white shadow-sm dark:bg-zinc-900">
+            <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
               <table className="w-full min-w-90 border-collapse text-sm">
                 <thead>
-                  <tr className="text-sm text-zinc-400">
+                  <tr className="text-sm text-ink-tertiary">
                     <th className="px-3 py-2 text-left font-medium">이름</th>
                     {Array.from({ length: weekCount }, (_, i) => (
                       <th
                         key={i}
                         className={
                           i === currentWeekIndex
-                            ? "px-1 py-2 font-bold text-orange-500"
+                            ? "px-1 py-2 font-bold text-primary"
                             : "px-1 py-2 font-medium"
                         }
                       >
@@ -239,11 +239,11 @@ export function StatusBoard({
                       key={member.id}
                       className={
                         member.id === currentUserId
-                          ? "bg-orange-50 dark:bg-orange-950/40"
-                          : "border-t border-zinc-100 dark:border-zinc-800"
+                          ? "bg-primary-50"
+                          : "border-t border-border-subtle"
                       }
                     >
-                      <td className="whitespace-nowrap px-3 py-2 font-semibold text-zinc-900 dark:text-zinc-50">
+                      <td className="whitespace-nowrap px-3 py-2 font-semibold text-ink-strong">
                         {member.name}
                       </td>
                       {member.weeks.map((week, weekIndex) => (
@@ -262,7 +262,7 @@ export function StatusBoard({
                           </button>
                         </td>
                       ))}
-                      <td className="px-3 py-2 text-center font-bold text-zinc-900 dark:text-zinc-50">
+                      <td className="px-3 py-2 text-center font-bold text-ink-strong">
                         {totalSuccess(member)}
                       </td>
                     </tr>
@@ -277,14 +277,14 @@ export function StatusBoard({
           <section className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-1.5">
               <div className="flex items-center gap-1.5">
-                <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
+                <h2 className="text-base font-semibold text-ink">
                   시즌 성공 뱃지
                 </h2>
                 <button
                   type="button"
                   onClick={() => setShowBadgeInfo(true)}
                   aria-label="뱃지 기준 보기"
-                  className="flex h-4 w-4 items-center justify-center rounded-full border text-sm border-zinc-500 text-zinc-500"
+                  className="flex h-4 w-4 items-center justify-center rounded-full border text-sm border-ink-secondary text-ink-secondary"
                 >
                   ?
                 </button>
@@ -294,7 +294,7 @@ export function StatusBoard({
                   type="button"
                   onClick={() => setBadgeSortKey("name")}
                   className={
-                    badgeSortKey === "name" ? "font-bold text-orange-500" : "text-zinc-400"
+                    badgeSortKey === "name" ? "font-bold text-primary" : "text-ink-tertiary"
                   }
                 >
                   이름순
@@ -303,7 +303,7 @@ export function StatusBoard({
                   type="button"
                   onClick={() => setBadgeSortKey("count")}
                   className={
-                    badgeSortKey === "count" ? "font-bold text-orange-500" : "text-zinc-400"
+                    badgeSortKey === "count" ? "font-bold text-primary" : "text-ink-tertiary"
                   }
                 >
                   뱃지 많은 순
@@ -318,11 +318,11 @@ export function StatusBoard({
                     key={member.id}
                     className={
                       member.id === currentUserId
-                        ? "flex items-center justify-between rounded-2xl bg-orange-50 px-4 py-3 shadow-sm dark:bg-orange-950/40"
-                        : "flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900"
+                        ? "flex items-center justify-between rounded-2xl border border-primary-400 bg-primary-50 px-4 py-3"
+                        : "flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3"
                     }
                   >
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                    <span className="font-semibold text-ink-strong">
                       {member.name}
                     </span>
                     {badges.length > 0 ? (
@@ -337,7 +337,7 @@ export function StatusBoard({
                         ))}
                       </span>
                     ) : (
-                      <span className="text-sm text-zinc-400">아직 없음</span>
+                      <span className="text-sm text-ink-tertiary">아직 없음</span>
                     )}
                   </li>
                 );
@@ -346,7 +346,7 @@ export function StatusBoard({
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
+            <h2 className="text-base font-semibold text-ink">
               시즌 이력
             </h2>
             {history.length === 0 ? (
@@ -356,27 +356,27 @@ export function StatusBoard({
                 {history.map((season) => (
                   <li
                     key={season.id}
-                    className="flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900"
+                    className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3"
                   >
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                      <span className="font-semibold text-ink-strong">
                         {formatKoreanDate(season.start_date)} ~{" "}
                         {formatKoreanDate(season.end_date)}
                       </span>
-                      <span className="text-sm text-zinc-400">
+                      <span className="text-sm text-ink-tertiary">
                         참가 {season.participantCount}명 · 완주{" "}
                         {season.completedCount}명
                       </span>
                     </div>
                     <span className="shrink-0 text-sm font-medium">
                       {!season.viewerParticipated ? (
-                        <span className="text-zinc-300 dark:text-zinc-600">
+                        <span className="text-ink-disabled">
                           미참여
                         </span>
                       ) : season.viewerCompleted ? (
-                        <span className="text-green-500">완주</span>
+                        <span className="text-success">완주</span>
                       ) : (
-                        <span className="text-zinc-400">참여</span>
+                        <span className="text-ink-tertiary">참여</span>
                       )}
                     </span>
                   </li>
@@ -393,18 +393,18 @@ export function StatusBoard({
           onClick={() => setModal(null)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl bg-white p-4 dark:bg-zinc-900"
+            className="w-full max-w-sm rounded-2xl bg-surface p-4 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+            <p className="text-base font-semibold text-ink-strong">
               {modal.name} · {modal.weekIndex + 1}주차
             </p>
             {isLoadingPhotos ? (
-              <p className="mt-4 py-8 text-center text-base text-zinc-400">
+              <p className="mt-4 py-8 text-center text-base text-ink-tertiary">
                 불러오는 중...
               </p>
             ) : modal.activities.length === 0 ? (
-              <p className="mt-4 py-8 text-center text-base text-zinc-400">
+              <p className="mt-4 py-8 text-center text-base text-ink-tertiary">
                 사진이 없어요.
               </p>
             ) : (
@@ -412,11 +412,11 @@ export function StatusBoard({
                 {modal.activities.map((activity) => (
                   <div key={activity.id} className="flex flex-col gap-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-semibold text-orange-500">
+                      <span className="font-semibold text-primary">
                         {activity.ordinal}회째 ·{" "}
                         {formatKoreanDate(activity.activityDate)}
                       </span>
-                      <span className="text-zinc-400">
+                      <span className="text-ink-tertiary">
                         {activity.distanceKm.toFixed(1)}km
                       </span>
                     </div>
@@ -438,7 +438,7 @@ export function StatusBoard({
             <button
               type="button"
               onClick={() => setModal(null)}
-              className="mt-4 w-full rounded-xl bg-zinc-200 py-2.5 text-base font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+              className="mt-4 w-full rounded-xl bg-muted-strong py-2.5 text-base font-medium text-ink"
             >
               닫기
             </button>
@@ -449,7 +449,7 @@ export function StatusBoard({
       {showBadgeInfo && (
         <BottomSheet onClose={() => setShowBadgeInfo(false)}>
           <div className="flex flex-col gap-3">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+            <h2 className="text-lg font-bold text-ink-strong">
               뱃지 기준
             </h2>
             <ul className="flex flex-col gap-3">
@@ -457,10 +457,10 @@ export function StatusBoard({
                 <li key={badge.emoji} className="flex items-center gap-3">
                   <span className="text-2xl">{badge.emoji}</span>
                   <div className="flex flex-col">
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                    <span className="font-semibold text-ink-strong">
                       {badge.label}
                     </span>
-                    <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                    <span className="text-sm text-ink-secondary">
                       {badge.criteria}
                     </span>
                   </div>

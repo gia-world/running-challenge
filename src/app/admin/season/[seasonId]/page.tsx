@@ -132,27 +132,27 @@ export default async function AdminSeasonDetailPage({
       <div>
         <Link
           href="/admin/season"
-          className="text-sm font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          className="text-sm font-medium text-ink-tertiary hover:text-ink"
         >
           ← 시즌 관리
         </Link>
         <div className="mt-1 flex items-center gap-2">
-          <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-lg font-bold text-ink-strong">
             {formatKoreanDate(season.start_date)} ~{" "}
             {formatKoreanDate(season.end_date)}
           </h1>
           {status === "active" && (
-            <span className="rounded-full bg-green-100 px-2 py-0.5 text-sm font-medium text-green-600 dark:bg-green-950 dark:text-green-400">
+            <span className="rounded-full bg-success-subtle px-2 py-0.5 text-sm font-medium text-success">
               진행중
             </span>
           )}
           {status === "settling" && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-sm font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+            <span className="rounded-full bg-warning-subtle px-2 py-0.5 text-sm font-medium text-warning">
               정산중
             </span>
           )}
           {status === "closed" && (
-            <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-sm font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+            <span className="rounded-full bg-muted px-2 py-0.5 text-sm font-medium text-ink-secondary">
               시즌 종료
             </span>
           )}
@@ -160,7 +160,7 @@ export default async function AdminSeasonDetailPage({
       </div>
 
       {isInGracePeriod && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-base text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+        <p className="rounded-lg bg-warning-subtle px-3 py-2 text-base text-warning">
           ⏰ 오늘 정오까지 인증하면 인정돼요. 정산 금액이 아직 바뀔 수 있어요.
         </p>
       )}
@@ -178,7 +178,7 @@ export default async function AdminSeasonDetailPage({
         initialRefundPerCertification={season.refund_per_certification}
       />
 
-      <h2 className=" text-zinc-500 dark:text-zinc-400 mt-2">참여자</h2>
+      <h2 className=" text-ink-secondary mt-2">참여자</h2>
       <ul className="flex flex-col gap-2">
         {members.map((member) => {
           const isParticipant = participantIds.has(member.id);
@@ -198,11 +198,11 @@ export default async function AdminSeasonDetailPage({
           return (
             <li
               key={member.id}
-              className="flex flex-col gap-2 rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900"
+              className="flex flex-col gap-2 rounded-2xl border border-border bg-surface px-4 py-3"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex flex-col gap-1">
-                  <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                  <span className="font-semibold text-ink-strong">
                     {member.name}
                   </span>
                   {isParticipant && (
@@ -213,10 +213,10 @@ export default async function AdminSeasonDetailPage({
                           title={`${index + 1}주차 ${week.achieved}회`}
                           className={
                             week.isSuccess
-                              ? "h-2.5 w-2.5 rounded-full bg-green-500"
+                              ? "h-2.5 w-2.5 rounded-full bg-success"
                               : week.achieved > 0
-                                ? "h-2.5 w-2.5 rounded-full bg-zinc-400"
-                                : "h-2.5 w-2.5 rounded-full bg-zinc-200 dark:bg-zinc-700"
+                                ? "h-2.5 w-2.5 rounded-full bg-ink-tertiary"
+                                : "h-2.5 w-2.5 rounded-full bg-muted-strong"
                           }
                         />
                       ))}
@@ -233,14 +233,14 @@ export default async function AdminSeasonDetailPage({
               </div>
 
               {settlement && (
-                <div className="flex flex-col gap-1 rounded-lg bg-zinc-50 px-3 py-2 text-base dark:bg-zinc-800">
+                <div className="flex flex-col gap-1 rounded-lg bg-subtle px-3 py-2 text-base">
                   {isRenewing ? (
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-zinc-500 dark:text-zinc-400">
+                      <span className="text-ink-secondary">
                         다음 시즌 연장 (환급 {formatWon(settlement.refund)}{" "}
                         이월)
                       </span>
-                      <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                      <span className="font-semibold text-ink-strong">
                         {amountToSend > 0
                           ? `상금 ${formatWon(amountToSend)} 송금`
                           : "송금 없음"}
@@ -248,25 +248,25 @@ export default async function AdminSeasonDetailPage({
                     </div>
                   ) : settlement.isCompleted && prizeShare > 0 ? (
                     <div className="flex items-center justify-between">
-                      <span className="text-zinc-500 dark:text-zinc-400">
+                      <span className="text-ink-secondary">
                         환급 {formatWon(settlement.refund)} + 상금{" "}
                         {formatWon(prizeShare)}
                       </span>
-                      <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                      <span className="font-semibold text-ink-strong">
                         = {formatWon(total)}
                       </span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
-                      <span className="text-zinc-500 dark:text-zinc-400">
+                      <span className="text-ink-secondary">
                         총 환급액
                       </span>
-                      <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                      <span className="font-semibold text-ink-strong">
                         {formatWon(total)}
                       </span>
                     </div>
                   )}
-                  <span className="text-zinc-500 dark:text-zinc-400">
+                  <span className="text-ink-secondary">
                     {member.bank_name && member.bank_account_number
                       ? `${member.bank_name} ${member.bank_account_number}`
                       : "계좌 미등록"}

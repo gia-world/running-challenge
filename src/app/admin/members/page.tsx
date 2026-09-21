@@ -33,7 +33,7 @@ export default async function AdminMembersPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+        <h1 className="text-lg font-bold text-ink-strong">
           팀원 관리 ({members.length}명)
         </h1>
       </div>

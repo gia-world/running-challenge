@@ -22,13 +22,13 @@ export function AdminTabs({ pendingCount = 0 }: { pendingCount?: number }) {
             href={tab.href}
             className={
               isActive
-                ? "flex items-center gap-1 text-base font-bold text-zinc-900 dark:text-zinc-50"
-                : "flex items-center gap-1 text-base font-bold text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                ? "flex items-center gap-1 border-b-2 border-primary pb-2 text-base font-bold text-ink-strong"
+                : "flex items-center gap-1 border-b-2 border-transparent pb-2 text-base font-bold text-ink-tertiary hover:text-ink"
             }
           >
             {tab.label}
             {tab.href === "/admin/review" && pendingCount > 0 && (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-sm font-bold text-white">
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-sm font-bold text-white">
                 {pendingCount}
               </span>
             )}

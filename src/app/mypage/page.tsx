@@ -52,9 +52,9 @@ export default async function MyPage() {
       : { data: null };
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
+    <div className="flex flex-1 flex-col bg-canvas">
       <PageHeader teamName={viewer.teamName}>
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+        <h1 className="text-lg font-bold text-ink-strong">
           마이페이지
         </h1>
       </PageHeader>
@@ -62,19 +62,19 @@ export default async function MyPage() {
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-8">
         <Link
           href="/home"
-          className="text-sm font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          className="text-sm font-medium text-ink-tertiary hover:text-ink"
         >
           ← 홈으로
         </Link>
         {/* <div>
-          <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
+          <h2 className="text-base font-semibold text-ink">
             {profile?.name ?? "러너"}
           </h2>
         </div> */}
 
         {showRenewalPrompt && viewer.activeSeason && (
           <div className="flex flex-col gap-2">
-            <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300">
+            <h2 className="text-lg font-bold text-ink">
               자동 연장
             </h2>
             <RenewalToggle
@@ -86,10 +86,10 @@ export default async function MyPage() {
         )}
 
         <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-bold text-zinc-700 dark:text-zinc-300">
+          <h2 className="text-lg font-bold text-ink">
             계좌 정보
           </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+          <p className="text-sm text-ink-secondary">
             {profile?.bank_account_number
               ? "참가비 정산은 아래 계좌로 진행돼요."
               : " 참가비 정산(환급/상금)을 받으려면 계좌 등록이 필요해요."}

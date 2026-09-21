@@ -157,25 +157,25 @@ export function CertifyForm({
   if (isDone) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-        <div className="animate-stamp-in flex h-24 w-24 items-center justify-center rounded-full border-4 border-orange-500 text-base font-extrabold text-orange-500">
+        <div className="animate-stamp-in flex h-24 w-24 items-center justify-center rounded-full border-4 border-primary text-base font-extrabold text-primary">
           인증완료
         </div>
-        <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+        <p className="text-lg font-bold text-ink-strong">
           인증샷을 올렸어요!
         </p>
-        <p className="text-base text-zinc-500 dark:text-zinc-400">
+        <p className="text-base text-ink-secondary">
           바로 이번 주 기록에 반영돼요. 팀원이 이상하다고 느끼면
           <br /> 재인증을 요청할 수 있어요.
         </p>
         {completedWeekGoal && (
-          <p className="animate-badge-pop rounded-full bg-orange-50 px-4 py-2 text-sm font-bold text-orange-600 dark:bg-orange-950 dark:text-orange-400">
+          <p className="animate-badge-pop rounded-full bg-primary-50 px-4 py-2 text-sm font-bold text-primary-600">
             🎉 이번 주 목표 {weeklyGoal}/{weeklyGoal} 달성!
           </p>
         )}
         <button
           type="button"
           onClick={() => router.push("/home")}
-          className="mt-4 rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white"
+          className="mt-4 rounded-xl bg-primary px-5 py-3 font-semibold text-white"
         >
           홈으로 가기
         </button>
@@ -204,7 +204,7 @@ export function CertifyForm({
       )}
 
       <label className="flex flex-col gap-2">
-        <span className="text-base font-medium text-zinc-700 dark:text-zinc-300">
+        <span className="text-base font-medium text-ink">
           인증샷 (여러 장 가능)
         </span>
         {photos.length > 0 ? (
@@ -229,7 +229,7 @@ export function CertifyForm({
             ))}
           </div>
         ) : (
-          <div className="flex aspect-square w-full items-center justify-center rounded-2xl border-2 border-dashed border-zinc-300 px-4 text-center text-sm text-zinc-400 dark:border-zinc-700">
+          <div className="flex aspect-square w-full items-center justify-center rounded-2xl border-2 border-dashed border-border-strong px-4 text-center text-sm text-ink-tertiary">
             날짜, 거리, 페이스가 보이는 스크린샷을 선택하세요
           </div>
         )}
@@ -244,7 +244,7 @@ export function CertifyForm({
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-base font-medium text-zinc-700 dark:text-zinc-300">
+        <span className="text-base font-medium text-ink">
           날짜
         </span>
         <input
@@ -252,12 +252,12 @@ export function CertifyForm({
           value={activityDate}
           max={maxActivityDate}
           onChange={(e) => setActivityDate(e.target.value)}
-          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-900"
+          className="rounded-xl border border-border-strong px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-base font-medium text-zinc-700 dark:text-zinc-300">
+        <span className="text-base font-medium text-ink">
           거리 (km)
         </span>
         <input
@@ -269,7 +269,7 @@ export function CertifyForm({
           onChange={(e) => setDistanceKm(e.target.value)}
           placeholder="5.0"
           disabled={isBlocked}
-          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900"
+          className="rounded-xl border border-border-strong px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-60"
         />
       </label>
 
@@ -278,7 +278,7 @@ export function CertifyForm({
       <button
         type="submit"
         disabled={isSubmitting || isBlocked}
-        className="rounded-xl bg-orange-500 px-5 py-3.5 font-semibold text-white disabled:opacity-60"
+        className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
       >
         {isBlocked
           ? "오늘은 이미 인증했어요"

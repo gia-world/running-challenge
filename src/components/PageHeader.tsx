@@ -21,10 +21,10 @@ export function PageHeader({
   children?: ReactNode;
 }) {
   return (
-    <header className="flex items-center justify-between border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
+    <header className="flex items-center justify-between border-b border-border px-6 py-4">
       <div>
         {eyebrowSkeleton ? (
-          <div className="h-3.5 w-24 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
+          <div className="h-3.5 w-24 animate-pulse rounded bg-muted-strong" />
         ) : (
           <TeamEyebrow teamName={teamName} suffix={suffix} />
         )}

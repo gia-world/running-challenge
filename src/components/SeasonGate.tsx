@@ -28,7 +28,7 @@ export function SeasonGate({
   if (!viewer.isSeasonMember) {
     return (
       <EmptyState>
-        <p className="text-sm text-zinc-400 dark:text-zinc-500">
+        <p className="text-sm text-ink-tertiary">
           {formatKoreanDate(viewer.activeSeason.start_date)} ~{" "}
           {formatKoreanDate(viewer.activeSeason.end_date)}
         </p>

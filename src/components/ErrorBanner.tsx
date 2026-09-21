@@ -9,7 +9,7 @@ export function ErrorBanner({
 }) {
   return (
     <p
-      className={`rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400 ${className}`}
+      className={`rounded-lg bg-danger-subtle px-3 py-2 text-sm text-danger ${className}`}
     >
       {children}
     </p>

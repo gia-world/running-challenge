@@ -66,13 +66,13 @@ export function JoinForm({ initialCode }: { initialCode?: string }) {
         onChange={(e) => setCode(e.target.value)}
         placeholder="초대 코드"
         autoFocus
-        className="rounded-xl border border-zinc-300 px-3 py-2.5 text-center text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-900"
+        className="rounded-xl border border-border-strong px-3 py-2.5 text-center text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
       />
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-xl bg-orange-500 px-5 py-3.5 font-semibold text-white disabled:opacity-60"
+        className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
       >
         {isSubmitting ? "참여 중..." : "참여하기"}
       </button>

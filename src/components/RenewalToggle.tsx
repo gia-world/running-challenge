@@ -46,12 +46,12 @@ export function RenewalToggle({
   if (choice !== null) {
     return (
       <div className="flex items-center justify-between gap-4">
-        <span className="text-base text-zinc-600 dark:text-zinc-400">
+        <span className="text-base text-ink">
           {choice ? (
             <>
               <span>다음 시즌 연장 선택 완료</span>
               <br />
-              <span className="text-sm text-zinc-500">
+              <span className="text-sm text-ink-secondary">
                 상금을 제외한 환급액이 다음 시즌 참가비로 이월돼요.
               </span>
             </>
@@ -63,7 +63,7 @@ export function RenewalToggle({
           type="button"
           onClick={() => setChoice(null)}
           disabled={isSubmitting}
-          className="rounded-xl bg-orange-500 px-3 py-2 font-semibold text-white disabled:opacity-60"
+          className="rounded-xl bg-primary px-3 py-2 font-semibold text-white disabled:opacity-60"
         >
           변경
         </button>
@@ -73,19 +73,19 @@ export function RenewalToggle({
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-base text-zinc-500 dark:text-zinc-400">
+      <p className="text-base text-ink-secondary">
         다음 시즌도 계속하시겠어요? 연장하면 이번 시즌 환급액은 다음 시즌
         참가비로 자동 이월돼요.
       </p>
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-sm text-danger">{error}</p>
       )}
       <div className="flex gap-2">
         <button
           type="button"
           onClick={() => setRenewal(true)}
           disabled={isSubmitting}
-          className="flex-1 rounded-xl bg-orange-500 px-4 py-3 font-semibold text-white disabled:opacity-60"
+          className="flex-1 rounded-xl bg-primary px-4 py-3 font-semibold text-white disabled:opacity-60"
         >
           연장할게요
         </button>
@@ -93,7 +93,7 @@ export function RenewalToggle({
           type="button"
           onClick={() => setRenewal(false)}
           disabled={isSubmitting}
-          className="flex-1 rounded-xl bg-zinc-200 px-4 py-3 font-semibold text-zinc-700 disabled:opacity-60 dark:bg-zinc-800 dark:text-zinc-300"
+          className="flex-1 rounded-xl bg-muted-strong px-4 py-3 font-semibold text-ink disabled:opacity-60"
         >
           환급 받을게요
         </button>

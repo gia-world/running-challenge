@@ -146,7 +146,7 @@ export function FeedCardActions({
   return (
     <div
       ref={containerRef}
-      className="flex flex-col gap-2 border-t border-zinc-100 px-4 py-2 text-sm dark:border-zinc-800"
+      className="flex flex-col gap-2 border-t border-border-subtle px-4 py-2 text-sm"
     >
       <div className="flex flex-wrap items-center gap-1.5">
         {activeReactions.map((emoji) => {
@@ -159,8 +159,8 @@ export function FeedCardActions({
               disabled={pendingEmoji === emoji}
               className={
                 state.reactedByMe
-                  ? "flex items-center gap-1 rounded-full border border-orange-400 bg-orange-50 px-2 py-1 font-semibold text-orange-600 dark:bg-orange-950"
-                  : "flex items-center gap-1 rounded-full border border-zinc-200 px-2 py-1 text-zinc-500 dark:border-zinc-700 dark:text-zinc-400"
+                  ? "flex items-center gap-1 rounded-full border border-primary-400 bg-primary-50 px-2 py-1 font-semibold text-primary-600"
+                  : "flex items-center gap-1 rounded-full border border-border px-2 py-1 text-ink-secondary"
               }
             >
               <span>{emoji}</span>
@@ -172,7 +172,7 @@ export function FeedCardActions({
         <button
           type="button"
           onClick={() => setIsPickerOpen((open) => !open)}
-          className="flex items-center justify-center rounded-full border border-dashed border-zinc-300 px-2 py-1 text-zinc-400 dark:border-zinc-700 dark:text-zinc-500"
+          className="flex items-center justify-center rounded-full border border-dashed border-border-strong px-2 py-1 text-ink-tertiary"
           aria-label="반응 추가"
         >
           {isPickerOpen ? "✕" : "+"}
@@ -185,8 +185,8 @@ export function FeedCardActions({
             disabled={isRequesting}
             className={
               requested
-                ? "ml-auto font-semibold text-red-500"
-                : "ml-auto text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                ? "ml-auto font-semibold text-danger"
+                : "ml-auto text-ink-tertiary hover:text-ink"
             }
           >
             {requested ? "재인증 요청 취소" : "재인증 요청"}
@@ -195,7 +195,7 @@ export function FeedCardActions({
       </div>
 
       {isPickerOpen && (
-        <div className="flex flex-wrap gap-1.5 rounded-xl bg-zinc-50 p-2 dark:bg-zinc-800">
+        <div className="flex flex-wrap gap-1.5 rounded-xl bg-subtle p-2">
           {REACTION_EMOJIS.map((emoji) => {
             const reactedByMe = reactions[emoji]?.reactedByMe ?? false;
             return (
@@ -206,8 +206,8 @@ export function FeedCardActions({
                 disabled={pendingEmoji === emoji}
                 className={
                   reactedByMe
-                    ? "flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-base ring-2 ring-orange-400 dark:bg-orange-950"
-                    : "flex h-8 w-8 items-center justify-center rounded-full bg-white text-base dark:bg-zinc-900"
+                    ? "flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-base ring-2 ring-primary-400"
+                    : "flex h-8 w-8 items-center justify-center rounded-full bg-surface text-base"
                 }
               >
                 {emoji}
@@ -217,7 +217,7 @@ export function FeedCardActions({
         </div>
       )}
 
-      {requestError && <span className="text-red-500">{requestError}</span>}
+      {requestError && <span className="text-danger">{requestError}</span>}
     </div>
   );
 }

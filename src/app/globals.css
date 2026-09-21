@@ -71,28 +71,53 @@
   font-display: swap;
 }
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Design tokens. Single light theme, white canvas — no dark mode variant.
+ * Every color used in the app should come from one of these, not a raw
+ * Tailwind palette class (zinc-500, orange-600, etc.) — see DESIGN.md.
+ */
+@theme {
+  /* Primary brand (orange) — the app's one accent color */
+  --color-primary-50: #fff7ed;
+  --color-primary-100: #ffedd5;
+  --color-primary-400: #fb923c;
+  --color-primary-500: #f97316;
+  --color-primary-600: #ea580c;
+  --color-primary: var(--color-primary-500);
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Text ("ink") — five-step hierarchy from strongest to disabled */
+  --color-ink-strong: #18181b;
+  --color-ink: #3f3f46;
+  --color-ink-secondary: #71717a;
+  --color-ink-tertiary: #a1a1aa;
+  --color-ink-disabled: #d4d4d8;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Surfaces — canvas and surface are both white; cards are told apart
+     from the page by a hairline border (see border-* below), not a tint. */
+  --color-canvas: #ffffff;
+  --color-surface: #ffffff;
+  --color-subtle: #fafafa;
+  --color-muted: #f4f4f5;
+  --color-muted-strong: #e4e4e7;
+  --color-inverse: #18181b;
+
+  /* Borders */
+  --color-border-subtle: #f4f4f5;
+  --color-border: #e4e4e7;
+  --color-border-strong: #d4d4d8;
+
+  /* Semantic feedback colors */
+  --color-success: #16a34a;
+  --color-success-subtle: #dcfce7;
+  --color-danger: #dc2626;
+  --color-danger-subtle: #fef2f2;
+  --color-warning: #b45309;
+  --color-warning-subtle: #fffbeb;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-canvas);
+  color: var(--color-ink);
   /* Stops double-tap-to-zoom on mobile (buttons/taps feel laggy without
      this, since the browser waits to see if a second tap is coming).
      Pinch-zoom still works since "manipulation" keeps pan-x/pan-y/pinch. */

@@ -56,15 +56,15 @@ export function OnboardingForm({
           onChange={(e) => setName(e.target.value)}
           placeholder="실명을 입력해주세요"
           autoFocus
-          className="rounded-xl border border-zinc-300 px-3 py-3 text-center text-lg focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-900"
+          className="rounded-xl border border-border-strong px-3 py-3 text-center text-lg focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
         {error && (
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <p className="text-sm text-danger">{error}</p>
         )}
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-xl bg-orange-500 px-5 py-3.5 font-semibold text-white disabled:opacity-60"
+          className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
         >
           {isSubmitting ? "저장 중..." : "이 이름으로 시작하기"}
         </button>
@@ -74,22 +74,22 @@ export function OnboardingForm({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="rounded-2xl bg-white px-4 py-4 text-lg font-bold text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-50">
+      <p className="rounded-2xl border border-border bg-surface px-4 py-4 text-lg font-bold text-ink-strong">
         {currentName}
       </p>
-      <p className="text-base text-zinc-500 dark:text-zinc-400 mt-4">
+      <p className="text-base text-ink-secondary mt-4">
         본인의 실명이 맞나요?
       </p>
 
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-sm text-danger">{error}</p>
       )}
 
       <button
         type="button"
         onClick={() => confirmName(currentName)}
         disabled={isSubmitting}
-        className="rounded-xl bg-orange-500 px-5 py-3.5 font-semibold text-white disabled:opacity-60"
+        className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
       >
         네, 맞아요
       </button>
@@ -97,7 +97,7 @@ export function OnboardingForm({
         type="button"
         onClick={() => setIsEditing(true)}
         disabled={isSubmitting}
-        className="rounded-xl bg-zinc-200 px-5 py-3.5 font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+        className="rounded-xl bg-muted-strong px-5 py-3.5 font-semibold text-ink"
       >
         아니요, 실명을 입력할게요
       </button>

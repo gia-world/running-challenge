@@ -49,13 +49,13 @@ export function BankForm({
   if (!isEditing) {
     return (
       <div className="flex items-center justify-between gap-4">
-        <span className="text-base text-zinc-600 dark:text-zinc-400">
+        <span className="text-base text-ink">
           {bankName} {accountNumber}
         </span>
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          className="rounded-xl bg-orange-500 px-3 py-2 font-semibold text-white"
+          className="rounded-xl bg-primary px-3 py-2 font-semibold text-white"
         >
           변경
         </button>
@@ -66,18 +66,18 @@ export function BankForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <label className="flex flex-col gap-1">
-        <span className="text-base text-zinc-500 dark:text-zinc-400">은행</span>
+        <span className="text-base text-ink-secondary">은행</span>
         <input
           type="text"
           value={bankName}
           onChange={(e) => setBankName(e.target.value)}
           placeholder="국민은행"
-          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-800"
+          className="rounded-xl border border-border-strong px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-base text-zinc-500 dark:text-zinc-400">
+        <span className="text-base text-ink-secondary">
           계좌번호
         </span>
         <input
@@ -86,18 +86,18 @@ export function BankForm({
           value={accountNumber}
           onChange={(e) => setAccountNumber(e.target.value)}
           placeholder="123456-78-901234"
-          className="rounded-xl border border-zinc-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-zinc-700 dark:bg-zinc-800"
+          className="rounded-xl border border-border-strong px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </label>
 
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-sm text-danger">{error}</p>
       )}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white disabled:opacity-60"
+        className="rounded-xl bg-primary px-5 py-3 font-semibold text-white disabled:opacity-60"
       >
         {isSubmitting ? "저장 중..." : "저장하기"}
       </button>

@@ -21,8 +21,8 @@ export function BankInfoSheet({ userId }: { userId: string }) {
     <BottomSheet onClose={close}>
       <div className="flex flex-col gap-3">
         <div>
-          <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">계좌 정보 등록</h2>
-          <p className="mt-1 text-base text-zinc-500 dark:text-zinc-400">
+          <h2 className="text-lg font-bold text-ink-strong">계좌 정보 등록</h2>
+          <p className="mt-1 text-base text-ink-secondary">
             참가비 정산(환급/상금)을 받으려면 계좌 등록이 필요해요.
           </p>
         </div>
@@ -30,7 +30,7 @@ export function BankInfoSheet({ userId }: { userId: string }) {
         <button
           type="button"
           onClick={close}
-          className="text-sm font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          className="text-sm font-medium text-ink-tertiary hover:text-ink"
         >
           나중에 할게요
         </button>

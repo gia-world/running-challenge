@@ -14,7 +14,7 @@ export function BottomNav({ active, isAdmin = false }: { active: ActiveTab; isAd
   const items = ITEMS.filter((item) => item.key !== "admin" || isAdmin);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 flex border-t border-zinc-200 bg-white pb-[env(safe-area-inset-bottom)] dark:border-zinc-800 dark:bg-zinc-950">
+    <nav className="fixed inset-x-0 bottom-0 flex border-t border-border bg-surface pb-[env(safe-area-inset-bottom)]">
       {items.map((item) => {
         const isActive = item.key === active;
         return (
@@ -23,8 +23,8 @@ export function BottomNav({ active, isAdmin = false }: { active: ActiveTab; isAd
             href={item.href}
             className={
               isActive
-                ? "flex flex-1 flex-col items-center gap-1 py-3 text-sm font-medium text-orange-500"
-                : "flex flex-1 flex-col items-center gap-1 py-3 text-sm font-medium text-zinc-400"
+                ? "flex flex-1 flex-col items-center gap-1 py-3 text-sm font-medium text-primary"
+                : "flex flex-1 flex-col items-center gap-1 py-3 text-sm font-medium text-ink-tertiary"
             }
           >
             <span className="text-lg">{item.icon}</span>

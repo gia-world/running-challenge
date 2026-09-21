@@ -23,13 +23,13 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
+    <div className="flex flex-1 flex-col items-center justify-center bg-canvas px-6">
       <div className="w-full max-w-sm text-center">
         <TeamEyebrow size="lg" />
-        <h1 className="mt-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+        <h1 className="mt-2 text-2xl font-bold text-ink-strong">
           이름을 확인해주세요
         </h1>
-        <p className="mt-2 text-base text-zinc-500 dark:text-zinc-400">
+        <p className="mt-2 text-base text-ink-secondary">
           팀원들에게는 이 이름으로 보여요.
         </p>
 

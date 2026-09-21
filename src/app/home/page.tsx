@@ -33,14 +33,14 @@ export default async function HomePage() {
     viewer.isSeasonMember && (!profile?.bank_name || !profile?.bank_account_number);
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
+    <div className="flex flex-1 flex-col bg-canvas pb-20">
       <PageHeader
         teamName={viewer.teamName}
         action={
           <div className="flex items-center gap-3">
             <Link
               href="/mypage"
-              className="text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+              className="text-sm font-medium text-ink-secondary hover:text-ink"
             >
               마이페이지
             </Link>
@@ -48,7 +48,7 @@ export default async function HomePage() {
           </div>
         }
       >
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+        <h1 className="text-lg font-bold text-ink-strong">
           {displayName}님, 안녕하세요 👋
         </h1>
       </PageHeader>
@@ -57,7 +57,7 @@ export default async function HomePage() {
         {viewer.graceSeason && viewer.isGraceSeasonMember && (
           <Link
             href="/certify?season=grace"
-            className="rounded-lg bg-amber-50 px-3 py-2 text-base text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+            className="rounded-lg bg-warning-subtle px-3 py-2 text-base text-warning"
           >
             ⏰ 새 시즌이 시작됐지만, 지난 시즌은 오늘 정오까지 인증할 수 있어요 →
           </Link>
@@ -69,7 +69,7 @@ export default async function HomePage() {
 
         <Link
           href="/certify"
-          className="mt-auto flex items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 py-3.5 font-semibold text-white"
+          className="mt-auto flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 font-semibold text-white"
         >
           인증하기
         </Link>
@@ -151,44 +151,44 @@ async function SeasonProgress({
   return (
     <>
       {isInGracePeriod && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-base text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+        <p className="rounded-lg bg-warning-subtle px-3 py-2 text-base text-warning">
           ⏰ 시즌이 끝났어요 — 오늘 정오까지 인증하면 이번 시즌 기록으로 인정돼요.
         </p>
       )}
 
-      <section className="rounded-2xl bg-white p-6 text-center shadow-sm dark:bg-zinc-900">
-        <p className="text-base font-medium text-zinc-500 dark:text-zinc-400">
+      <section className="rounded-2xl border border-border bg-surface p-6 text-center">
+        <p className="text-base font-medium text-ink-secondary">
           이번 주 인증 현황 ({currentWeekIndex + 1}주차)
         </p>
         <div className="mt-4 flex justify-center">
           <WeeklyDots achieved={achieved} goal={WEEKLY_GOAL} />
         </div>
-        <p className="mt-5 text-xl font-bold text-zinc-900 dark:text-zinc-50">
+        <p className="mt-5 text-xl font-bold text-ink-strong">
           {achieved} / {WEEKLY_GOAL}회 완료
         </p>
-        <p className="mt-1 text-base text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1 text-base text-ink-secondary">
           {remaining === 0
             ? "이번 주 목표를 다 채웠어요! 🎉"
             : `${remaining}회만 더 뛰면 이번 주 목표 달성이에요`}
         </p>
-        <p className="mt-3 text-sm font-medium text-orange-500">
+        <p className="mt-3 text-sm font-medium text-primary">
           이번 시즌 {successfulWeeks} / {weekCount}주 성공
         </p>
         {renewNextSeason !== null && (
-          <p className="mt-1 text-sm text-zinc-400">
+          <p className="mt-1 text-sm text-ink-tertiary">
             다음 시즌: {renewNextSeason ? "연장 예정 (참가비 자동 이월)" : "이번 시즌으로 마무리"}
           </p>
         )}
       </section>
 
       <section>
-        <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">
+        <h2 className="text-base font-semibold text-ink">
           이번 주 인증 기록 ({formatKoreanDate(start)}~{formatKoreanDate(end)})
         </h2>
         <ActivityStatusList activities={weekActivities} emptyMessage="아직 이번 주 인증 기록이 없어요." />
         <Link
           href="/history"
-          className="mt-3 block text-center text-sm font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          className="mt-3 block text-center text-sm font-medium text-ink-tertiary hover:text-ink"
         >
           시즌 전체 기록 보기 →
         </Link>

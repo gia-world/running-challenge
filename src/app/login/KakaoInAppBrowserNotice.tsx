@@ -28,12 +28,12 @@ export function KakaoInAppBrowserNotice() {
   if (!isKakaoWebview) return null;
 
   return (
-    <div className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-base text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+    <div className="mb-4 rounded-lg bg-warning-subtle px-3 py-2 text-base text-warning">
       카카오톡 브라우저에서는 로그인이 불안정할 수 있어요. 외부 브라우저로 이동할게요.
       <button
         type="button"
         onClick={openInExternalBrowser}
-        className="mt-2 block w-full rounded-lg bg-amber-100 px-3 py-2 text-center text-base font-semibold text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+        className="mt-2 block w-full rounded-lg bg-warning-subtle px-3 py-2 text-center text-base font-semibold text-warning"
       >
         외부 브라우저로 열기
       </button>

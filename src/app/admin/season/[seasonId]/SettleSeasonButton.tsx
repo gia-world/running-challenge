@@ -46,18 +46,18 @@ export function SettleSeasonButton({
   return (
     <div className="flex flex-col gap-2">
       {needsConfirm && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-base text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+        <p className="rounded-lg bg-warning-subtle px-3 py-2 text-base text-warning">
           정산완료 처리하면 재인증 요청 신청/처리가 모두 막혀요. 계속할까요?
         </p>
       )}
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-sm text-danger">{error}</p>
       )}
       <button
         type="button"
         onClick={handleClick}
         disabled={isSubmitting}
-        className="rounded-xl bg-zinc-900 px-5 py-3 font-semibold text-white disabled:opacity-60 dark:bg-zinc-50 dark:text-zinc-900"
+        className="rounded-xl bg-inverse px-5 py-3 font-semibold text-white disabled:opacity-60"
       >
         {isSubmitting
           ? "처리 중..."

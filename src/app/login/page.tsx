@@ -31,20 +31,20 @@ export default async function LoginPage({
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
+    <div className="flex flex-1 flex-col items-center justify-center bg-canvas px-6">
       <div className="w-full max-w-sm text-center">
         {teamName ? (
           <p className=" text-xl">
-            <span className="text-orange-500 font-extrabold">{teamName}</span>
+            <span className="text-primary font-extrabold">{teamName}</span>
             &apos;s
           </p>
         ) : (
           <TeamEyebrow teamName={teamName} size="lg" />
         )}
-        <h1 className="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+        <h1 className="mt-2 text-2xl font-semibold text-ink-strong">
           주 3회 러닝 인증 챌린지
         </h1>
-        <p className="mt-2 text-base text-zinc-500 dark:text-zinc-400">
+        <p className="mt-2 text-base text-ink-secondary">
           카카오 계정으로 바로 시작하세요.
         </p>
 

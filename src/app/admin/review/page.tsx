@@ -66,33 +66,33 @@ export default async function AdminReviewPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+      <h1 className="text-lg font-bold text-ink-strong">
         재인증 요청함 ({items.length})
       </h1>
 
       {items.length === 0 ? (
-        <p className="mt-10 text-center text-base text-zinc-400 dark:text-zinc-600">
+        <p className="mt-10 text-center text-base text-ink-tertiary">
           재인증 요청이 없어요.
         </p>
       ) : (
         items.map((item) => (
           <div
             key={item.activityId}
-            className="overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-zinc-900"
+            className="overflow-hidden rounded-2xl border border-border bg-surface"
           >
             {item.photoUrls.length > 0 && (
               <PhotoCarousel photoUrls={item.photoUrls} alt="인증샷" />
             )}
             <div className="px-4 py-3">
               <div className="flex items-center justify-between text-base">
-                <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+                <span className="font-semibold text-ink-strong">
                   {item.ownerName}
                 </span>
-                <span className="text-zinc-500 dark:text-zinc-400">
+                <span className="text-ink-secondary">
                   {formatKoreanDate(item.activity_date)} · {Number(item.distance_km).toFixed(1)}km
                 </span>
               </div>
-              <p className="mt-1 text-sm text-zinc-400 dark:text-zinc-500">
+              <p className="mt-1 text-sm text-ink-tertiary">
                 {item.requesterNames.join(", ")}님이 재인증을 요청했어요
               </p>
               <ReviewItem activityId={item.activityId} />

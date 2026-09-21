@@ -29,21 +29,21 @@ export default async function CertifyPage({
   const isSelectedSeasonMember = useGrace ? viewer.isGraceSeasonMember : viewer.isSeasonMember;
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 pb-20 dark:bg-black">
+    <div className="flex flex-1 flex-col bg-canvas pb-20">
       <PageHeader teamName={viewer.teamName}>
-        <h1 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">인증하기</h1>
+        <h1 className="text-lg font-bold text-ink-strong">인증하기</h1>
       </PageHeader>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-6">
         {hasOverlap && viewer.activeSeason && viewer.graceSeason && (
           <div className="flex flex-col gap-2">
-            <div className="flex gap-2 text-base">
+            <div className="flex gap-1 rounded-xl bg-muted p-1 text-base">
               <Link
                 href="/certify?season=grace"
                 className={
                   useGrace
-                    ? "flex-1 rounded-xl bg-orange-500 py-2 text-center font-semibold text-white"
-                    : "flex-1 rounded-xl bg-zinc-100 py-2 text-center font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+                    ? "flex-1 rounded-lg bg-surface py-2 text-center font-semibold text-ink-strong shadow-sm"
+                    : "flex-1 rounded-lg py-2 text-center font-medium text-ink-secondary"
                 }
               >
                 지난 시즌 (~{formatKoreanDate(viewer.graceSeason.end_date)})
@@ -52,15 +52,15 @@ export default async function CertifyPage({
                 href="/certify?season=current"
                 className={
                   !useGrace
-                    ? "flex-1 rounded-xl bg-orange-500 py-2 text-center font-semibold text-white"
-                    : "flex-1 rounded-xl bg-zinc-100 py-2 text-center font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+                    ? "flex-1 rounded-lg bg-surface py-2 text-center font-semibold text-ink-strong shadow-sm"
+                    : "flex-1 rounded-lg py-2 text-center font-medium text-ink-secondary"
                 }
               >
                 새 시즌 ({formatKoreanDate(viewer.activeSeason.start_date)}~)
               </Link>
             </div>
             {useGrace && (
-              <p className="rounded-lg bg-amber-50 px-3 py-2 text-base text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+              <p className="rounded-lg bg-warning-subtle px-3 py-2 text-base text-warning">
                 ⏰ 지난 시즌은 오늘 정오까지만 인증할 수 있어요.
               </p>
             )}
@@ -75,7 +75,7 @@ export default async function CertifyPage({
           </EmptyState>
         ) : !isSelectedSeasonMember ? (
           <EmptyState>
-            <p className="text-sm text-zinc-400 dark:text-zinc-500">
+            <p className="text-sm text-ink-tertiary">
               {formatKoreanDate(selectedSeason.start_date)} ~{" "}
               {formatKoreanDate(selectedSeason.end_date)}
             </p>
