@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { WEEKLY_GOAL, todayInSeoul, isBeforeNoonInSeoul, yesterdayInSeoul } from "@/lib/week";
+import {
+  WEEKLY_GOAL,
+  todayInSeoul,
+  isBeforeNoonInSeoul,
+  yesterdayInSeoul,
+} from "@/lib/week";
 import {
   seasonWeekIndexForDate,
   seasonWeekRange,
@@ -30,7 +35,8 @@ export default async function HomePage() {
 
   const displayName = profile?.name ?? "러너";
   const needsBankInfo =
-    viewer.isSeasonMember && (!profile?.bank_name || !profile?.bank_account_number);
+    viewer.isSeasonMember &&
+    (!profile?.bank_name || !profile?.bank_account_number);
 
   return (
     <div className="flex flex-1 flex-col bg-canvas pb-20">
@@ -59,20 +65,25 @@ export default async function HomePage() {
             href="/certify?season=grace"
             className="rounded-lg bg-warning-subtle px-3 py-2 text-base text-warning"
           >
-            ⏰ 새 시즌이 시작됐지만, 지난 시즌은 오늘 정오까지 인증할 수 있어요 →
+            ⏰ 새 시즌이 시작됐지만, 지난 시즌은 오늘 정오까지 인증할 수 있어요
+            →
           </Link>
         )}
 
         <SeasonGate viewer={viewer}>
-          {viewer.activeSeason && <SeasonProgress userId={user.id} season={viewer.activeSeason} />}
+          {viewer.activeSeason && (
+            <SeasonProgress userId={user.id} season={viewer.activeSeason} />
+          )}
         </SeasonGate>
 
-        <Link
-          href="/certify"
-          className="mt-auto flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 font-semibold text-white"
-        >
-          인증하기
-        </Link>
+        {viewer.activeSeason && (
+          <Link
+            href="/certify"
+            className="mt-auto flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 font-semibold text-white"
+          >
+            인증하기
+          </Link>
+        )}
       </main>
 
       <BottomNav active="home" isAdmin={viewer.teamRole === "admin"} />
@@ -92,9 +103,11 @@ async function SeasonProgress({
   const supabase = await createClient();
   const today = todayInSeoul();
   const effectiveDate = cappedTodayForSeason(season.end_date, today);
-  const currentWeekIndex = seasonWeekIndexForDate(season.start_date, effectiveDate) ?? 0;
+  const currentWeekIndex =
+    seasonWeekIndexForDate(season.start_date, effectiveDate) ?? 0;
   const { start, end } = seasonWeekRange(season.start_date, currentWeekIndex);
-  const isInGracePeriod = season.end_date === yesterdayInSeoul() && isBeforeNoonInSeoul();
+  const isInGracePeriod =
+    season.end_date === yesterdayInSeoul() && isBeforeNoonInSeoul();
 
   const { data: seasonMembership } = await supabase
     .from("season_memberships")
@@ -110,7 +123,9 @@ async function SeasonProgress({
   // week's activity list below, rather than querying the season twice.
   const { data: seasonActivitiesRaw } = await supabase
     .from("activities")
-    .select("id, activity_date, distance_km, created_at, status, rejected_reason")
+    .select(
+      "id, activity_date, distance_km, created_at, status, rejected_reason",
+    )
     .eq("user_id", userId)
     .eq("season_id", season.id)
     .order("activity_date", { ascending: true })
@@ -127,32 +142,44 @@ async function SeasonProgress({
     >();
 
   const seasonActivities = seasonActivitiesRaw ?? [];
-  const approvedActivities = seasonActivities.filter((a) => a.status === "approved");
+  const approvedActivities = seasonActivities.filter(
+    (a) => a.status === "approved",
+  );
 
   const weekCount = seasonWeekCount(season.start_date, season.end_date);
-  const datesByWeek: Set<string>[] = Array.from({ length: weekCount }, () => new Set());
+  const datesByWeek: Set<string>[] = Array.from(
+    { length: weekCount },
+    () => new Set(),
+  );
   for (const activity of approvedActivities) {
-    const weekIndex = seasonWeekIndexForDate(season.start_date, activity.activity_date);
+    const weekIndex = seasonWeekIndexForDate(
+      season.start_date,
+      activity.activity_date,
+    );
     if (weekIndex !== null && weekIndex < weekCount) {
       datesByWeek[weekIndex].add(activity.activity_date);
     }
   }
 
-  const successfulWeeks = datesByWeek.filter((dates) => dates.size >= WEEKLY_GOAL).length;
+  const successfulWeeks = datesByWeek.filter(
+    (dates) => dates.size >= WEEKLY_GOAL,
+  ).length;
   const achieved = datesByWeek[currentWeekIndex]?.size ?? 0;
   const remaining = Math.max(WEEKLY_GOAL - achieved, 0);
 
   // Not deduped by date: a rejected submission and the resubmission that
   // replaced it can share a date, and both are worth showing.
   const weekActivities = seasonActivities.filter(
-    (activity) => activity.activity_date >= start && activity.activity_date <= end,
+    (activity) =>
+      activity.activity_date >= start && activity.activity_date <= end,
   );
 
   return (
     <>
       {isInGracePeriod && (
         <p className="rounded-lg bg-warning-subtle px-3 py-2 text-base text-warning">
-          ⏰ 시즌이 끝났어요 — 오늘 정오까지 인증하면 이번 시즌 기록으로 인정돼요.
+          ⏰ 시즌이 끝났어요 — 오늘 정오까지 인증하면 이번 시즌 기록으로
+          인정돼요.
         </p>
       )}
 
@@ -176,7 +203,10 @@ async function SeasonProgress({
         </p>
         {renewNextSeason !== null && (
           <p className="mt-1 text-sm text-ink-tertiary">
-            다음 시즌: {renewNextSeason ? "연장 예정 (참가비 자동 이월)" : "이번 시즌으로 마무리"}
+            다음 시즌:{" "}
+            {renewNextSeason
+              ? "연장 예정 (참가비 자동 이월)"
+              : "이번 시즌으로 마무리"}
           </p>
         )}
       </section>
@@ -185,7 +215,10 @@ async function SeasonProgress({
         <h2 className="text-base font-semibold text-ink">
           이번 주 인증 기록 ({formatKoreanDate(start)}~{formatKoreanDate(end)})
         </h2>
-        <ActivityStatusList activities={weekActivities} emptyMessage="아직 이번 주 인증 기록이 없어요." />
+        <ActivityStatusList
+          activities={weekActivities}
+          emptyMessage="아직 이번 주 인증 기록이 없어요."
+        />
         <Link
           href="/history"
           className="mt-3 block text-center text-sm font-medium text-ink-tertiary hover:text-ink"
