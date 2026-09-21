@@ -173,6 +173,7 @@ export default async function AdminSeasonDetailPage({
         seasonId={season.id}
         initialEntryFee={season.entry_fee}
         initialRefundPerCertification={season.refund_per_certification}
+        readOnly={status === "closed"}
       />
 
       <SectionTitle className="mt-2">참여자</SectionTitle>

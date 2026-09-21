@@ -13,13 +13,18 @@ export function SeasonFeeForm({
   seasonId,
   initialEntryFee,
   initialRefundPerCertification,
+  readOnly = false,
 }: {
   seasonId: string;
   initialEntryFee: number | null;
   initialRefundPerCertification: number | null;
+  /** 시즌 종료(정산 완료) 후에는 이미 정산에 쓰인 금액이 바뀌면 안 되므로 수정 버튼 자체를 숨긴다. */
+  readOnly?: boolean;
 }) {
   const router = useRouter();
-  const [isEditing, setIsEditing] = useState(initialEntryFee == null && initialRefundPerCertification == null);
+  const [isEditing, setIsEditing] = useState(
+    !readOnly && initialEntryFee == null && initialRefundPerCertification == null,
+  );
   const [entryFee, setEntryFee] = useState(initialEntryFee?.toString() ?? DEFAULT_ENTRY_FEE);
   const [refundPerCertification, setRefundPerCertification] = useState(
     initialRefundPerCertification?.toString() ?? DEFAULT_REFUND_PER_CERTIFICATION,
@@ -67,13 +72,15 @@ export function SeasonFeeForm({
           참가비 {initialEntryFee?.toLocaleString("ko-KR")}원 · 인증 1회당{" "}
           {initialRefundPerCertification?.toLocaleString("ko-KR")}원 환급
         </span>
-        <button
-          type="button"
-          onClick={() => setIsEditing(true)}
-          className="shrink-0 rounded-xl bg-primary px-3 py-2 font-semibold text-white"
-        >
-          수정
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            className="shrink-0 rounded-xl bg-primary px-3 py-2 font-semibold text-white"
+          >
+            수정
+          </button>
+        )}
       </div>
     );
   }
