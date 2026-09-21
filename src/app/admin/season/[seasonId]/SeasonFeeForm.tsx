@@ -70,7 +70,7 @@ export function SeasonFeeForm({
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          className="shrink-0 text-sm font-medium text-primary"
+          className="shrink-0 rounded-xl bg-primary px-3 py-2 font-semibold text-white"
         >
           수정
         </button>
@@ -96,7 +96,7 @@ export function SeasonFeeForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-white disabled:opacity-60"
+        className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
       >
         {isSubmitting ? "저장 중..." : "저장하기"}
       </button>

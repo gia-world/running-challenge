@@ -90,7 +90,7 @@ export function BankForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-xl bg-primary px-5 py-3 font-semibold text-white disabled:opacity-60"
+        className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
       >
         {isSubmitting ? "저장 중..." : "저장하기"}
       </button>

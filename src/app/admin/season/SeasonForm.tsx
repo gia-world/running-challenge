@@ -156,7 +156,7 @@ export function SeasonForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-xl bg-primary px-5 py-3 font-semibold text-white disabled:opacity-60"
+        className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
       >
         {isSubmitting
           ? "생성 중..."

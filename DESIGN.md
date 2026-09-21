@@ -53,7 +53,9 @@ rounded-2xl border border-border bg-surface px-4 py-3
 - **Secondary**: `bg-muted-strong text-ink`.
 - **Inverse (강한 확인/2단계 액션)**: `bg-inverse text-white` — 정산완료의 "그래도 진행" 버튼처럼, 색은 danger가 아니지만 되돌리기 무거운 액션.
 - **Danger**: `bg-danger text-white` — 반려 확정처럼 진짜 파괴적인 액션만.
-- **Ghost**: 배경 없음, `text-primary text-sm font-medium` — "수정", "변경" 같은 가벼운 인라인 액션.
+- **Ghost**: 배경 없음, `text-primary text-sm font-medium` — 지금은 실제로 쓰는 곳이 없음. 카드 안 요약 텍스트 옆 "수정"/"변경" 같은 인라인 액션은 Ghost가 아니라 아래 소형 알약을 쓴다 (SeasonFeeForm의 "수정"이 한동안 Ghost로 혼자 떠 있었는데, 나머지 전부와 맞춰 소형 알약으로 바꿨다).
+- **소형 알약 (카드 안 인라인 액션)**: `rounded-xl bg-primary px-3 py-2 font-semibold text-white` (또는 `bg-muted-strong text-ink`) — BankForm "변경", RenewalToggle "변경", SeasonFeeForm "수정", ParticipantToggle, InviteCodeCard 전부 이 크기.
+- **전체 너비 제출 버튼**: `rounded-xl bg-primary px-5 py-3.5 font-semibold text-white` — 폼 맨 아래 꽉 차는 제출 버튼은 전부 `py-3.5`로 통일 (전에는 py-3.5/py-3/py-2.5가 근거 없이 섞여 있었음). `items-center`로 버튼이 내용 너비만큼만 줄어드는 경우(CertifyForm 완료 화면의 "홈으로 가기")는 꽉 찬 버튼이 아니라서 예외 — `py-3`.
 - 모든 버튼 `disabled:opacity-60`으로 통일 (부분적으로 회색 처리하지 않음).
 
 ## 인풋
