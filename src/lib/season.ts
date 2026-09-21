@@ -56,7 +56,15 @@ export function cappedTodayForSeason(seasonEndDate: string, today: string): stri
   return seasonEndDate < today ? seasonEndDate : today;
 }
 
-/** Which 0-indexed week of the season a date falls in, or null if outside the season. */
+/**
+ * Which 0-indexed week of the season a date falls in, or null if before the
+ * season started. Deliberately has no upper bound tied to SEASON_LENGTH_DAYS
+ * (the 4-week default) — a season can run longer than that, and capping
+ * here would silently drop week 5+ from stats, hide the last-week renewal
+ * prompt, and mislabel the current week on home/status for any season an
+ * admin extends past 4 weeks. Callers that need to bound by a season's own
+ * actual length should compare against seasonWeekCount themselves.
+ */
 export function seasonWeekIndexForDate(
   seasonStartDate: string,
   dateISO: string,
@@ -64,7 +72,7 @@ export function seasonWeekIndexForDate(
   const start = parseISODate(seasonStartDate);
   const date = parseISODate(dateISO);
   const diffDays = Math.round((date.getTime() - start.getTime()) / 86_400_000);
-  if (diffDays < 0 || diffDays >= SEASON_LENGTH_DAYS) return null;
+  if (diffDays < 0) return null;
   return Math.floor(diffDays / 7);
 }
 
