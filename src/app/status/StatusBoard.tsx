@@ -5,8 +5,9 @@ import { createClient } from "@/lib/supabase/client";
 import { seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
 import { getSignedPhotoUrls } from "@/lib/photos";
-import { badgeFor } from "@/lib/badges";
+import { earnedBadges, BADGE_CATALOG } from "@/lib/badges";
 import { EmptyState } from "@/components/EmptyState";
+import { BottomSheet } from "@/components/BottomSheet";
 import type { WeekStat } from "@/lib/seasonStats";
 import type { SeasonHistoryEntry } from "@/lib/seasonHistory";
 
@@ -68,6 +69,7 @@ export function StatusBoard({
     activities: ModalActivity[];
   } | null>(null);
   const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
+  const [showBadgeInfo, setShowBadgeInfo] = useState(false);
 
   const sortedMembers = [...members].sort((a, b) => {
     if (sortKey === "total") return totalSuccess(b) - totalSuccess(a);
@@ -240,10 +242,20 @@ export function StatusBoard({
       ) : (
         <div className="flex flex-col gap-6">
           <section className="flex flex-col gap-2">
-            <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">시즌 성공 뱃지</h2>
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-base font-semibold text-zinc-700 dark:text-zinc-300">시즌 성공 뱃지</h2>
+              <button
+                type="button"
+                onClick={() => setShowBadgeInfo(true)}
+                aria-label="뱃지 기준 보기"
+                className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-200 text-sm font-bold text-zinc-500 dark:bg-zinc-700 dark:text-zinc-300"
+              >
+                ⓘ
+              </button>
+            </div>
             <ul className="flex flex-col gap-2">
               {badgeMembers.map((member) => {
-                const badge = badgeFor(member.completedCount, member.hasParticipated);
+                const badges = earnedBadges(member.completedCount, member.hasParticipated);
                 return (
                   <li
                     key={member.id}
@@ -254,10 +266,13 @@ export function StatusBoard({
                     }
                   >
                     <span className="font-semibold text-zinc-900 dark:text-zinc-50">{member.name}</span>
-                    {badge ? (
-                      <span className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
-                        <span className="text-lg">{badge.emoji}</span>
-                        {member.completedCount > 0 ? `${member.completedCount}개 기수 완주` : badge.label}
+                    {badges.length > 0 ? (
+                      <span className="flex items-center gap-1 text-xl">
+                        {badges.map((badge) => (
+                          <span key={badge.emoji} title={badge.label}>
+                            {badge.emoji}
+                          </span>
+                        ))}
                       </span>
                     ) : (
                       <span className="text-sm text-zinc-400">아직 없음</span>
@@ -354,6 +369,25 @@ export function StatusBoard({
             </button>
           </div>
         </div>
+      )}
+
+      {showBadgeInfo && (
+        <BottomSheet onClose={() => setShowBadgeInfo(false)}>
+          <div className="flex flex-col gap-3">
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">뱃지 기준</h2>
+            <ul className="flex flex-col gap-3">
+              {BADGE_CATALOG.map((badge) => (
+                <li key={badge.emoji} className="flex items-center gap-3">
+                  <span className="text-2xl">{badge.emoji}</span>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-zinc-900 dark:text-zinc-50">{badge.label}</span>
+                    <span className="text-sm text-zinc-500 dark:text-zinc-400">{badge.criteria}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </BottomSheet>
       )}
     </div>
   );
