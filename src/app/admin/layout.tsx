@@ -5,7 +5,11 @@ import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
 import { requireTeamViewer } from "@/lib/viewer";
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { viewer } = await requireTeamViewer();
 
   if (viewer.teamRole !== "admin") {
@@ -18,7 +22,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .select("activity_id, activities(seasons(settled_at))")
     .eq("status", "pending")
     .returns<
-      { activity_id: string; activities: { seasons: { settled_at: string | null } | null } | null }[]
+      {
+        activity_id: string;
+        activities: { seasons: { settled_at: string | null } | null } | null;
+      }[]
     >();
   // A closed (settled) season no longer accepts review processing, so its
   // pending requests shouldn't inflate the badge either.
@@ -30,11 +37,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex flex-1 flex-col bg-canvas pb-20">
-      <PageHeader teamName={viewer.teamName} suffix="ADMIN">
-        <AdminTabs pendingCount={pendingCount} />
+      <PageHeader teamName={viewer.teamName}>
+        <h1 className="text-lg font-bold text-ink-strong">ADMIN</h1>
       </PageHeader>
 
-      <main className="mx-auto w-full max-w-md flex-1 px-6 py-6">{children}</main>
+      <main className="mx-auto w-full max-w-md flex-1 px-6 py-6">
+        <AdminTabs pendingCount={pendingCount} />
+        {children}
+      </main>
 
       <BottomNav active="admin" isAdmin />
     </div>
