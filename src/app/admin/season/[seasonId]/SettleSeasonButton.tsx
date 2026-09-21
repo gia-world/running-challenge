@@ -4,7 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export function SettleSeasonButton({ seasonId }: { seasonId: string }) {
+export function SettleSeasonButton({
+  seasonId,
+  hasPendingReviewRequests,
+}: {
+  seasonId: string;
+  hasPendingReviewRequests: boolean;
+}) {
   const router = useRouter();
   const [needsConfirm, setNeedsConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,7 +36,7 @@ export function SettleSeasonButton({ seasonId }: { seasonId: string }) {
   }
 
   function handleClick() {
-    if (!needsConfirm) {
+    if (hasPendingReviewRequests && !needsConfirm) {
       setNeedsConfirm(true);
       return;
     }

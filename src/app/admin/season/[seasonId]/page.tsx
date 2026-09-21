@@ -75,6 +75,24 @@ export default async function AdminSeasonDetailPage({
   );
   const weekCount = seasonWeekCount(season.start_date, season.end_date);
   const status = computeSeasonStatus(season, todayInSeoul());
+
+  let hasPendingReviewRequests = false;
+  if (status === "settling") {
+    const { data: seasonActivities } = await supabase
+      .from("activities")
+      .select("id")
+      .eq("season_id", season.id);
+    const seasonActivityIds = (seasonActivities ?? []).map((a) => a.id);
+
+    if (seasonActivityIds.length > 0) {
+      const { data: pendingRequests } = await supabase
+        .from("activity_review_requests")
+        .select("activity_id")
+        .eq("status", "pending")
+        .in("activity_id", seasonActivityIds);
+      hasPendingReviewRequests = (pendingRequests ?? []).length > 0;
+    }
+  }
   // Mirrors the grace-period rule in loadViewerContext: a season that ended
   // yesterday still accepts certifications until noon KST today, so the
   // settlement totals below can still shift until that window closes.
@@ -147,7 +165,12 @@ export default async function AdminSeasonDetailPage({
         </p>
       )}
 
-      {status === "settling" && <SettleSeasonButton seasonId={season.id} />}
+      {status === "settling" && (
+        <SettleSeasonButton
+          seasonId={season.id}
+          hasPendingReviewRequests={hasPendingReviewRequests}
+        />
+      )}
 
       <SeasonFeeForm
         seasonId={season.id}
