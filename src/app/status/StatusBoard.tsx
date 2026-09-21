@@ -267,9 +267,9 @@ export function StatusBoard({
                   >
                     <span className="font-semibold text-zinc-900 dark:text-zinc-50">{member.name}</span>
                     {badges.length > 0 ? (
-                      <span className="flex items-center gap-1 text-xl">
-                        {badges.map((badge) => (
-                          <span key={badge.emoji} title={badge.label}>
+                      <span className="flex flex-wrap items-center justify-end gap-1 text-xl">
+                        {badges.map((badge, index) => (
+                          <span key={`${badge.emoji}-${index}`} title={badge.label}>
                             {badge.emoji}
                           </span>
                         ))}

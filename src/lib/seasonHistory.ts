@@ -19,22 +19,29 @@ export type TeamSeasonHistory = {
 };
 
 /**
- * Every season a team has ever run, each with team-wide participant/완주
+ * Every CONCLUDED season a team has run, each with team-wide participant/완주
  * counts plus this viewer's own record — and, across all of it, a lifetime
  * completed-season tally per user (what the season success badge is based
- * on). Runs one query pair per season, so it scales with how many seasons a
- * team has ever run, not with team size.
+ * on). The currently active season is deliberately excluded — badges and
+ * history are a record of seasons that have already ended, not a live
+ * projection of the one still in progress. Runs one query pair per season,
+ * so it scales with how many seasons a team has ever run, not with team size.
  */
 export async function computeTeamSeasonHistory(
   supabase: SupabaseClient,
   teamId: string,
   viewerId: string,
+  excludeSeasonId: string | null,
 ): Promise<TeamSeasonHistory> {
-  const { data: seasonsRaw } = await supabase
+  let query = supabase
     .from("seasons")
     .select("id, start_date, end_date")
     .eq("team_id", teamId)
     .order("start_date", { ascending: false });
+  if (excludeSeasonId) {
+    query = query.neq("id", excludeSeasonId);
+  }
+  const { data: seasonsRaw } = await query;
 
   const completedCountByUserId = new Map<string, number>();
   const participatedUserIds = new Set<string>();

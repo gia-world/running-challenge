@@ -28,11 +28,14 @@ export default async function StatusPage() {
 
   // Lifetime history/badges don't depend on there being an active season —
   // computed unconditionally so the "전체 기록" tab always works, even
-  // between seasons or for someone not in the current one.
+  // between seasons or for someone not in the current one. The season
+  // still in progress is excluded — badges/history are a record of
+  // seasons that have already ended.
   const { seasons, completedCountByUserId, participatedUserIds } = await computeTeamSeasonHistory(
     supabase,
     viewer.teamId,
     user.id,
+    viewer.activeSeason?.id ?? null,
   );
 
   const badgeMembers = allMembers
