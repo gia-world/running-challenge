@@ -176,7 +176,7 @@ async function SeasonProgress({
         </p>
       )}
 
-      <section className="rounded-2xl border border-border bg-surface p-6 text-center">
+      <section className="rounded-2xl border border-border bg-surface px-4 py-3 text-center">
         <p className="text-base font-medium text-ink-secondary">
           이번 주 인증 현황 ({currentWeekIndex + 1}주차)
         </p>

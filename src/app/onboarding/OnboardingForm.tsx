@@ -75,7 +75,7 @@ export function OnboardingForm({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="rounded-2xl border border-border bg-surface px-4 py-4 text-lg font-bold text-ink-strong">
+      <p className="rounded-2xl border border-border bg-surface px-4 py-3 text-lg font-bold text-ink-strong">
         {currentName}
       </p>
       <p className="text-base text-ink-secondary mt-4">

@@ -32,6 +32,8 @@ rounded-2xl border border-border bg-surface px-4 py-3
 
 `shadow-sm`으로 카드를 띄우던 이전 방식은 쓰지 않는다 — 그림자는 진짜로 화면 위에 떠 있는 요소(바텀시트, 포토 모달)에만 남겨둔다.
 
+한동안 내용에 따라 `p-4`(폼이 든 카드), `p-6`(홈 화면 히어로 카드)처럼 조금씩 다르게 썼는데, 근거가 약해서 전부 `px-4 py-3`로 통일했다. 실제로 봤을 때 특정 카드가 답답해 보이면 그때 역할별 규칙을 새로 정할 것 — 지금은 예외 없이 이 값 하나.
+
 ## 라운드 (역할별로 고정)
 
 | 역할 | 클래스 | 예 |
@@ -75,6 +77,10 @@ rounded-2xl border border-border bg-surface px-4 py-3
 - **포커스 시 항상**: `focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary` — 브라우저 기본 포커스 아웃라인을 쓰지 않는다. `BASE`에 이미 포함돼 있으니 `Input`을 쓰는 한 빠뜨릴 일이 없다.
 - 인풋마다 실제로 달라지는 건 정렬뿐이다 — 화면에 필드 하나만 있는 "히어로" 스타일 화면(JoinForm의 초대 코드, OnboardingForm의 실명 입력)만 `className="text-center"`로 가운데 정렬, 나머지는 기본값(왼쪽 정렬)을 그대로 쓴다. `py-3`/`text-lg`처럼 이 두 필드만 다르게 크게 썼던 적이 있었는데, `text-lg`는 인풋에 전역으로 `font-size: 16px`를 강제하는 `globals.css` 규칙 때문에 애초에 렌더링에 영향이 없는 죽은 코드였고 `py-3`도 별다른 근거 없이 남아있던 값이라 — 전부 지우고 하나로 통일했다.
 - 라벨 텍스트 스타일은 기본이 `text-base text-ink-secondary`이고, 다르게 써야 하면(CertifyForm의 날짜/거리 필드는 `text-base font-medium text-ink`) `labelClassName`으로 넘긴다.
+
+## 폼 최상위 간격
+
+`<form className="flex flex-col gap-4">`처럼 필드들을 세로로 쌓는 폼의 최상위 컨테이너는 전부 `gap-4`. 필드 개수에 따라 `gap-3`/`gap-5`로 조금씩 다르게 쓰던 걸 통일했다 — 눈으로 봤을 때 특정 폼이 너무 빽빽하거나 헐렁해 보이면 그때 다시 조정.
 - `font-size`는 16px 미만이면 iOS Safari가 자동 확대하므로, `globals.css`의 전역 규칙(`input, select, textarea { font-size: 16px; }`)이 항상 이긴다 — 개별 인풋에 `text-sm`을 줘도 실제 렌더링은 16px.
 - 여러 필드가 몰려 있는 화면에서 `bg-muted`(인풋 채움)가 다른 `bg-muted` 요소(세그먼트 탭 트랙, 칩)와 바로 붙으면 구분이 안 간다 — 인풋 옆/위에 놓이는 트랙·칩 종류는 전부 한 단계 진한 `bg-muted-strong`을 쓴다 (아래 세그먼트 탭 섹션 참고).
 - `src/components/Textarea.tsx` — 여러 줄 입력이 필요할 때 쓰는 filled 텍스트에어리어. `Input`과 같은 배경/보더/포커스 스타일이고, 추가로 내용에 따라 자동으로 높이가 늘어나고(`scrollHeight` 기반) `maxLength`를 주면 우측 하단에 `n/max` 카운터가 뜬다. 아직 실제로 쓰는 화면은 없음.

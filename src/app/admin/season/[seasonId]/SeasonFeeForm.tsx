@@ -81,7 +81,7 @@ export function SeasonFeeForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4"
+      className="flex flex-col gap-4 rounded-2xl border border-border bg-surface px-4 py-3"
     >
       <SeasonFeeFields
         entryFee={entryFee}

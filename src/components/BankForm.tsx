@@ -65,7 +65,7 @@ export function BankForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <Input
         type="text"
         label="은행"

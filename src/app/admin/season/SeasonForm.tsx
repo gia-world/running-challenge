@@ -113,7 +113,7 @@ export function SeasonForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <SectionTitle>새 시즌 만들기</SectionTitle>
 
       <Input

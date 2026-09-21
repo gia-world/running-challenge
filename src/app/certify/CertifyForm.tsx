@@ -196,7 +196,7 @@ export function CertifyForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {isBlocked && (
         <ErrorBanner>
           오늘은 이미 인증하셨어요.

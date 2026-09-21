@@ -57,7 +57,7 @@ export function InviteCodeCard({
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-4">
+    <div className="rounded-2xl border border-border bg-surface px-4 py-3">
       <p className="text-base font-medium text-ink-secondary">초대 코드</p>
       <div className="mt-2 flex items-center gap-2">
         <p className="flex-1 rounded-lg bg-muted px-3 py-2 text-center font-mono text-lg font-bold tracking-widest text-ink-strong">
