@@ -121,7 +121,6 @@ export function SeasonForm({
         label="시작일"
         value={startDate}
         onChange={(e) => handleStartDateChange(e.target.value)}
-        className="px-3 py-2.5 text-sm"
       />
 
       <Input
@@ -132,7 +131,6 @@ export function SeasonForm({
           setEndDate(e.target.value);
           setNeedsOverlapConfirm(false);
         }}
-        className="px-3 py-2.5 text-sm"
       />
 
       <SeasonFeeFields

@@ -72,7 +72,6 @@ export function BankForm({
         value={bankName}
         onChange={(e) => setBankName(e.target.value)}
         placeholder="국민은행"
-        className="px-3 py-2.5 text-sm"
       />
 
       <Input
@@ -82,7 +81,6 @@ export function BankForm({
         value={accountNumber}
         onChange={(e) => setAccountNumber(e.target.value)}
         placeholder="123456-78-901234"
-        className="px-3 py-2.5 text-sm"
       />
 
       {error && (

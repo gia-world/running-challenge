@@ -67,7 +67,7 @@ export function JoinForm({ initialCode }: { initialCode?: string }) {
         onChange={(e) => setCode(e.target.value)}
         placeholder="초대 코드"
         autoFocus
-        className="px-3 py-2.5 text-center text-sm"
+        className="text-center"
       />
       {error && <p className="text-sm text-danger">{error}</p>}
       <button

@@ -66,13 +66,12 @@ rounded-2xl border border-border bg-surface px-4 py-3
   label="시작일"
   value={startDate}
   onChange={(e) => handleStartDateChange(e.target.value)}
-  className="px-3 py-2.5 text-sm"
 />
 ```
 
-- 컴포넌트 내부 `BASE`는 필드마다 항상 같은 것만 담는다: `rounded-xl border border-transparent bg-muted text-ink-strong placeholder:text-ink-tertiary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-60` — 원티드 레퍼런스의 filled 변형이다. outlined(흰 배경 + 보더)는 카드 보더와 톤이 겹쳐 촌스러워 보인다는 피드백으로 filled로 교체했다. 보더는 `border-transparent`로 항상 자리를 잡아둬서 포커스 때 보더가 생겨도 레이아웃이 밀리지 않는다.
+- 컴포넌트 내부 `BASE`에 padding/글자 크기까지 전부 고정돼 있다: `rounded-xl border border-transparent bg-muted px-3 py-2.5 text-sm text-ink-strong placeholder:text-ink-tertiary focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-60` — 원티드 레퍼런스의 filled 변형이다. outlined(흰 배경 + 보더)는 카드 보더와 톤이 겹쳐 촌스러워 보인다는 피드백으로 filled로 교체했다. 보더는 `border-transparent`로 항상 자리를 잡아둬서 포커스 때 보더가 생겨도 레이아웃이 밀리지 않는다.
 - **포커스 시 항상**: `focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary` — 브라우저 기본 포커스 아웃라인을 쓰지 않는다. `BASE`에 이미 포함돼 있으니 `Input`을 쓰는 한 빠뜨릴 일이 없다.
-- padding/정렬/글자 크기(`px-3 py-2.5 text-sm`, `py-3 text-center text-lg` 등)는 필드마다 달라서 `BASE`엔 안 넣고 매번 `className`으로 넘긴다 — `BASE`가 그 속성들을 아예 선언하지 않으니 겹칠 일이 없다.
+- 인풋마다 실제로 달라지는 건 정렬뿐이다 — 화면에 필드 하나만 있는 "히어로" 스타일 화면(JoinForm의 초대 코드, OnboardingForm의 실명 입력)만 `className="text-center"`로 가운데 정렬, 나머지는 기본값(왼쪽 정렬)을 그대로 쓴다. `py-3`/`text-lg`처럼 이 두 필드만 다르게 크게 썼던 적이 있었는데, `text-lg`는 인풋에 전역으로 `font-size: 16px`를 강제하는 `globals.css` 규칙 때문에 애초에 렌더링에 영향이 없는 죽은 코드였고 `py-3`도 별다른 근거 없이 남아있던 값이라 — 전부 지우고 하나로 통일했다.
 - 라벨 텍스트 스타일은 기본이 `text-base text-ink-secondary`이고, 다르게 써야 하면(CertifyForm의 날짜/거리 필드는 `text-base font-medium text-ink`) `labelClassName`으로 넘긴다.
 - `font-size`는 16px 미만이면 iOS Safari가 자동 확대하므로, `globals.css`의 전역 규칙(`input, select, textarea { font-size: 16px; }`)이 항상 이긴다 — 개별 인풋에 `text-sm`을 줘도 실제 렌더링은 16px.
 - 여러 필드가 몰려 있는 화면에서 `bg-muted`(인풋 채움)가 다른 `bg-muted` 요소(세그먼트 탭 트랙, 칩)와 바로 붙으면 구분이 안 간다 — 인풋 옆/위에 놓이는 트랙·칩 종류는 전부 한 단계 진한 `bg-muted-strong`을 쓴다 (아래 세그먼트 탭 섹션 참고).

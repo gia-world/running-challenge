@@ -251,7 +251,6 @@ export function CertifyForm({
         value={activityDate}
         max={maxActivityDate}
         onChange={(e) => setActivityDate(e.target.value)}
-        className="px-3 py-2.5 text-sm"
       />
 
       <Input
@@ -265,7 +264,6 @@ export function CertifyForm({
         onChange={(e) => setDistanceKm(e.target.value)}
         placeholder="5.0"
         disabled={isBlocked}
-        className="px-3 py-2.5 text-sm"
       />
 
       {error && <ErrorBanner>{error}</ErrorBanner>}

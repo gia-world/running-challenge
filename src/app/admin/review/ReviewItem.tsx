@@ -119,7 +119,6 @@ export function ReviewItem({ activityId }: { activityId: string }) {
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="반려 사유 (직접 입력도 가능해요)"
-          className="px-3 py-2.5 text-sm"
         />
         {error && <p className="text-sm text-danger">{error}</p>}
         <div className="flex gap-2">

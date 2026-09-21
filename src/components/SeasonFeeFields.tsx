@@ -30,7 +30,6 @@ export function SeasonFeeFields({
         value={entryFee}
         onChange={(e) => onEntryFeeChange(e.target.value)}
         placeholder={DEFAULT_ENTRY_FEE}
-        className="px-3 py-2.5 text-sm"
       />
 
       <Input
@@ -42,7 +41,6 @@ export function SeasonFeeFields({
         value={refundPerCertification}
         onChange={(e) => onRefundPerCertificationChange(e.target.value)}
         placeholder={DEFAULT_REFUND_PER_CERTIFICATION}
-        className="px-3 py-2.5 text-sm"
       />
     </>
   );
