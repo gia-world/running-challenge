@@ -3,6 +3,7 @@ import { FeedCardActions } from "@/components/FeedCardActions";
 import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
+import { SeasonGate } from "@/components/SeasonGate";
 import { formatKoreanDate } from "@/lib/format";
 import { describeSeasonOccurrence } from "@/lib/season";
 import { getSignedPhotoUrls } from "@/lib/photos";
@@ -23,6 +24,20 @@ type FeedRow = {
 export default async function FeedPage() {
   const { user, viewer } = await requireTeamViewer();
 
+  return (
+    <PageShell
+      teamName={viewer.teamName}
+      header={<PageTitle>피드</PageTitle>}
+      bottomNav={{ active: "feed", isAdmin: viewer.teamRole === "admin" }}
+    >
+      <SeasonGate viewer={viewer}>
+        <Feed userId={user.id} />
+      </SeasonGate>
+    </PageShell>
+  );
+}
+
+async function Feed({ userId }: { userId: string }) {
   const supabase = await createClient();
   const { data: activities, error } = await supabase
     .from("activities")
@@ -103,7 +118,7 @@ export default async function FeedPage() {
     const emojiMap = reactionsByActivity.get(reaction.activity_id) ?? new Map();
     const entry = emojiMap.get(reaction.emoji) ?? { count: 0, reactedByMe: false };
     entry.count += 1;
-    if (reaction.user_id === user.id) {
+    if (reaction.user_id === userId) {
       entry.reactedByMe = true;
     }
     emojiMap.set(reaction.emoji, entry);
@@ -112,7 +127,7 @@ export default async function FeedPage() {
 
   const requestedByMe = new Set(
     (reviewRequests ?? [])
-      .filter((request) => request.requested_by === user.id)
+      .filter((request) => request.requested_by === userId)
       .map((request) => request.activity_id),
   );
 
@@ -143,55 +158,53 @@ export default async function FeedPage() {
     }),
   );
 
+  if (items.length === 0) {
+    return (
+      <p className="mt-10 text-center text-base text-ink-tertiary">
+        아직 인증된 기록이 없어요.
+      </p>
+    );
+  }
+
   return (
-    <PageShell
-      teamName={viewer.teamName}
-      header={<PageTitle>피드</PageTitle>}
-      bottomNav={{ active: "feed", isAdmin: viewer.teamRole === "admin" }}
-    >
-      {items.length === 0 ? (
-          <p className="mt-10 text-center text-base text-ink-tertiary">
-            아직 인증된 기록이 없어요.
-          </p>
-        ) : (
-          items.map((item) => (
-            <article
-              key={item.id}
-              className="overflow-hidden rounded-2xl border border-border bg-surface"
-            >
-              {item.photoUrls.length > 0 && (
-                <PhotoCarousel photoUrls={item.photoUrls} alt="인증샷" />
+    <>
+      {items.map((item) => (
+        <article
+          key={item.id}
+          className="overflow-hidden rounded-2xl border border-border bg-surface"
+        >
+          {item.photoUrls.length > 0 && (
+            <PhotoCarousel photoUrls={item.photoUrls} alt="인증샷" />
+          )}
+          <div className="flex items-center justify-between px-4 py-3 text-base">
+            <p>
+              <span className="font-semibold text-ink-strong">
+                {item.profiles?.name ?? "러너"}
+              </span>
+              {" · "}
+              {item.occurrenceLabel && (
+                <span className="text-sm font-medium text-primary">
+                  {item.occurrenceLabel}
+                </span>
               )}
-              <div className="flex items-center justify-between px-4 py-3 text-base">
-                <p>
-                  <span className="font-semibold text-ink-strong">
-                    {item.profiles?.name ?? "러너"}
-                  </span>
-                  {" · "}
-                  {item.occurrenceLabel && (
-                    <span className="text-sm font-medium text-primary">
-                      {item.occurrenceLabel}
-                    </span>
-                  )}
-                </p>
-                <div className="flex flex-col items-end gap-0.5">
-                  <span className="text-ink-secondary">
-                    {formatKoreanDate(item.activity_date)} ·{" "}
-                    {Number(item.distance_km).toFixed(2)}km
-                  </span>
-                </div>
-              </div>
-              <FeedCardActions
-                activityId={item.id}
-                currentUserId={user.id}
-                isOwnActivity={item.user_id === user.id}
-                isSeasonSettled={item.isSeasonSettled}
-                initialReactions={item.reactions}
-                initialRequested={item.requestedByMe}
-              />
-            </article>
-          ))
-        )}
-    </PageShell>
+            </p>
+            <div className="flex flex-col items-end gap-0.5">
+              <span className="text-ink-secondary">
+                {formatKoreanDate(item.activity_date)} ·{" "}
+                {Number(item.distance_km).toFixed(2)}km
+              </span>
+            </div>
+          </div>
+          <FeedCardActions
+            activityId={item.id}
+            currentUserId={userId}
+            isOwnActivity={item.user_id === userId}
+            isSeasonSettled={item.isSeasonSettled}
+            initialReactions={item.reactions}
+            initialRequested={item.requestedByMe}
+          />
+        </article>
+      ))}
+    </>
   );
 }

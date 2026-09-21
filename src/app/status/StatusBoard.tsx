@@ -166,7 +166,7 @@ export function StatusBoard({
               <p className="mt-2">
                 이번 시즌에는 참여 중이 아니에요.
                 <br />
-                관리자에게 참여를 요청해주세요.
+                관리자에게 참여 승인을 요청해주세요.
               </p>
             </EmptyState>
           ) : (
