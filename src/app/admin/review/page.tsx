@@ -29,7 +29,10 @@ export default async function AdminReviewPage() {
     .returns<ReviewRequestRow[]>();
 
   if (error) {
-    console.error("[admin/review] failed to load review requests:", error.message);
+    console.error(
+      "[admin/review] failed to load review requests:",
+      error.message,
+    );
   }
 
   const grouped = new Map<
@@ -54,22 +57,23 @@ export default async function AdminReviewPage() {
   }
 
   const items = await Promise.all(
-    Array.from(grouped.entries()).map(async ([activityId, { activity, requesterNames }]) => ({
-      activityId,
-      requesterNames,
-      activity_date: activity!.activity_date,
-      distance_km: activity!.distance_km,
-      ownerName: activity!.profiles?.name ?? "러너",
-      photoUrls: await getSignedPhotoUrls(supabase, activity!.activity_photos),
-    })),
+    Array.from(grouped.entries()).map(
+      async ([activityId, { activity, requesterNames }]) => ({
+        activityId,
+        requesterNames,
+        activity_date: activity!.activity_date,
+        distance_km: activity!.distance_km,
+        ownerName: activity!.profiles?.name ?? "러너",
+        photoUrls: await getSignedPhotoUrls(
+          supabase,
+          activity!.activity_photos,
+        ),
+      }),
+    ),
   );
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-lg font-bold text-ink-strong">
-        재인증 요청함 ({items.length})
-      </h1>
-
       {items.length === 0 ? (
         <p className="mt-10 text-center text-base text-ink-tertiary">
           재인증 요청이 없어요.
@@ -89,7 +93,8 @@ export default async function AdminReviewPage() {
                   {item.ownerName}
                 </span>
                 <span className="text-ink-secondary">
-                  {formatKoreanDate(item.activity_date)} · {Number(item.distance_km).toFixed(1)}km
+                  {formatKoreanDate(item.activity_date)} ·{" "}
+                  {Number(item.distance_km).toFixed(1)}km
                 </span>
               </div>
               <p className="mt-1 text-sm text-ink-tertiary">

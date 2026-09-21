@@ -31,25 +31,27 @@ export default async function AdminMembersPage() {
   const members = memberships ?? [];
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
+      {team && (
+        <InviteCodeCard teamId={team.id} initialCode={team.invite_code} />
+      )}
+
       <div>
-        <h1 className="text-lg font-bold text-ink-strong">
+        <h2 className="text-base font-semibold text-ink">
           팀원 관리 ({members.length}명)
-        </h1>
+        </h2>
+
+        <ul className="flex flex-col gap-2">
+          {members.map((member) => (
+            <MemberRow
+              key={member.id}
+              membershipId={member.id}
+              name={member.profiles?.name ?? "러너"}
+              role={member.role}
+            />
+          ))}
+        </ul>
       </div>
-
-      {team && <InviteCodeCard teamId={team.id} initialCode={team.invite_code} />}
-
-      <ul className="flex flex-col gap-2">
-        {members.map((member) => (
-          <MemberRow
-            key={member.id}
-            membershipId={member.id}
-            name={member.profiles?.name ?? "러너"}
-            role={member.role}
-          />
-        ))}
-      </ul>
     </div>
   );
 }
