@@ -29,6 +29,19 @@ export function seasonWeekRange(
   return { start: toISODate(start), end: toISODate(end) };
 }
 
+/**
+ * Caps "today" at the season's own end date. During the grace period, the
+ * real calendar date is already one day past end_date — feeding that raw
+ * date into seasonWeekIndexForDate would compute a week beyond the season's
+ * actual length whenever the season is shorter than the full 4-week grid
+ * (SEASON_LENGTH_DAYS doesn't know the season was cut short). Anything
+ * treating "today" as "the season week to show as current" should go
+ * through this first.
+ */
+export function cappedTodayForSeason(seasonEndDate: string, today: string): string {
+  return seasonEndDate < today ? seasonEndDate : today;
+}
+
 /** Which 0-indexed week of the season a date falls in, or null if outside the season. */
 export function seasonWeekIndexForDate(
   seasonStartDate: string,

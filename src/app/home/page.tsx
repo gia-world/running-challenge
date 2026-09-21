@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { WEEKLY_GOAL, todayInSeoul } from "@/lib/week";
-import { seasonWeekIndexForDate, seasonWeekRange, SEASON_WEEKS } from "@/lib/season";
+import { WEEKLY_GOAL, todayInSeoul, isBeforeNoonInSeoul, yesterdayInSeoul } from "@/lib/week";
+import {
+  seasonWeekIndexForDate,
+  seasonWeekRange,
+  cappedTodayForSeason,
+  SEASON_WEEKS,
+} from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
 import { requireTeamViewer } from "@/lib/viewer";
 import { WeeklyDots } from "@/components/WeeklyDots";
@@ -77,8 +82,10 @@ async function SeasonProgress({
 }) {
   const supabase = await createClient();
   const today = todayInSeoul();
-  const currentWeekIndex = seasonWeekIndexForDate(season.start_date, today) ?? 0;
+  const effectiveDate = cappedTodayForSeason(season.end_date, today);
+  const currentWeekIndex = seasonWeekIndexForDate(season.start_date, effectiveDate) ?? 0;
   const { start, end } = seasonWeekRange(season.start_date, currentWeekIndex);
+  const isInGracePeriod = season.end_date === yesterdayInSeoul() && isBeforeNoonInSeoul();
 
   const { data: seasonMembership } = await supabase
     .from("season_memberships")
@@ -133,6 +140,12 @@ async function SeasonProgress({
 
   return (
     <>
+      {isInGracePeriod && (
+        <p className="rounded-lg bg-amber-50 px-3 py-2 text-base text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+          ⏰ 시즌이 끝났어요 — 오늘 정오까지 인증하면 이번 시즌 기록으로 인정돼요.
+        </p>
+      )}
+
       <section className="rounded-2xl bg-white p-6 text-center shadow-sm dark:bg-zinc-900">
         <p className="text-base font-medium text-zinc-500 dark:text-zinc-400">
           이번 주 인증 현황 ({currentWeekIndex + 1}주차)

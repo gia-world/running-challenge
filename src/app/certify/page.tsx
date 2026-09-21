@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { SeasonGate } from "@/components/SeasonGate";
 import { requireTeamViewer } from "@/lib/viewer";
 import { todayInSeoul, WEEKLY_GOAL } from "@/lib/week";
-import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
+import { seasonWeekIndexForDate, seasonWeekRange, cappedTodayForSeason } from "@/lib/season";
 import { CertifyForm } from "./CertifyForm";
 
 export default async function CertifyPage() {
@@ -47,8 +47,13 @@ async function CertifyFormLoader({
 }) {
   const supabase = await createClient();
   const today = todayInSeoul();
+  const maxActivityDate = cappedTodayForSeason(seasonEndDate, today);
 
-  const currentWeekIndex = seasonWeekIndexForDate(seasonStartDate, today);
+  // Capped so a grace-period day (already past end_date) is treated as
+  // still belonging to the season's real last week, not a nonexistent week
+  // beyond it — otherwise achievedThisWeek/showRenewalPrompt below would
+  // look at an empty future week instead of the one that actually matters.
+  const currentWeekIndex = seasonWeekIndexForDate(seasonStartDate, maxActivityDate);
   const { start, end } =
     currentWeekIndex !== null
       ? seasonWeekRange(seasonStartDate, currentWeekIndex)
@@ -90,12 +95,6 @@ async function CertifyFormLoader({
     currentWeekIndex !== null &&
     currentWeekIndex === lastWeekIndex &&
     seasonMembership?.renew_next_season == null;
-
-  // During the grace period, "today" is the day after the season actually
-  // ended — cap the pickable date at the season's real end so a grace-period
-  // upload still backfills a day within the season, never one after it
-  // (a date past end_date wouldn't map to any week — see seasonWeekIndexForDate).
-  const maxActivityDate = seasonEndDate < today ? seasonEndDate : today;
 
   return (
     <CertifyForm

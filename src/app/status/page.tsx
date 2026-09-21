@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
 import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
 import { computeTeamSeasonHistory } from "@/lib/seasonHistory";
-import { seasonWeekIndexForDate } from "@/lib/season";
+import { seasonWeekIndexForDate, cappedTodayForSeason } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
 import { BottomNav } from "@/components/BottomNav";
 import { PageHeader } from "@/components/PageHeader";
@@ -58,7 +58,8 @@ export default async function StatusPage() {
     currentSeasonMembers = allMembers
       .filter((p) => participantIds.has(p.id))
       .map((p) => ({ id: p.id, name: p.name, weeks: weeklyStats.get(p.id) ?? emptyWeekStats() }));
-    currentWeekIndex = seasonWeekIndexForDate(season.start_date, todayInSeoul()) ?? 0;
+    const effectiveDate = cappedTodayForSeason(season.end_date, todayInSeoul());
+    currentWeekIndex = seasonWeekIndexForDate(season.start_date, effectiveDate) ?? 0;
   }
 
   return (
