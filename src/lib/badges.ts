@@ -2,10 +2,22 @@ export type Badge = { emoji: string; label: string; criteria: string };
 
 // Ascending order — the case a member's badge row is built from.
 export const BADGE_CATALOG: Badge[] = [
-  { emoji: "🌱", label: "최초 참여", criteria: "시즌에 처음 참여하면 획득 (최대 1개)" },
-  { emoji: "🎖️", label: "완주 메달", criteria: "완주한 시즌마다 1개씩 획득 — 5개 모이면 🏆로 교환" },
-  { emoji: "🏆", label: "5기수 트로피", criteria: "메달 5개를 모으면 1개 획득 — 5개 모이면 🐲로 교환" },
-  { emoji: "🐲", label: "25기수 드래곤", criteria: "트로피 5개(25개 기수 완주)를 모으면 획득" },
+  {
+    emoji: "🌱",
+    label: "최초 참여",
+    criteria: "시즌에 처음 참여하면 획득 (최대 1개)",
+  },
+  {
+    emoji: "🎖️",
+    label: "메달",
+    criteria: "완주한 시즌마다 1개씩 획득 (5개 모이면 🏆로 교환)",
+  },
+  {
+    emoji: "🏆",
+    label: "트로피",
+    criteria: "메달 5개를 모으면 1개 획득 (5개 모이면 🐲로 교환)",
+  },
+  { emoji: "🐲", label: "용", criteria: "트로피 5개를 모으면 획득" },
 ];
 
 /**
@@ -16,7 +28,10 @@ export const BADGE_CATALOG: Badge[] = [
  * actually concluded count — `completedSeasonCount` must exclude the
  * currently active season, since badges are awarded once a season ends.
  */
-export function earnedBadges(completedSeasonCount: number, hasParticipated: boolean): Badge[] {
+export function earnedBadges(
+  completedSeasonCount: number,
+  hasParticipated: boolean,
+): Badge[] {
   const earned: Badge[] = [];
   if (hasParticipated) earned.push(BADGE_CATALOG[0]);
 
