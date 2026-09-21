@@ -121,7 +121,7 @@ export default async function AdminSeasonDetailPage({
             {formatKoreanDate(season.end_date)}
           </h1>
           {status === "active" && (
-            <span className="rounded-full bg-orange-100 px-2 py-0.5 text-sm font-medium text-orange-600 dark:bg-orange-950 dark:text-orange-400">
+            <span className="rounded-full bg-green-100 px-2 py-0.5 text-sm font-medium text-green-600 dark:bg-green-950 dark:text-green-400">
               진행중
             </span>
           )}

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
 import { formatKoreanDate } from "@/lib/format";
+import { todayInSeoul } from "@/lib/week";
+import { computeSeasonStatus } from "@/lib/seasonStatus";
 import { EmptyState } from "@/components/EmptyState";
 import { SeasonForm } from "./SeasonForm";
 
@@ -12,7 +14,7 @@ export default async function AdminSeasonPage() {
   const supabase = await createClient();
   const { data: seasons } = await supabase
     .from("seasons")
-    .select("id, start_date, end_date")
+    .select("id, start_date, end_date, settled_at")
     .eq("team_id", teamId)
     .order("start_date", { ascending: false });
 
@@ -36,7 +38,7 @@ export default async function AdminSeasonPage() {
         ) : (
           <ul className="mt-2 flex flex-col gap-2">
             {allSeasons.map((season) => {
-              const isActive = season.id === viewer.activeSeason?.id;
+              const status = computeSeasonStatus(season, todayInSeoul());
               return (
                 <li key={season.id}>
                   <Link
@@ -46,9 +48,19 @@ export default async function AdminSeasonPage() {
                     <span className="text-zinc-900 dark:text-zinc-50">
                       {formatKoreanDate(season.start_date)} ~ {formatKoreanDate(season.end_date)}
                     </span>
-                    {isActive && (
-                      <span className="rounded-full bg-orange-100 px-2 py-0.5 text-sm font-medium text-orange-600 dark:bg-orange-950 dark:text-orange-400">
+                    {status === "active" && (
+                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-sm font-medium text-green-600 dark:bg-green-950 dark:text-green-400">
                         진행중
+                      </span>
+                    )}
+                    {status === "settling" && (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-sm font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-400">
+                        정산중
+                      </span>
+                    )}
+                    {status === "closed" && (
+                      <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-sm font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                        시즌 종료
                       </span>
                     )}
                   </Link>
