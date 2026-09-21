@@ -41,8 +41,7 @@ export default async function AdminLayout({
       header={<PageTitle>ADMIN</PageTitle>}
       bottomNav={{ active: "admin", isAdmin: true }}
     >
-      <AdminTabs pendingCount={pendingCount} />
-      {children}
+      <AdminTabs pendingCount={pendingCount}>{children}</AdminTabs>
     </PageShell>
   );
 }

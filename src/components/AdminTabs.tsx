@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 import { SegmentedTabs } from "./SegmentedTabs";
 
 const TABS = [
@@ -9,7 +10,13 @@ const TABS = [
   { href: "/admin/season", label: "시즌 관리" },
 ] as const;
 
-export function AdminTabs({ pendingCount = 0 }: { pendingCount?: number }) {
+export function AdminTabs({
+  pendingCount = 0,
+  children,
+}: {
+  pendingCount?: number;
+  children: ReactNode;
+}) {
   const pathname = usePathname();
 
   return (
@@ -29,6 +36,8 @@ export function AdminTabs({ pendingCount = 0 }: { pendingCount?: number }) {
           </span>
         ),
       }))}
-    />
+    >
+      {children}
+    </SegmentedTabs>
   );
 }

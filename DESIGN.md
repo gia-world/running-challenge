@@ -96,15 +96,24 @@ rounded-2xl border border-border bg-surface px-4 py-3
 - `main`의 기본 클래스는 `gap-4 py-6`(피드/현황판/인증하기/관리자와 동일) — 다른 간격이 필요하면(홈의 `gap-8 py-10`, 마이페이지/시즌 전체 기록의 `gap-6`) `mainClassName`으로 넘긴다.
 - 로그인/온보딩/참여하기처럼 헤더·바텀네비가 아예 없는 가운데 정렬 화면은 대신 `CenteredPage`를 쓴다.
 
-## 타이포 컴포넌트
+## 타이포 컴포넌트 & 헤딩 체계
 
-h1/h2를 페이지마다 직접 `className`으로 반복하지 않고 아래 두 컴포넌트로 통일한다:
+제목 관련 클래스를 페이지마다 직접 쓰지 않고 아래 컴포넌트로 통일한다. 시각적 크기와는 별개로, **실제 heading 태그(h1~h6)는 사이트 전체에서 일관된 체계를 따르며 대부분 자동으로 계산된다** — 화면에 로고 대신 서비스명이 없기 때문에, 접근성 트리 상으로는 항상 아래 순서를 따른다:
 
-- **`PageTitle`** — 페이지 타이틀(h1). 기본(`size` 생략)은 인앱 화면의 `text-lg font-bold`, `size="lg"`는 로그인/온보딩/참여하기 같은 단독 화면의 `text-2xl font-bold`.
-- **`SectionTitle`** — 섹션 타이틀(h2). 기본은 리스트/섹션 라벨의 `text-base font-semibold`, `size="lg"`는 마이페이지의 "자동 연장"/"계좌 정보"처럼 하나의 화면 같은 비중을 가진 섹션의 `text-lg font-bold`.
-- **`BackLink`** — "← 홈", "← 시즌 관리"처럼 반복되는 뒤로가기 링크.
+1. **h1 (숨김)** — "러닝 인증 챌린지". `PageShell`이 매 화면마다 `sr-only`로 한 번 렌더링. 페이지에서 직접 다루지 않는다.
+2. **h2** — `PageHeader`의 팀명(`TeamEyebrow`). `PageShell`이 자동으로 처리.
+3. **h3** — 현재 메뉴/페이지 이름. `<PageTitle>`(기본 크기)이 렌더링.
+4. **h4 (있으면 숨김)** — 페이지 안에 세그먼트 탭이 있으면, 그 활성 탭의 라벨이 `SegmentedTabs`에 의해 `sr-only`로 자동 렌더링. 세그먼트 탭이 없는 화면에는 이 단계가 아예 없다.
+5. **섹션 제목** — `<SectionTitle>`. 세그먼트 탭 없이 바로 오면 h4, 탭 아래에 있으면 h5 — **직접 레벨을 지정하지 않아도 자동으로 정해진다.**
 
-새 화면에서 제목이 필요하면 이 세 컴포넌트를 조합해서 쓰고, 직접 `<h1 className="...">`/`<h2 className="...">`를 새로 쓰지 않는다.
+이 자동 계산은 `HeadingLevelBoundary`/`useHeadingLevel`(`src/components/HeadingLevel.tsx`)로 만든 React Context 기반 "지금 몇 레벨인지" 추적 장치 덕분이다. `PageShell`이 `<main>`을 레벨 4로 고정해서 시작하고, `SegmentedTabs`는 패널 콘텐츠를 **children으로 받았을 때만** 그 아래를 한 단계 깊게(`HeadingLevelBoundary`, level 생략 = ambient+1) 만든다. `SectionTitle`은 내부적으로 `Heading`(`src/components/Heading.tsx`)을 통해 현재 컨텍스트 레벨을 읽어 알맞은 태그를 고른다.
+
+- **`PageTitle`** — 페이지 타이틀. 기본(`size` 생략)은 인앱 화면에서 h3로 렌더링(`text-lg font-bold`). `size="lg"`는 로그인/온보딩/참여하기처럼 팀명·메뉴 체계가 없는 단독 화면 전용 — 거기서는 이 컴포넌트 자체가 진짜 h1이다(`text-2xl font-bold`).
+- **`SectionTitle`** — 섹션 제목. 항상 위 자동 레벨 규칙을 따른다(h4 또는 h5). `size="lg"`는 크기만 키운 변형(마이페이지의 "자동 연장"/"계좌 정보").
+- **`SegmentedTabs`** — 탭이 지배하는 패널 콘텐츠는 반드시 **children으로** 넘긴다(형제 요소로 따로 두지 않음) — 그래야 활성 탭의 숨김 헤딩과 레벨 자동 증가가 같이 작동한다. `StatusBoard`(이번 시즌/전체 기록), `AdminTabs`(관리자 하위 페이지를 children으로 감쌈) 참고. 패널이 children 형태로 안 맞는 경우(예: 인증하기의 지난 시즌/새 시즌 피커 — 콘텐츠가 탭 유무와 무관하게 항상 렌더링됨)엔 children 없이 써도 된다, 그 아래엔 레벨이 자동으로 깊어지지 않을 뿐.
+- **`BackLink`** — "← 홈", "← 시즌 관리"처럼 반복되는 뒤로가기 링크. 헤딩과 무관.
+
+새 화면에서 제목이 필요하면 이 컴포넌트들을 조합해서 쓰고, 직접 `<h1 className="...">`~`<h6 className="...">`나 숫자로 된 heading level을 새로 쓰지 않는다.
 
 ## 그림자
 

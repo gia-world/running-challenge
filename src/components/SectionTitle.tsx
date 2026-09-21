@@ -1,9 +1,14 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { Heading } from "./Heading";
 
 /**
- * The h2 every section inside a page uses. "base" is the common case
- * (a list/table/section label); "lg" is for a section that reads more
- * like its own sub-page (마이페이지's "자동 연장"/"계좌 정보").
+ * The section heading every list/table/section inside a page uses. Its
+ * actual tag (h4 under a plain page, h5 under a page with a SegmentedTabs
+ * above it) comes from HeadingLevelBoundary automatically — never pass a
+ * level by hand. "base" is the common case; "lg" is for a section that
+ * reads more like its own sub-page (마이페이지's "자동 연장"/"계좌 정보").
  */
 export function SectionTitle({
   size = "base",
@@ -18,5 +23,5 @@ export function SectionTitle({
     size === "lg"
       ? "text-lg font-bold text-ink-strong"
       : "text-base font-semibold text-ink";
-  return <h2 className={className ? `${base} ${className}` : base}>{children}</h2>;
+  return <Heading className={className ? `${base} ${className}` : base}>{children}</Heading>;
 }

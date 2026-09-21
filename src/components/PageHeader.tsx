@@ -26,7 +26,7 @@ export function PageHeader({
         {eyebrowSkeleton ? (
           <div className="h-3.5 w-24 animate-pulse rounded bg-muted-strong" />
         ) : (
-          <TeamEyebrow teamName={teamName} suffix={suffix} />
+          <TeamEyebrow teamName={teamName} suffix={suffix} as="h2" />
         )}
         {children}
       </div>
