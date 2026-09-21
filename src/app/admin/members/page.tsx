@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
-import { PageTitle } from "@/components/PageTitle";
+import { SectionTitle } from "@/components/SectionTitle";
 import type { UserRole } from "@/lib/types";
 import { InviteCodeCard } from "./InviteCodeCard";
 import { MemberRow } from "./MemberRow";
@@ -32,21 +32,25 @@ export default async function AdminMembersPage() {
   const members = memberships ?? [];
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageTitle>팀원 관리 ({members.length}명)</PageTitle>
+    <div className="flex flex-col gap-4">
+      {team && (
+        <InviteCodeCard teamId={team.id} initialCode={team.invite_code} />
+      )}
 
-      {team && <InviteCodeCard teamId={team.id} initialCode={team.invite_code} />}
+      <div>
+        <SectionTitle>팀원 관리 ({members.length}명)</SectionTitle>
 
-      <ul className="flex flex-col gap-2">
-        {members.map((member) => (
-          <MemberRow
-            key={member.id}
-            membershipId={member.id}
-            name={member.profiles?.name ?? "러너"}
-            role={member.role}
-          />
-        ))}
-      </ul>
+        <ul className="flex flex-col gap-2">
+          {members.map((member) => (
+            <MemberRow
+              key={member.id}
+              membershipId={member.id}
+              name={member.profiles?.name ?? "러너"}
+              role={member.role}
+            />
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

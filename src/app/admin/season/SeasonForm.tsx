@@ -84,14 +84,12 @@ export function SeasonForm({
         .eq("renew_next_season", true);
 
       if (previousMembers && previousMembers.length > 0) {
-        await supabase
-          .from("season_memberships")
-          .insert(
-            previousMembers.map((m) => ({
-              season_id: season.id,
-              user_id: m.user_id,
-            })),
-          );
+        await supabase.from("season_memberships").insert(
+          previousMembers.map((m) => ({
+            season_id: season.id,
+            user_id: m.user_id,
+          })),
+        );
       }
     }
 
@@ -113,16 +111,11 @@ export function SeasonForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4"
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <SectionTitle>새 시즌 만들기</SectionTitle>
 
       <label className="flex flex-col gap-1">
-        <span className="text-base text-ink-secondary">
-          시작일
-        </span>
+        <span className="text-base text-ink-secondary">시작일</span>
         <input
           type="date"
           value={startDate}
@@ -169,9 +162,7 @@ export function SeasonForm({
           기간이 겹치는 시즌이 있어요. 그래도 만들까요?
         </p>
       )}
-      {error && (
-        <p className="text-sm text-danger">{error}</p>
-      )}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <button
         type="submit"

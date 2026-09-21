@@ -5,7 +5,6 @@ import { formatKoreanDate } from "@/lib/format";
 import { todayInSeoul } from "@/lib/week";
 import { computeSeasonStatus } from "@/lib/seasonStatus";
 import { EmptyState } from "@/components/EmptyState";
-import { PageTitle } from "@/components/PageTitle";
 import { SectionTitle } from "@/components/SectionTitle";
 import { SeasonForm } from "./SeasonForm";
 
@@ -25,8 +24,6 @@ export default async function AdminSeasonPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageTitle>시즌 관리</PageTitle>
-
       <SeasonForm
         teamId={teamId}
         existingSeasons={allSeasons}
@@ -48,7 +45,8 @@ export default async function AdminSeasonPage() {
                     className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-base"
                   >
                     <span className="text-ink-strong">
-                      {formatKoreanDate(season.start_date)} ~ {formatKoreanDate(season.end_date)}
+                      {formatKoreanDate(season.start_date)} ~{" "}
+                      {formatKoreanDate(season.end_date)}
                     </span>
                     {status === "active" && (
                       <span className="rounded-full bg-success-subtle px-2 py-0.5 text-sm font-medium text-success">
