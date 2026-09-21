@@ -11,6 +11,7 @@ import {
   DEFAULT_REFUND_PER_CERTIFICATION,
 } from "@/components/SeasonFeeFields";
 import { SectionTitle } from "@/components/SectionTitle";
+import { Checkbox } from "@/components/Checkbox";
 
 type ExistingSeason = { id: string; start_date: string; end_date: string };
 
@@ -120,7 +121,7 @@ export function SeasonForm({
           type="date"
           value={startDate}
           onChange={(e) => handleStartDateChange(e.target.value)}
-          className="rounded-xl border border-border-strong px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="rounded-xl border border-border-strong px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </label>
 
@@ -135,7 +136,7 @@ export function SeasonForm({
             setEndDate(e.target.value);
             setNeedsOverlapConfirm(false);
           }}
-          className="rounded-xl border border-border-strong px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="rounded-xl border border-border-strong px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </label>
 
@@ -147,14 +148,9 @@ export function SeasonForm({
       />
 
       {previousSeasonId && (
-        <label className="flex items-center gap-2 text-base text-ink">
-          <input
-            type="checkbox"
-            checked={copyPrevious}
-            onChange={(e) => setCopyPrevious(e.target.checked)}
-          />
+        <Checkbox checked={copyPrevious} onChange={setCopyPrevious}>
           자동 연장 참여자 포함
-        </label>
+        </Checkbox>
       )}
 
       {needsOverlapConfirm && (

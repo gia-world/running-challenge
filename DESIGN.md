@@ -58,9 +58,22 @@ rounded-2xl border border-border bg-surface px-4 py-3
 
 ## 인풋
 
-- 기본: `rounded-xl border border-border-strong px-3 py-2 text-sm`
+- 기본: `rounded-xl border border-border-strong px-3 py-2.5 text-sm` (원티드 레퍼런스의 outlined 인풋 기준 — 터치 영역 확보를 위해 `py-2`에서 `py-2.5`로 조정)
 - **포커스 시 항상**: `focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary` — 브라우저 기본 포커스 아웃라인을 쓰지 않는다. 새 인풋을 추가할 때 절대 빠뜨리지 말 것.
 - `font-size`는 16px 미만이면 iOS Safari가 자동 확대하므로, `globals.css`의 전역 규칙(`input, select, textarea { font-size: 16px; }`)이 항상 이긴다 — 개별 인풋에 `text-sm`을 줘도 실제 렌더링은 16px.
+- 라벨이 있는 필드는 `<label className="flex flex-col gap-1"><span className="text-base text-ink-secondary">라벨</span><input .../></label>` 패턴을 그대로 반복해서 쓴다 (버튼처럼 컴포넌트로 묶지 않음 — 필드마다 padding/정렬이 조금씩 달라서 클래스 문자열만 기준으로 삼는 게 더 유연함).
+
+## 체크박스
+
+`src/components/Checkbox.tsx` — 네이티브 체크박스는 기본 스타일이 없어서 그대로 쓰면 나머지 UI와 톤이 안 맞으니, 원티드 레퍼런스의 control-row 패턴(연한 배경의 행 + 원형 박스)으로 감싼 컴포넌트를 항상 쓴다. 네이티브 `<input type="checkbox">`는 `sr-only`로 실제 DOM에 남겨서 키보드/스크린리더 동작은 그대로 유지하고, 보이는 원형 박스만 체크 여부에 따라 `bg-primary`로 채워진다.
+
+```tsx
+<Checkbox checked={copyPrevious} onChange={setCopyPrevious}>
+  자동 연장 참여자 포함
+</Checkbox>
+```
+
+라디오 버튼은 아직 앱에서 쓰는 곳이 없어 별도 컴포넌트를 만들지 않았음 — 필요해지면 `Checkbox.tsx`와 같은 패턴(원형 박스, 체크 대신 점)으로 추가.
 
 ## 세그먼트 탭 (뷰 전환·페이지 이동 공통)
 

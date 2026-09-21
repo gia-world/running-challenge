@@ -252,7 +252,7 @@ export function CertifyForm({
           value={activityDate}
           max={maxActivityDate}
           onChange={(e) => setActivityDate(e.target.value)}
-          className="rounded-xl border border-border-strong px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="rounded-xl border border-border-strong px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         />
       </label>
 
@@ -269,7 +269,7 @@ export function CertifyForm({
           onChange={(e) => setDistanceKm(e.target.value)}
           placeholder="5.0"
           disabled={isBlocked}
-          className="rounded-xl border border-border-strong px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-60"
+          className="rounded-xl border border-border-strong px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-60"
         />
       </label>
 
