@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { compressImage } from "@/lib/image";
@@ -37,6 +37,7 @@ export function CertifyForm({
   const router = useRouter();
   const today = todayInSeoul();
   const [photos, setPhotos] = useState<PendingPhoto[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [activityDate, setActivityDate] = useState(maxActivityDate);
   const [distanceKm, setDistanceKm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,9 +50,21 @@ export function CertifyForm({
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files ?? []);
-    setPhotos(
-      selected.map((file) => ({ file, previewUrl: URL.createObjectURL(file) })),
-    );
+    // Reset so picking the exact same file again (e.g. right after
+    // removing it) still fires this handler — browsers skip the change
+    // event when the input's value hasn't visibly changed.
+    e.target.value = "";
+
+    setPhotos((prev) => {
+      const existingKeys = new Set(prev.map((p) => `${p.file.name}:${p.file.size}`));
+      const deduped = selected.filter(
+        (file) => !existingKeys.has(`${file.name}:${file.size}`),
+      );
+      return [
+        ...prev,
+        ...deduped.map((file) => ({ file, previewUrl: URL.createObjectURL(file) })),
+      ];
+    });
   }
 
   function removePhoto(index: number) {
@@ -198,12 +211,12 @@ export function CertifyForm({
         </ErrorBanner>
       )}
 
-      <label className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2">
         <span className="text-base font-medium text-ink">
           인증샷 (여러 장 가능)
         </span>
         {photos.length > 0 ? (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {photos.map((photo, index) => (
               <div key={photo.previewUrl} className="relative aspect-square">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -215,20 +228,36 @@ export function CertifyForm({
                 <button
                   type="button"
                   onClick={() => removePhoto(index)}
-                  className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-sm font-bold text-white"
+                  className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-sm font-bold text-white"
                   aria-label="사진 삭제"
                 >
                   ✕
                 </button>
               </div>
             ))}
+            {!isBlocked && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex aspect-square w-full items-center justify-center rounded-xl border-2 border-dashed border-border-strong text-3xl text-ink-tertiary"
+                aria-label="사진 추가"
+              >
+                +
+              </button>
+            )}
           </div>
         ) : (
-          <div className="flex aspect-square w-full items-center justify-center rounded-2xl border-2 border-dashed border-border-strong px-4 text-center text-sm text-ink-tertiary">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isBlocked}
+            className="flex aspect-square w-full items-center justify-center rounded-2xl border-2 border-dashed border-border-strong px-4 text-center text-sm text-ink-tertiary disabled:opacity-60"
+          >
             날짜, 거리, 페이스가 보이는 스크린샷을 선택하세요
-          </div>
+          </button>
         )}
         <input
+          ref={fileInputRef}
           type="file"
           accept="image/*"
           multiple
@@ -236,7 +265,7 @@ export function CertifyForm({
           onChange={handleFileChange}
           className="sr-only"
         />
-      </label>
+      </div>
 
       <Input
         type="date"
