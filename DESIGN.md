@@ -157,7 +157,7 @@ rounded-2xl border border-border bg-surface px-4 py-3
 
 `src/components/HamburgerMenu.tsx` — `PageHeader`가 항상 렌더링하는 전역 메뉴(`isAdmin` prop만 받음). `bg-black/60` 딤 배경 + 오른쪽에서 슬라이드인하는 `w-64 rounded-l-2xl bg-surface shadow-lg` 드로어(`animate-drawer-in`, `globals.css`) — 오른쪽인 건 헤더의 햄버거 아이콘 자체가 오른쪽에 있어서다(왼쪽에서 열리면 아이콘 위치와 열리는 방향이 안 맞아 어색했음). 열려있는 동안 `document.body.style.overflow = "hidden"`으로 배경 스크롤을 잠근다 (모달과 동일 패턴).
 
-- 항목(순서대로): 챌린지 수다방(카톡 오픈채팅 링크, `target="_blank"`) → (관리자는 `isAdmin`일 때만) 관리자 그룹 → 설정(구 "마이페이지" — 페이지 타이틀도 같이 바꿨다) → my 인증 그룹, 그 아래 구분선 다음 로그아웃.
+- 항목(순서대로): my 인증 그룹 → 챌린지 수다방(카톡 오픈채팅 링크, `target="_blank"`) → 설정(구 "마이페이지" — 페이지 타이틀도 같이 바꿨다) → (관리자는 `isAdmin`일 때만) 관리자 그룹, 그 아래 구분선 다음 로그아웃.
 - **관리자**, **my 인증**은 그 자체로는 클릭 안 되는 뎁스1 그룹 라벨(`<p className="text-sm font-semibold text-ink-tertiary">`)이고, 바로 아래 들여쓴(`pl-6`) 뎁스2 항목이 실제 목적지다 — 관리자는 `AdminTabs`의 3개 탭과 동일한 재인증 요청함/팀원 관리/시즌 관리, my 인증은 이번주 인증 기록/시즌 전체 기록. 관리자 뎁스1 자체를 눌러서 들어가던 예전 방식(`/admin/review`로 이동)은, 그 안에 또 서브탭이 있어서 "들어가서 또 들어가는" 느낌이라는 피드백으로 없앴다 — 지금은 원하는 관리 화면으로 메뉴에서 바로 한 번에 이동한다.
 - 이번주 인증 기록(`/history?scope=week`)과 시즌 전체 기록(`/history`)은 페이지를 따로 만들지 않고, `history/page.tsx`가 `scope` 쿼리 파라미터로 같은 주차별 렌더링 로직을 재사용한다 — `scope=week`면 현재 주차 섹션 하나만, 없으면 전체 주차를 순서대로 보여주고 타이틀만 그에 맞춰 바뀐다.
 - 챌린지 수다방은 실제 카톡 링크를 받기 전이라 `HamburgerMenu.tsx` 상단의 `CHAT_URL` 상수가 `"#"` 더미로 남아있다(`// TODO` 주석) — 실제 링크 받으면 그 한 줄만 바꾸면 된다.
@@ -168,7 +168,7 @@ rounded-2xl border border-border bg-surface px-4 py-3
 
 제목 관련 클래스를 페이지마다 직접 쓰지 않고 아래 컴포넌트로 통일한다. 시각적 크기와는 별개로, **실제 heading 태그(h1~h6)는 사이트 전체에서 일관된 체계를 따르며 대부분 자동으로 계산된다** — 화면에 로고 대신 서비스명이 없기 때문에, 접근성 트리 상으로는 항상 아래 순서를 따른다:
 
-1. **h1 (숨김)** — "러닝 인증 챌린지". `PageShell`이 매 화면마다 `sr-only`로 한 번 렌더링. 페이지에서 직접 다루지 않는다.
+1. **h1 (숨김)** — 앱 이름("런챌"). `PageShell`이 매 화면마다 `sr-only`로 한 번 렌더링. 페이지에서 직접 다루지 않는다.
 2. **h2** — `PageHeader`의 팀명(`TeamEyebrow`). `PageShell`이 자동으로 처리.
 3. **h3** — 현재 메뉴/페이지 이름. `<PageTitle>`(기본 크기)이 렌더링.
 4. **h4 (있으면 숨김)** — 페이지 안에 세그먼트 탭이 있으면, 그 활성 탭의 라벨이 `SegmentedTabs`에 의해 `sr-only`로 자동 렌더링. 세그먼트 탭이 없는 화면에는 이 단계가 아예 없다.
