@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/Button";
 
 const UNIQUE_VIOLATION = "23505";
 
@@ -21,12 +22,18 @@ const REACTION_EMOJIS = [
 export type ReactionState = { count: number; reactedByMe: boolean };
 
 /**
- * The feed card's reaction/재인증 요청 row — a controlled component so the
- * same reaction data can be shown both in the collapsed feed card and
+ * The feed card's reaction/재인증요청·삭제 row — a controlled component so
+ * the same reaction data can be shown both in the collapsed feed card and
  * inside PhotoViewerModal without the two drifting out of sync. `reactions`
- * and `requested` live in the parent (FeedCard); only picker-open/pending
- * state, which resets harmlessly whenever this remounts, stays local here.
- * Same size/tone everywhere it's rendered — the modal just reuses the card.
+ * and `requested` live in the parent (FeedCard); only picker-open/pending/
+ * delete-confirm state, which resets harmlessly whenever this remounts,
+ * stays local here. Same size/tone everywhere it's rendered — the modal
+ * just reuses the card.
+ *
+ * The row's right-aligned slot always shows exactly one of two things,
+ * decided purely by ownership — 본인 사진이면 삭제, 아니면 재인증요청 — so
+ * the collapsed card and the modal always offer the same action in the
+ * same place, instead of 삭제 only turning up once you open the modal.
  */
 export function ReactionBar({
   activityId,
@@ -37,6 +44,8 @@ export function ReactionBar({
   onReactionsChange,
   requested,
   onRequestedChange,
+  canDelete,
+  onDelete,
 }: {
   activityId: string;
   currentUserId: string;
@@ -46,6 +55,8 @@ export function ReactionBar({
   onReactionsChange: (next: Record<string, ReactionState>) => void;
   requested: boolean;
   onRequestedChange: (next: boolean) => void;
+  canDelete: boolean;
+  onDelete: () => Promise<void>;
 }) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   // A set, not a single value — multi-select means several emoji requests
@@ -54,6 +65,9 @@ export function ReactionBar({
   const [pendingEmojis, setPendingEmojis] = useState<ReadonlySet<string>>(new Set());
   const [isRequesting, setIsRequesting] = useState(false);
   const [requestError, setRequestError] = useState<string | null>(null);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -153,6 +167,17 @@ export function ReactionBar({
     }
   }
 
+  async function handleDelete() {
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await onDelete();
+    } catch {
+      setDeleteError("삭제에 실패했어요. 다시 시도해주세요.");
+      setIsDeleting(false);
+    }
+  }
+
   const activeReactions = REACTION_EMOJIS.filter((emoji) => (reactions[emoji]?.count ?? 0) > 0);
 
   return (
@@ -194,21 +219,63 @@ export function ReactionBar({
           {isPickerOpen ? "✕" : "+"}
         </button>
 
-        {!isOwnActivity && !isSeasonSettled && (
-          <button
-            type="button"
-            onClick={toggleRequest}
-            disabled={isRequesting}
-            className={
-              requested
-                ? "ml-auto font-semibold text-danger"
-                : "ml-auto text-ink-tertiary hover:text-ink"
-            }
-          >
-            {requested ? "재인증 요청 취소" : "재인증 요청"}
-          </button>
-        )}
+        {isOwnActivity
+          ? canDelete && (
+              <button
+                type="button"
+                onClick={() => setIsConfirmingDelete(true)}
+                className="ml-auto text-ink-tertiary hover:text-danger"
+              >
+                삭제
+              </button>
+            )
+          : !isSeasonSettled && (
+              <button
+                type="button"
+                onClick={toggleRequest}
+                disabled={isRequesting}
+                className={
+                  requested
+                    ? "ml-auto font-semibold text-danger"
+                    : "ml-auto text-ink-tertiary hover:text-ink"
+                }
+              >
+                {requested ? "재인증 요청 취소" : "재인증 요청"}
+              </button>
+            )}
       </div>
+
+      {isConfirmingDelete && (
+        <div className="flex flex-col gap-2">
+          <p className="text-ink-secondary">
+            삭제하면 인증샷과 기록이 모두 사라져요. 정말 삭제할까요?
+          </p>
+          {deleteError && <span className="text-danger">{deleteError}</span>}
+          <div className="flex gap-2">
+            <Button
+              variant="danger"
+              size="auto"
+              className="flex-1"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "삭제 중..." : "삭제"}
+            </Button>
+            <Button
+              variant="secondary"
+              size="auto"
+              className="flex-1"
+              onClick={() => {
+                setIsConfirmingDelete(false);
+                setDeleteError(null);
+              }}
+              disabled={isDeleting}
+            >
+              닫기
+            </Button>
+          </div>
+        </div>
+      )}
 
       {isPickerOpen && (
         <div className="flex flex-wrap gap-1.5 rounded-xl bg-subtle p-2">

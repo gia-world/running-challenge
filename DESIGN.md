@@ -210,12 +210,14 @@ rounded-2xl border border-border bg-surface px-4 py-3
 - 모달이 열려 있는 동안 `document.body.style.overflow = "hidden"`으로 배경 스크롤을 잠근다(mount/unmount `useEffect`) — 안 그러면 모달 안에서 세로로 스와이프할 때 모달 뒤 피드 페이지가 같이 스크롤된다.
 - 사진은 `object-contain`. **확대는 이 모달 안에서만 가능하다** — 앱 전체는 `layout.tsx`의 `viewport`(`maximumScale: 1, userScalable: false`)로 브라우저 기본 핀치줌을 꺼뒀다(엉뚱한 곳에서 핀치했다가 페이지 전체가 늘어나는 걸 방지). 대신 이 모달만 `onTouchStart`/`onTouchMove`/`onTouchEnd`로 직접 두 손가락 핀치(scale 1~4배)와, 확대된 상태에서 한 손가락 드래그(팬)를 구현한다. 캐러셀 스와이프와 팬 제스처가 서로 손가락을 뺏으면 안 되니, 사진 스크롤러의 `touch-action`을 `zoom.scale`에 따라 동적으로 바꾼다 — 1배(안 확대)일 땐 `pan-x`로 브라우저가 가로 스와이프를 그대로 처리하고, 확대 중엔 `none`으로 브라우저 제스처를 완전히 꺼서 팬 로직이 단독으로 손가락을 받는다. 사진을 넘기면(`index` 변경) 확대 상태는 매번 1배로 초기화된다.
 - **길게 눌러 저장하는 것만 막는다, 화면 캡처는 막지 않는다(못 막는다)** — 각 `<img>`에 `onContextMenu` preventDefault, `draggable={false}`, 인라인 스타일로 `WebkitTouchCallout: "none"`을 준다. 스크린샷 차단은 웹에서 애초에 불가능한 영역이라 시도하지 않는다.
-- 삭제는 `canDelete` prop 하나로 노출 여부를 정한다 — 호출부(서버 컴포넌트)가 본인 활동인지 + 시즌 그레이스 기간(`isWithinCertificationGrace`)인지를 미리 계산해서 넘긴다.
+- 삭제는 `canDelete` prop 하나로 노출 여부를 정한다 — 호출부(서버 컴포넌트)가 본인 활동인지 + 시즌 그레이스 기간(`isWithinCertificationGrace`)인지를 미리 계산해서 넘긴다. 단, 피드에서는 `FeedCard`가 이 모달에 항상 `canDelete={false}`를 넘긴다 — 피드는 `footer`로 넘기는 `ReactionBar`가 삭제/재인증요청을 이미 같은 자리에서 처리하므로, 모달 자체의 삭제 섹션까지 같이 뜨면 중복이다. 리액션이 없는 홈/시즌 전체 기록(`ActivityStatusList`)은 `footer` 없이 모달 자체의 `canDelete`를 그대로 쓴다.
 - `footer` prop으로 리액션 바(`ReactionBar`)를 사진 아래에 끼워 넣을 수 있다 — 피드에서만 쓰고, 리액션이 없는 홈/시즌 전체 기록에서는 생략한다.
 
 `src/components/FeedCard.tsx` — 피드 목록의 접힌 카드(사진 썸네일 + 정보 줄 + 리액션 바). `isViewerOpen` 상태를 들고 있다가 사진을 탭하면 `PhotoViewerModal`을 띄운다. 리액션(`reactions`/`requested`)도 이 컴포넌트가 들고 있는 controlled 값이라, 접힌 카드에서 반응을 남기고 모달을 열어도(또는 그 반대도) 항상 같은 값을 보여준다 — 모달이 열려 있는 동안은 접힌 카드 쪽 `ReactionBar`를 숨기고(`{!isViewerOpen && ...}`) 모달의 `footer`에만 렌더링해서 리액션 UI가 동시에 두 군데 마운트되는 걸 막는다. 선택 항목인 `note`(인증 시 "하고 싶은 말")는 인스타 캡션처럼 `infoRow`와 `ReactionBar` 사이에 끼워 넣고, 모달을 열었을 때도 같은 자리(footer 안, ReactionBar 위)에 그대로 보여준다.
 
-`src/components/ReactionBar.tsx` — 이모지 리액션 + 재인증요청 UI. `reactions`/`requested`는 호출부가 주는 controlled 값이고, 픽커 열림 상태·pending 상태처럼 일시적인 UI 상태만 내부에서 관리한다. 크기·톤 분기 없이 접힌 피드 카드와 `PhotoViewerModal`의 `footer` 어디서든 완전히 같은 모습(`text-sm`)으로 렌더링한다 — "모달 안에서 리액션 바를 키울 필요 없다, 원래 카드 크기 그대로"라는 피드백으로, 한때 있었던 `size="large"` 변형은 다시 걷어냈다.
+`src/components/ReactionBar.tsx` — 이모지 리액션 + 재인증요청/삭제 UI. `reactions`/`requested`는 호출부가 주는 controlled 값이고, 픽커 열림 상태·pending 상태·삭제 확인 상태처럼 일시적인 UI 상태만 내부에서 관리한다. 크기·톤 분기 없이 접힌 피드 카드와 `PhotoViewerModal`의 `footer` 어디서든 완전히 같은 모습(`text-sm`)으로 렌더링한다 — "모달 안에서 리액션 바를 키울 필요 없다, 원래 카드 크기 그대로"라는 피드백으로, 한때 있었던 `size="large"` 변형은 다시 걷어냈다.
+
+- **오른쪽 끝 슬롯은 소유권 하나로만 갈린다** — `isOwnActivity`면 `canDelete`일 때만 "삭제", 아니면 `isSeasonSettled`가 아닐 때만 "재인증 요청"(또는 "재인증 요청 취소"). 접힌 카드에서 열어봐야만 삭제가 보이던 예전 방식(모달 안에만 있던 삭제 섹션) 대신, 카드/모달 둘 다 항상 같은 자리에 같은 액션이 뜨도록 통일했다. 삭제를 누르면 이 컴포넌트 안에서 바로 확인 문구 + 삭제/닫기 버튼 쌍(`PhotoViewerModal`의 기존 삭제 확인 UI와 동일한 패턴)이 뜬다 — `canDelete`/`onDelete`는 `FeedCard`가 넘겨준다.
 
 - 고정된 10종 이모지 중 여러 개를 동시에 선택할 수 있다(다중 선택, 눌렀다고 닫히지 않음).
 - **두 가지 표시 모드가 절대 같이 안 보인다**: 평소엔 실제로 반응이 달린 이모지만 칩(`rounded-full border`)으로 나열되고, "+" 버튼을 누르면 이 칩 줄이 통째로 사라지고 그 자리에 10개짜리 고정 그리드가 뜬다. 칩 줄은 반응 개수에 따라 폭이 계속 바뀌는 가변 크기라, 피커가 열려 있는 동안 같이 보이게 두면 선택할 때마다 레이아웃이 흔들린다 — 그래서 열려 있을 땐 아예 숨긴다.

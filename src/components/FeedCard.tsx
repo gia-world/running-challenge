@@ -86,6 +86,8 @@ export function FeedCard({
     onReactionsChange: setReactions,
     requested,
     onRequestedChange: setRequested,
+    canDelete,
+    onDelete: deleteActivity,
   };
 
   const noteBlock = note && (
@@ -100,10 +102,13 @@ export function FeedCard({
       {!isViewerOpen && <ReactionBar {...reactionBarProps} />}
 
       {isViewerOpen && (
+        // canDelete is false here on purpose — the feed's ReactionBar (in
+        // footer below) already offers 삭제/재인증요청 in the same slot, so
+        // the modal's own built-in delete section would just duplicate it.
         <PhotoViewerModal
           photos={photoUrls}
           caption={caption}
-          canDelete={canDelete}
+          canDelete={false}
           onClose={() => setIsViewerOpen(false)}
           onDelete={deleteActivity}
           footer={
