@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AdminTabs } from "@/components/AdminTabs";
 import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
+import { BackLink } from "@/components/BackLink";
 import { requireTeamViewer } from "@/lib/viewer";
 
 export default async function AdminLayout({
@@ -38,8 +39,13 @@ export default async function AdminLayout({
   return (
     <PageShell
       teamName={viewer.teamName}
-      header={<PageTitle>ADMIN</PageTitle>}
-      bottomNav={{ active: "admin", isAdmin: true }}
+      header={
+        <>
+          <BackLink href="/home">← 홈</BackLink>
+          <PageTitle className="mt-1">ADMIN</PageTitle>
+        </>
+      }
+      isAdmin
     >
       <AdminTabs pendingCount={pendingCount}>{children}</AdminTabs>
     </PageShell>

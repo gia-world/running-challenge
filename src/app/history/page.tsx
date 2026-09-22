@@ -31,7 +31,7 @@ export default async function HistoryPage() {
         </>
       }
       mainClassName="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-6"
-      bottomNav={{ active: "home", isAdmin: viewer.teamRole === "admin" }}
+      isAdmin={viewer.teamRole === "admin"}
     >
       <SeasonGate viewer={viewer}>
         {viewer.activeSeason && (

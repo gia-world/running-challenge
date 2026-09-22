@@ -5,26 +5,19 @@ import {
   todayInSeoul,
   isBeforeNoonInSeoul,
   yesterdayInSeoul,
-  isWithinCertificationGrace,
 } from "@/lib/week";
 import {
   seasonWeekIndexForDate,
-  seasonWeekRange,
   seasonWeekCount,
   cappedTodayForSeason,
 } from "@/lib/season";
-import { formatKoreanDate } from "@/lib/format";
 import { requireTeamViewer } from "@/lib/viewer";
-import { getSignedPhotoUrls } from "@/lib/photos";
 import { WeeklyDots } from "@/components/WeeklyDots";
 import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
-import { SectionTitle } from "@/components/SectionTitle";
 import { SeasonGate } from "@/components/SeasonGate";
-import { ActivityStatusList } from "@/components/ActivityStatusList";
 import { BankInfoSheet } from "@/components/BankInfoSheet";
 import type { ActivityStatus } from "@/lib/types";
-import { SignOutButton } from "./SignOutButton";
 
 export default async function HomePage() {
   const { user, viewer } = await requireTeamViewer();
@@ -44,20 +37,10 @@ export default async function HomePage() {
   return (
     <PageShell
       teamName={viewer.teamName}
-      headerAction={
-        <div className="flex items-center gap-3">
-          <Link
-            href="/mypage"
-            className="text-sm font-medium text-ink-secondary hover:text-ink"
-          >
-            마이페이지
-          </Link>
-          <SignOutButton />
-        </div>
-      }
       header={<PageTitle>{displayName}님, 안녕하세요 👋</PageTitle>}
       mainClassName="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10"
-      bottomNav={{ active: "home", isAdmin: viewer.teamRole === "admin" }}
+      isAdmin={viewer.teamRole === "admin"}
+      bottomNav={{ active: "home" }}
     >
       {viewer.graceSeason && viewer.isGraceSeasonMember && (
         <Link
@@ -100,7 +83,6 @@ async function SeasonProgress({
   const effectiveDate = cappedTodayForSeason(season.end_date, today);
   const currentWeekIndex =
     seasonWeekIndexForDate(season.start_date, effectiveDate) ?? 0;
-  const { start, end } = seasonWeekRange(season.start_date, currentWeekIndex);
   const isInGracePeriod =
     season.end_date === yesterdayInSeoul() && isBeforeNoonInSeoul();
 
@@ -112,42 +94,20 @@ async function SeasonProgress({
     .maybeSingle();
   const renewNextSeason = seasonMembership?.renew_next_season ?? null;
 
-  // Fetched once (every status, not just approved — a crew member needs to
-  // see their own pending/rejected submissions and why, not just what
-  // counted) and reused for both the season-wide weekly tally and this
-  // week's activity list below, rather than querying the season twice.
-  const { data: seasonActivitiesRaw } = await supabase
+  const { data: approvedActivities } = await supabase
     .from("activities")
-    .select(
-      "id, activity_date, distance_km, created_at, status, rejected_reason, activity_photos(storage_path, sort_order)",
-    )
+    .select("activity_date")
     .eq("user_id", userId)
     .eq("season_id", season.id)
-    .order("activity_date", { ascending: true })
-    .order("created_at", { ascending: true })
-    .returns<
-      {
-        id: string;
-        activity_date: string;
-        distance_km: number;
-        created_at: string;
-        status: ActivityStatus;
-        rejected_reason: string | null;
-        activity_photos: { storage_path: string; sort_order: number }[];
-      }[]
-    >();
-
-  const seasonActivities = seasonActivitiesRaw ?? [];
-  const approvedActivities = seasonActivities.filter(
-    (a) => a.status === "approved",
-  );
+    .eq("status", "approved" satisfies ActivityStatus)
+    .returns<{ activity_date: string }[]>();
 
   const weekCount = seasonWeekCount(season.start_date, season.end_date);
   const datesByWeek: Set<string>[] = Array.from(
     { length: weekCount },
     () => new Set(),
   );
-  for (const activity of approvedActivities) {
+  for (const activity of approvedActivities ?? []) {
     const weekIndex = seasonWeekIndexForDate(
       season.start_date,
       activity.activity_date,
@@ -162,21 +122,6 @@ async function SeasonProgress({
   ).length;
   const achieved = datesByWeek[currentWeekIndex]?.size ?? 0;
   const remaining = Math.max(WEEKLY_GOAL - achieved, 0);
-
-  // Not deduped by date: a rejected submission and the resubmission that
-  // replaced it can share a date, and both are worth showing.
-  const weekActivitiesRaw = seasonActivities.filter(
-    (activity) =>
-      activity.activity_date >= start && activity.activity_date <= end,
-  );
-  const weekActivities = await Promise.all(
-    weekActivitiesRaw.map(async (activity) => ({
-      ...activity,
-      photoUrls: await getSignedPhotoUrls(supabase, activity.activity_photos),
-      photoStoragePaths: activity.activity_photos.map((p) => p.storage_path),
-    })),
-  );
-  const canDeleteThisSeason = isWithinCertificationGrace(season.end_date);
 
   return (
     <>
@@ -213,23 +158,6 @@ async function SeasonProgress({
               : "이번 시즌으로 마무리"}
           </p>
         )}
-      </section>
-
-      <section>
-        <SectionTitle>
-          이번 주 인증 기록 ({formatKoreanDate(start)}~{formatKoreanDate(end)})
-        </SectionTitle>
-        <ActivityStatusList
-          activities={weekActivities}
-          emptyMessage="아직 이번 주 인증 기록이 없어요."
-          canDelete={canDeleteThisSeason}
-        />
-        <Link
-          href="/history"
-          className="mt-3 block text-center text-sm font-medium text-ink-tertiary hover:text-ink"
-        >
-          시즌 전체 기록 보기 →
-        </Link>
       </section>
     </>
   );

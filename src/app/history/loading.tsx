@@ -12,7 +12,6 @@ export default function Loading() {
         </>
       }
       mainClassName="mx-auto flex w-full max-w-md flex-1 items-center justify-center px-6 py-6"
-      bottomNav={{ active: "home" }}
     >
       <LoadingSpinner />
     </PageShell>

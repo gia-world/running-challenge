@@ -29,7 +29,8 @@ export default async function FeedPage() {
     <PageShell
       teamName={viewer.teamName}
       header={<PageTitle>피드</PageTitle>}
-      bottomNav={{ active: "feed", isAdmin: viewer.teamRole === "admin" }}
+      isAdmin={viewer.teamRole === "admin"}
+      bottomNav={{ active: "feed" }}
     >
       <SeasonGate viewer={viewer}>
         <Feed userId={user.id} />

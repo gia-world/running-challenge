@@ -32,7 +32,8 @@ export default async function CertifyPage({
     <PageShell
       teamName={viewer.teamName}
       header={<PageTitle>인증하기</PageTitle>}
-      bottomNav={{ active: "certify", isAdmin: viewer.teamRole === "admin" }}
+      isAdmin={viewer.teamRole === "admin"}
+      bottomNav={{ active: "certify" }}
     >
       {hasOverlap && viewer.activeSeason && viewer.graceSeason && (
         <div className="flex flex-col gap-2">

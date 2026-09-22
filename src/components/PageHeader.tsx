@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 import { TeamEyebrow } from "./TeamEyebrow";
+import { HamburgerMenu } from "./HamburgerMenu";
 
 export function PageHeader({
   teamName,
   eyebrowSkeleton = false,
   suffix,
-  action,
+  isAdmin = false,
   children,
 }: {
   teamName?: string | null;
@@ -17,7 +18,7 @@ export function PageHeader({
    */
   eyebrowSkeleton?: boolean;
   suffix?: string;
-  action?: ReactNode;
+  isAdmin?: boolean;
   children?: ReactNode;
 }) {
   return (
@@ -30,7 +31,7 @@ export function PageHeader({
         )}
         {children}
       </div>
-      {action}
+      <HamburgerMenu isAdmin={isAdmin} />
     </header>
   );
 }

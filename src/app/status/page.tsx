@@ -83,7 +83,8 @@ export default async function StatusPage() {
     <PageShell
       teamName={viewer.teamName}
       header={<PageTitle>현황판</PageTitle>}
-      bottomNav={{ active: "status", isAdmin: viewer.teamRole === "admin" }}
+      isAdmin={viewer.teamRole === "admin"}
+      bottomNav={{ active: "status" }}
     >
       <StatusBoard
         isSeasonMember={viewer.isSeasonMember}
