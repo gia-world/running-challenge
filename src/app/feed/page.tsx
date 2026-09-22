@@ -8,6 +8,7 @@ import { formatKoreanDate } from "@/lib/format";
 import { describeSeasonOccurrence } from "@/lib/season";
 import { getSignedPhotoUrls } from "@/lib/photos";
 import { requireTeamViewer } from "@/lib/viewer";
+import { isWithinCertificationGrace } from "@/lib/week";
 
 const FEED_LIMIT = 50;
 
@@ -62,10 +63,15 @@ async function Feed({ userId }: { userId: string }) {
       seasonIds.length > 0
         ? supabase
             .from("seasons")
-            .select("id, start_date, settled_at")
+            .select("id, start_date, end_date, settled_at")
             .in("id", seasonIds)
         : Promise.resolve({
-            data: [] as { id: string; start_date: string; settled_at: string | null }[],
+            data: [] as {
+              id: string;
+              start_date: string;
+              end_date: string;
+              settled_at: string | null;
+            }[],
           }),
       seasonIds.length > 0
         ? supabase
@@ -102,6 +108,9 @@ async function Feed({ userId }: { userId: string }) {
   const seasonStartDates = new Map(
     (seasons ?? []).map((s) => [s.id, s.start_date]),
   );
+  const seasonEndDates = new Map(
+    (seasons ?? []).map((s) => [s.id, s.end_date]),
+  );
   const settledSeasonIds = new Set(
     (seasons ?? []).filter((s) => s.settled_at).map((s) => s.id),
   );
@@ -136,6 +145,7 @@ async function Feed({ userId }: { userId: string }) {
       const photoUrls = await getSignedPhotoUrls(supabase, row.activity_photos);
 
       const seasonStart = seasonStartDates.get(row.season_id);
+      const seasonEnd = seasonEndDates.get(row.season_id);
       const dates =
         datesByUserSeason.get(`${row.user_id}:${row.season_id}`) ?? [];
       const occurrence = seasonStart
@@ -155,6 +165,7 @@ async function Feed({ userId }: { userId: string }) {
         ),
         requestedByMe: requestedByMe.has(row.id),
         isSeasonSettled: settledSeasonIds.has(row.season_id),
+        canDelete: !!seasonEnd && isWithinCertificationGrace(seasonEnd),
       };
     }),
   );
@@ -201,6 +212,7 @@ async function Feed({ userId }: { userId: string }) {
             currentUserId={userId}
             isOwnActivity={item.user_id === userId}
             isSeasonSettled={item.isSeasonSettled}
+            canDelete={item.canDelete}
             photoStoragePaths={item.photoStoragePaths}
             initialReactions={item.reactions}
             initialRequested={item.requestedByMe}

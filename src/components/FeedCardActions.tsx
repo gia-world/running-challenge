@@ -28,6 +28,7 @@ export function FeedCardActions({
   currentUserId,
   isOwnActivity,
   isSeasonSettled,
+  canDelete,
   photoStoragePaths,
   initialReactions,
   initialRequested,
@@ -36,6 +37,8 @@ export function FeedCardActions({
   currentUserId: string;
   isOwnActivity: boolean;
   isSeasonSettled: boolean;
+  /** Whether the activity's season is still within its certification grace window — deleting shouldn't be possible once certifying for it no longer is. */
+  canDelete: boolean;
   photoStoragePaths: string[];
   initialReactions: { emoji: string; count: number; reactedByMe: boolean }[];
   initialRequested: boolean;
@@ -282,7 +285,7 @@ export function FeedCardActions({
           </button>
         )}
 
-        {isOwnActivity && !isSeasonSettled && (
+        {isOwnActivity && canDelete && (
           <button
             type="button"
             onClick={() => setIsConfirmingDelete(true)}

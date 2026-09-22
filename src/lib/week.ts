@@ -31,3 +31,17 @@ export function isBeforeNoonInSeoul(): boolean {
   );
   return hour < 12;
 }
+
+/**
+ * Whether a season is still within its certification grace window — today
+ * is on or before the season's end date, or it's the very next day and
+ * still before noon KST. Mirrors the grace check loadViewerContext already
+ * does for certification itself, reused here to gate deleting an activity:
+ * once certification for a season closes, undoing one shouldn't be
+ * possible either.
+ */
+export function isWithinCertificationGrace(seasonEndDate: string): boolean {
+  const today = todayInSeoul();
+  if (today <= seasonEndDate) return true;
+  return seasonEndDate === yesterdayInSeoul() && isBeforeNoonInSeoul();
+}
