@@ -22,10 +22,10 @@ export type ReactionState = { count: number; reactedByMe: boolean };
 
 /**
  * The feed card's reaction/재인증 요청 row — a controlled component so the
- * same reaction data can be shown both in the collapsed feed card and
- * inside PhotoViewerModal without the two drifting out of sync. `reactions`
- * and `requested` live in the parent (FeedCard); only picker-open/pending
- * state, which resets harmlessly whenever this remounts, stays local here.
+ * same reaction data can be shown consistently wherever an activity shows
+ * up (feed card, activity detail page). `reactions` and `requested` live
+ * in the caller; only picker-open/pending state, which resets harmlessly
+ * whenever this remounts, stays local here.
  */
 export function ReactionBar({
   activityId,
@@ -36,7 +36,6 @@ export function ReactionBar({
   onReactionsChange,
   requested,
   onRequestedChange,
-  dark = false,
 }: {
   activityId: string;
   currentUserId: string;
@@ -46,8 +45,6 @@ export function ReactionBar({
   onReactionsChange: (next: Record<string, ReactionState>) => void;
   requested: boolean;
   onRequestedChange: (next: boolean) => void;
-  /** The modal renders this against a dark backdrop — swaps text/border colors to match. */
-  dark?: boolean;
 }) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   // A set, not a single value — multi-select means several emoji requests
@@ -157,30 +154,12 @@ export function ReactionBar({
 
   const activeReactions = REACTION_EMOJIS.filter((emoji) => (reactions[emoji]?.count ?? 0) > 0);
 
-  const chipInactive = dark
-    ? "flex items-center gap-1 rounded-full border border-white/20 px-2 py-1 text-white/70"
-    : "flex items-center gap-1 rounded-full border border-border px-2 py-1 text-ink-secondary";
-  const addButtonClass = dark
-    ? "flex items-center justify-center rounded-full border border-dashed border-white/30 px-2 py-1 text-white/60"
-    : "flex items-center justify-center rounded-full border border-dashed border-border-strong px-2 py-1 text-ink-tertiary";
-  const requestInactiveClass = dark
-    ? "ml-auto text-white/60 hover:text-white"
-    : "ml-auto text-ink-tertiary hover:text-ink";
-  const pickerWrapClass = dark ? "flex flex-wrap gap-1.5 rounded-xl bg-white/10 p-2" : "flex flex-wrap gap-1.5 rounded-xl bg-subtle p-2";
-  const pickerInactiveClass = dark
-    ? "flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-base"
-    : "flex h-8 w-8 items-center justify-center rounded-full bg-surface text-base";
-
   return (
     <div
       ref={containerRef}
-      className={
-        dark
-          ? "flex flex-col gap-2 px-4 py-3 text-sm"
-          : "flex flex-col gap-2 border-t border-border-subtle px-4 py-2 text-sm"
-      }
+      className="flex flex-col gap-2 border-t border-border-subtle px-4 py-3 text-base"
     >
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-2">
         {/* Hidden while the picker's open so picking emojis (which changes
             how many chips there are) never reflows this row mid-selection —
             it only reappears once the picker closes. */}
@@ -195,8 +174,8 @@ export function ReactionBar({
                 disabled={pendingEmojis.has(emoji)}
                 className={
                   state.reactedByMe
-                    ? "flex items-center gap-1 rounded-full border border-primary-400 bg-primary-50 px-2 py-1 font-semibold text-primary-600"
-                    : chipInactive
+                    ? "flex items-center gap-1 rounded-full border border-primary-400 bg-primary-50 px-2.5 py-1.5 font-semibold text-primary-600"
+                    : "flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-ink-secondary"
                 }
               >
                 <span>{emoji}</span>
@@ -208,7 +187,7 @@ export function ReactionBar({
         <button
           type="button"
           onClick={() => setIsPickerOpen((open) => !open)}
-          className={addButtonClass}
+          className="flex items-center justify-center rounded-full border border-dashed border-border-strong px-2.5 py-1.5 text-ink-tertiary"
           aria-label="반응 추가"
         >
           {isPickerOpen ? "✕" : "+"}
@@ -219,7 +198,7 @@ export function ReactionBar({
             type="button"
             onClick={toggleRequest}
             disabled={isRequesting}
-            className={requested ? "ml-auto font-semibold text-danger" : requestInactiveClass}
+            className={requested ? "ml-auto font-semibold text-danger" : "ml-auto text-ink-tertiary hover:text-ink"}
           >
             {requested ? "재인증 요청 취소" : "재인증 요청"}
           </button>
@@ -227,7 +206,7 @@ export function ReactionBar({
       </div>
 
       {isPickerOpen && (
-        <div className={pickerWrapClass}>
+        <div className="flex flex-wrap gap-2 rounded-xl bg-subtle p-2">
           {REACTION_EMOJIS.map((emoji) => {
             const reactedByMe = reactions[emoji]?.reactedByMe ?? false;
             return (
@@ -238,8 +217,8 @@ export function ReactionBar({
                 disabled={pendingEmojis.has(emoji)}
                 className={
                   reactedByMe
-                    ? "flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-base ring-2 ring-primary-400"
-                    : pickerInactiveClass
+                    ? "flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-lg ring-2 ring-primary-400"
+                    : "flex h-9 w-9 items-center justify-center rounded-full bg-surface text-lg"
                 }
               >
                 {emoji}
