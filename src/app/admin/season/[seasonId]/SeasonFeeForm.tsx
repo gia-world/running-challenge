@@ -8,6 +8,7 @@ import {
   DEFAULT_ENTRY_FEE,
   DEFAULT_REFUND_PER_CERTIFICATION,
 } from "@/components/SeasonFeeFields";
+import { Button } from "@/components/Button";
 
 export function SeasonFeeForm({
   seasonId,
@@ -73,13 +74,9 @@ export function SeasonFeeForm({
           {initialRefundPerCertification?.toLocaleString("ko-KR")}원 환급
         </span>
         {!readOnly && (
-          <button
-            type="button"
-            onClick={() => setIsEditing(true)}
-            className="shrink-0 rounded-xl bg-primary px-3 py-2 font-semibold text-white"
-          >
+          <Button size="pill" onClick={() => setIsEditing(true)}>
             수정
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -100,13 +97,9 @@ export function SeasonFeeForm({
 
       {error && <p className="text-sm text-danger">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
-      >
+      <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "저장 중..." : "저장하기"}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/Input";
+import { Button } from "@/components/Button";
 
 export function JoinForm({ initialCode }: { initialCode?: string }) {
   const router = useRouter();
@@ -70,13 +71,9 @@ export function JoinForm({ initialCode }: { initialCode?: string }) {
         className="text-center"
       />
       {error && <p className="text-sm text-danger">{error}</p>}
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
-      >
+      <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "참여 중..." : "참여하기"}
-      </button>
+      </Button>
     </form>
   );
 }

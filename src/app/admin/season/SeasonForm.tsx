@@ -13,6 +13,7 @@ import {
 import { SectionTitle } from "@/components/SectionTitle";
 import { Checkbox } from "@/components/Checkbox";
 import { Input } from "@/components/Input";
+import { Button } from "@/components/Button";
 
 type ExistingSeason = { id: string; start_date: string; end_date: string };
 
@@ -153,17 +154,13 @@ export function SeasonForm({
       )}
       {error && <p className="text-sm text-danger">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
-      >
+      <Button type="submit" disabled={isSubmitting}>
         {isSubmitting
           ? "생성 중..."
           : needsOverlapConfirm
             ? "그래도 만들기"
             : "시즌 만들기"}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/Button";
 
 export function SettleSeasonButton({
   seasonId,
@@ -53,18 +54,13 @@ export function SettleSeasonButton({
       {error && (
         <p className="text-sm text-danger">{error}</p>
       )}
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={isSubmitting}
-        className="rounded-xl bg-inverse px-5 py-3 font-semibold text-white disabled:opacity-60"
-      >
+      <Button variant="inverse" size="auto" onClick={handleClick} disabled={isSubmitting}>
         {isSubmitting
           ? "처리 중..."
           : needsConfirm
             ? "그래도 정산완료"
             : "정산완료"}
-      </button>
+      </Button>
     </div>
   );
 }

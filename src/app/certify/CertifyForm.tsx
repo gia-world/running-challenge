@@ -10,6 +10,7 @@ import { ErrorBanner } from "@/components/ErrorBanner";
 import { BottomSheet } from "@/components/BottomSheet";
 import { RenewalToggle } from "@/components/RenewalToggle";
 import { Input } from "@/components/Input";
+import { Button } from "@/components/Button";
 
 type PendingPhoto = { file: File; previewUrl: string };
 
@@ -168,13 +169,9 @@ export function CertifyForm({
             🎉 이번 주 목표 {weeklyGoal}/{weeklyGoal} 달성!
           </p>
         )}
-        <button
-          type="button"
-          onClick={() => router.push("/home")}
-          className="mt-4 rounded-xl bg-primary px-5 py-3 font-semibold text-white"
-        >
+        <Button size="auto" className="mt-4" onClick={() => router.push("/home")}>
           홈으로 가기
-        </button>
+        </Button>
 
         {activityDate === today &&
           showRenewalPrompt &&
@@ -265,17 +262,13 @@ export function CertifyForm({
 
       {error && <ErrorBanner>{error}</ErrorBanner>}
 
-      <button
-        type="submit"
-        disabled={isSubmitting || isBlocked}
-        className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
-      >
+      <Button type="submit" disabled={isSubmitting || isBlocked}>
         {isBlocked
           ? "오늘은 이미 인증했어요"
           : isSubmitting
             ? "업로드 중..."
             : "인증하기"}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -11,6 +11,7 @@ import { BottomSheet } from "@/components/BottomSheet";
 import { SegmentedTabs } from "@/components/SegmentedTabs";
 import { SectionTitle } from "@/components/SectionTitle";
 import { SeasonGate } from "@/components/SeasonGate";
+import { Button } from "@/components/Button";
 import type { WeekStat } from "@/lib/seasonStats";
 import type { SeasonHistoryEntry } from "@/lib/seasonHistory";
 
@@ -394,13 +395,9 @@ export function StatusBoard({
                 ))}
               </div>
             )}
-            <button
-              type="button"
-              onClick={() => setModal(null)}
-              className="mt-4 w-full rounded-xl bg-muted-strong py-2.5 text-base font-medium text-ink"
-            >
+            <Button variant="secondary" className="mt-4" onClick={() => setModal(null)}>
               닫기
-            </button>
+            </Button>
           </div>
         </div>
       )}

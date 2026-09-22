@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/Button";
 
 export function ParticipantToggle({
   seasonId,
@@ -37,17 +38,13 @@ export function ParticipantToggle({
   }
 
   return (
-    <button
-      type="button"
+    <Button
+      size="pill"
+      variant={isParticipant ? "secondary" : "primary"}
       onClick={toggle}
       disabled={isSubmitting}
-      className={
-        isParticipant
-          ? "shrink-0 rounded-xl bg-muted-strong px-3 py-2 text-base font-medium text-ink disabled:opacity-60"
-          : "shrink-0 rounded-xl bg-primary px-3 py-2 text-base font-semibold text-white disabled:opacity-60"
-      }
     >
       {isParticipant ? "참여 취소" : "참여 추가"}
-    </button>
+    </Button>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/Input";
+import { Button } from "@/components/Button";
 
 const REJECT_REASONS = [
   "날짜가 안 보여요",
@@ -122,25 +123,21 @@ export function ReviewItem({ activityId }: { activityId: string }) {
         />
         {error && <p className="text-sm text-danger">{error}</p>}
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={reject}
-            disabled={isSubmitting}
-            className="flex-1 rounded-xl bg-danger py-2 text-base font-semibold text-white disabled:opacity-60"
-          >
+          <Button variant="danger" size="auto" className="flex-1" onClick={reject} disabled={isSubmitting}>
             반려 확정
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="secondary"
+            size="auto"
+            className="flex-1"
             onClick={() => {
               setIsShowingReject(false);
               setError(null);
             }}
             disabled={isSubmitting}
-            className="flex-1 rounded-xl bg-muted-strong py-2 text-base font-semibold text-ink"
           >
             닫기
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -150,22 +147,18 @@ export function ReviewItem({ activityId }: { activityId: string }) {
     <div className="mt-3 flex flex-col gap-2">
       {error && <p className="text-sm text-danger">{error}</p>}
       <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={approve}
-          disabled={isSubmitting}
-          className="flex-1 rounded-xl bg-primary py-2 text-base font-semibold text-white disabled:opacity-60"
-        >
+        <Button size="auto" className="flex-1" onClick={approve} disabled={isSubmitting}>
           인정 유지
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="secondary"
+          size="auto"
+          className="flex-1"
           onClick={() => setIsShowingReject(true)}
           disabled={isSubmitting}
-          className="flex-1 rounded-xl bg-muted-strong py-2 text-base font-semibold text-ink"
         >
           반려
-        </button>
+        </Button>
       </div>
     </div>
   );

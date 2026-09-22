@@ -51,14 +51,29 @@ rounded-2xl border border-border bg-surface px-4 py-3
 
 ## 버튼
 
-- **Primary**: `bg-primary text-white font-semibold`, 화면당 하나만.
-- **Secondary**: `bg-muted-strong text-ink`.
-- **Inverse (강한 확인/2단계 액션)**: `bg-inverse text-white` — 정산완료의 "그래도 진행" 버튼처럼, 색은 danger가 아니지만 되돌리기 무거운 액션.
-- **Danger**: `bg-danger text-white` — 반려 확정처럼 진짜 파괴적인 액션만.
-- **Ghost**: 배경 없음, `text-primary text-sm font-medium` — 지금은 실제로 쓰는 곳이 없음. 카드 안 요약 텍스트 옆 "수정"/"변경" 같은 인라인 액션은 Ghost가 아니라 아래 소형 알약을 쓴다 (SeasonFeeForm의 "수정"이 한동안 Ghost로 혼자 떠 있었는데, 나머지 전부와 맞춰 소형 알약으로 바꿨다).
-- **소형 알약 (카드 안 인라인 액션)**: `rounded-xl bg-primary px-3 py-2 font-semibold text-white` (또는 `bg-muted-strong text-ink`) — BankForm "변경", RenewalToggle "변경", SeasonFeeForm "수정", ParticipantToggle, InviteCodeCard 전부 이 크기.
-- **전체 너비 제출 버튼**: `rounded-xl bg-primary px-5 py-3.5 font-semibold text-white` — 폼 맨 아래 꽉 차는 제출 버튼은 전부 `py-3.5`로 통일 (전에는 py-3.5/py-3/py-2.5가 근거 없이 섞여 있었음). `items-center`로 버튼이 내용 너비만큼만 줄어드는 경우(CertifyForm 완료 화면의 "홈으로 가기")는 꽉 찬 버튼이 아니라서 예외 — `py-3`.
-- 모든 버튼 `disabled:opacity-60`으로 통일 (부분적으로 회색 처리하지 않음).
+채워진(filled) 버튼은 전부 `src/components/Button.tsx`를 쓴다 — 직접 `<button className="rounded-xl bg-... px-... py-...">`를 새로 짜지 않는다. `variant`(색)와 `size`(크기/너비)를 조합해서 쓴다.
+
+```tsx
+<Button>참여하기</Button>
+<Button variant="secondary">아니요, 실명을 입력할게요</Button>
+<Button variant="inverse" size="auto">정산완료</Button>
+<Button variant="danger" size="auto" className="flex-1">반려 확정</Button>
+<Button size="pill">변경</Button>
+```
+
+**variant (색)**
+- **primary** (기본값): `bg-primary text-white font-semibold` — 화면당 가장 중요한 액션 하나에만.
+- **secondary**: `bg-muted-strong text-ink font-medium`.
+- **inverse** (강한 확인/2단계 액션): `bg-inverse text-white` — 정산완료의 "그래도 진행" 버튼처럼, 색은 danger가 아니지만 되돌리기 무거운 액션.
+- **danger**: `bg-danger text-white` — 반려 확정처럼 진짜 파괴적인 액션만.
+- `disabled:opacity-60`이 모든 variant에 기본 포함 (부분적으로 회색 처리하지 않음).
+
+**size (크기/너비)** — 무게가 줄어드는 3단 체계:
+- **full** (기본값, `w-full px-5 py-3.5`): 폼 맨 아래 꽉 차는 제출 버튼.
+- **auto** (`px-5 py-3`): 내용 너비만큼만 차지하는 단독 액션(CertifyForm 완료 화면의 "홈으로 가기", 정산완료). 두 개를 나란히 두는 화면(연장 여부 선택, 반려 확인)은 `className="flex-1"`을 얹어서 각각 폭을 나눠 쓴다.
+- **pill** (`shrink-0 px-3 py-2`): 카드 안 요약 텍스트 옆 인라인 액션("변경"/"수정"/"참여 추가" 등). `shrink-0`이 기본 포함이라 옆에 긴 텍스트가 있어도 버튼 자체가 눌려 찌그러지지 않는다 (한동안 BankForm/RenewalToggle의 "변경"에 이게 빠져 있어서 글자가 세로로 줄바꿈되는 버그가 있었음). 옆 버튼과 폭을 나눠 써야 하면(InviteCodeCard의 "초대 링크 복사") `className="flex-1"`을 더해서 shrink-0과 flex-1을 같이 쓴다 — 절대 내용보다 좁아지진 않으면서 남는 공간은 채운다.
+
+**컴포넌트 대상이 아닌 버튼**: 텍스트만 있고 배경이 없는 토글/링크형 버튼(로그아웃, 정렬 전환, "관리자로 지정")은 화면마다 활성/비활성 색 로직이 달라서 대상이 아니다. 카카오 로그인 버튼(고유 브랜드 컬러), 피드 리액션 피커(별도 섹션), 반려 사유 프리셋 칩도 각자 다른 모양이라 예외.
 
 ## 인풋
 

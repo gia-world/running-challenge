@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/Button";
 
 export function RenewalToggle({
   seasonId,
@@ -59,14 +60,9 @@ export function RenewalToggle({
             "연장 안 함 — 환급액을 그대로 받아요."
           )}
         </span>
-        <button
-          type="button"
-          onClick={() => setChoice(null)}
-          disabled={isSubmitting}
-          className="shrink-0 rounded-xl bg-primary px-3 py-2 font-semibold text-white disabled:opacity-60"
-        >
+        <Button size="pill" onClick={() => setChoice(null)} disabled={isSubmitting}>
           변경
-        </button>
+        </Button>
       </div>
     );
   }
@@ -81,22 +77,18 @@ export function RenewalToggle({
         <p className="text-sm text-danger">{error}</p>
       )}
       <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setRenewal(true)}
-          disabled={isSubmitting}
-          className="flex-1 rounded-xl bg-primary px-4 py-3 font-semibold text-white disabled:opacity-60"
-        >
+        <Button size="auto" className="flex-1" onClick={() => setRenewal(true)} disabled={isSubmitting}>
           연장할게요
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="secondary"
+          size="auto"
+          className="flex-1"
           onClick={() => setRenewal(false)}
           disabled={isSubmitting}
-          className="flex-1 rounded-xl bg-muted-strong px-4 py-3 font-semibold text-ink disabled:opacity-60"
         >
           환급 받을게요
-        </button>
+        </Button>
       </div>
     </div>
   );

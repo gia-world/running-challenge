@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/Input";
+import { Button } from "@/components/Button";
 
 export function BankForm({
   userId,
@@ -53,13 +54,9 @@ export function BankForm({
         <span className="text-base text-ink">
           {bankName} {accountNumber}
         </span>
-        <button
-          type="button"
-          onClick={() => setIsEditing(true)}
-          className="shrink-0 rounded-xl bg-primary px-3 py-2 font-semibold text-white"
-        >
+        <Button size="pill" onClick={() => setIsEditing(true)}>
           변경
-        </button>
+        </Button>
       </div>
     );
   }
@@ -87,13 +84,9 @@ export function BankForm({
         <p className="text-sm text-danger">{error}</p>
       )}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
-      >
+      <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "저장 중..." : "저장하기"}
-      </button>
+      </Button>
     </form>
   );
 }

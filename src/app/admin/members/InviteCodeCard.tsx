@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/Button";
 
 function randomInviteCode(): string {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 8);
@@ -63,31 +64,18 @@ export function InviteCodeCard({
         <p className="flex-1 rounded-lg bg-muted px-3 py-2 text-center font-mono text-lg font-bold tracking-widest text-ink-strong">
           {code}
         </p>
-        <button
-          type="button"
-          onClick={() => copy(code, "code")}
-          className="rounded-xl bg-muted-strong px-3 py-2 text-base font-medium text-ink"
-        >
+        <Button size="pill" variant="secondary" onClick={() => copy(code, "code")}>
           {copied === "code" ? "복사됨" : "복사"}
-        </button>
+        </Button>
       </div>
 
       <div className="mt-3 flex gap-2">
-        <button
-          type="button"
-          onClick={() => copy(inviteLink, "link")}
-          className="flex-1 rounded-xl bg-primary px-3 py-2 text-base font-semibold text-white"
-        >
+        <Button size="pill" className="flex-1" onClick={() => copy(inviteLink, "link")}>
           {copied === "link" ? "링크 복사됨" : "초대 링크 복사"}
-        </button>
-        <button
-          type="button"
-          onClick={regenerate}
-          disabled={isRegenerating}
-          className="rounded-xl bg-muted-strong px-3 py-2 text-base font-medium text-ink disabled:opacity-60"
-        >
+        </Button>
+        <Button size="pill" variant="secondary" onClick={regenerate} disabled={isRegenerating}>
           {isRegenerating ? "재발급 중..." : "재발급"}
-        </button>
+        </Button>
       </div>
 
       {error && <p className="mt-2 text-sm text-danger">{error}</p>}

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/Input";
+import { Button } from "@/components/Button";
 
 export function OnboardingForm({
   userId,
@@ -65,13 +66,9 @@ export function OnboardingForm({
         {error && (
           <p className="text-sm text-danger">{error}</p>
         )}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
-        >
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "저장 중..." : "이 이름으로 시작하기"}
-        </button>
+        </Button>
       </form>
     );
   }
@@ -89,22 +86,12 @@ export function OnboardingForm({
         <p className="text-sm text-danger">{error}</p>
       )}
 
-      <button
-        type="button"
-        onClick={() => confirmName(currentName)}
-        disabled={isSubmitting}
-        className="rounded-xl bg-primary px-5 py-3.5 font-semibold text-white disabled:opacity-60"
-      >
+      <Button onClick={() => confirmName(currentName)} disabled={isSubmitting}>
         네, 맞아요
-      </button>
-      <button
-        type="button"
-        onClick={() => setIsEditing(true)}
-        disabled={isSubmitting}
-        className="rounded-xl bg-muted-strong px-5 py-3.5 font-semibold text-ink"
-      >
+      </Button>
+      <Button variant="secondary" onClick={() => setIsEditing(true)} disabled={isSubmitting}>
         아니요, 실명을 입력할게요
-      </button>
+      </Button>
     </div>
   );
 }
