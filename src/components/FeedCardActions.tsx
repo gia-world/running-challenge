@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { CERTIFICATIONS_BUCKET } from "@/lib/photos";
+import { Button } from "@/components/Button";
 
 const UNIQUE_VIOLATION = "23505";
 
@@ -25,6 +28,7 @@ export function FeedCardActions({
   currentUserId,
   isOwnActivity,
   isSeasonSettled,
+  photoStoragePaths,
   initialReactions,
   initialRequested,
 }: {
@@ -32,9 +36,14 @@ export function FeedCardActions({
   currentUserId: string;
   isOwnActivity: boolean;
   isSeasonSettled: boolean;
+  photoStoragePaths: string[];
   initialReactions: { emoji: string; count: number; reactedByMe: boolean }[];
   initialRequested: boolean;
 }) {
+  const router = useRouter();
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [reactions, setReactions] = useState<Record<string, ReactionState>>(
     () =>
       Object.fromEntries(
@@ -152,6 +161,71 @@ export function FeedCardActions({
     }
   }
 
+  async function deleteActivity() {
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    const supabase = createClient();
+    const { error } = await supabase.from("activities").delete().eq("id", activityId);
+
+    if (error) {
+      console.error("[feed] activity delete failed:", error.message);
+      setDeleteError("삭제에 실패했어요. 다시 시도해주세요.");
+      setIsDeleting(false);
+      return;
+    }
+
+    // Best-effort — the activity row is already gone (the part everyone
+    // else sees), so a leftover storage file just wastes space rather
+    // than leaving anything inconsistent for the user.
+    if (photoStoragePaths.length > 0) {
+      supabase.storage
+        .from(CERTIFICATIONS_BUCKET)
+        .remove(photoStoragePaths)
+        .then(({ error: storageError }) => {
+          if (storageError) {
+            console.error("[feed] certification photo cleanup failed:", storageError.message);
+          }
+        });
+    }
+
+    router.refresh();
+  }
+
+  if (isConfirmingDelete) {
+    return (
+      <div className="flex flex-col gap-2 border-t border-border-subtle px-4 py-2 text-sm">
+        <p className="text-ink-secondary">
+          삭제하면 인증샷과 기록이 모두 사라져요. 정말 삭제할까요?
+        </p>
+        {deleteError && <span className="text-danger">{deleteError}</span>}
+        <div className="flex gap-2">
+          <Button
+            variant="danger"
+            size="auto"
+            className="flex-1"
+            onClick={deleteActivity}
+            disabled={isDeleting}
+          >
+            {isDeleting ? "삭제 중..." : "삭제"}
+          </Button>
+          <Button
+            variant="secondary"
+            size="auto"
+            className="flex-1"
+            onClick={() => {
+              setIsConfirmingDelete(false);
+              setDeleteError(null);
+            }}
+            disabled={isDeleting}
+          >
+            닫기
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const activeReactions = REACTION_EMOJIS.filter((emoji) => (reactions[emoji]?.count ?? 0) > 0);
 
   return (
@@ -205,6 +279,16 @@ export function FeedCardActions({
             }
           >
             {requested ? "재인증 요청 취소" : "재인증 요청"}
+          </button>
+        )}
+
+        {isOwnActivity && !isSeasonSettled && (
+          <button
+            type="button"
+            onClick={() => setIsConfirmingDelete(true)}
+            className="ml-auto text-ink-tertiary hover:text-danger"
+          >
+            삭제
           </button>
         )}
       </div>

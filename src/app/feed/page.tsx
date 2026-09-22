@@ -145,6 +145,7 @@ async function Feed({ userId }: { userId: string }) {
       return {
         ...row,
         photoUrls,
+        photoStoragePaths: row.activity_photos.map((p) => p.storage_path),
         occurrenceLabel: occurrence
           ? `${occurrence.weekIndex + 1}주차 ${occurrence.ordinal}회`
           : null,
@@ -200,6 +201,7 @@ async function Feed({ userId }: { userId: string }) {
             currentUserId={userId}
             isOwnActivity={item.user_id === userId}
             isSeasonSettled={item.isSeasonSettled}
+            photoStoragePaths={item.photoStoragePaths}
             initialReactions={item.reactions}
             initialRequested={item.requestedByMe}
           />
