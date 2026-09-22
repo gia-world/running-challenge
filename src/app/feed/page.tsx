@@ -17,6 +17,7 @@ type FeedRow = {
   season_id: string;
   activity_date: string;
   distance_km: number;
+  note: string | null;
   profiles: { name: string } | null;
   activity_photos: { storage_path: string; sort_order: number }[];
 };
@@ -42,7 +43,7 @@ async function Feed({ userId }: { userId: string }) {
   const { data: activities, error } = await supabase
     .from("activities")
     .select(
-      "id, user_id, season_id, activity_date, distance_km, profiles!user_id(name), activity_photos(storage_path, sort_order)",
+      "id, user_id, season_id, activity_date, distance_km, note, profiles!user_id(name), activity_photos(storage_path, sort_order)",
     )
     .eq("status", "approved")
     .order("created_at", { ascending: false })
@@ -192,6 +193,7 @@ async function Feed({ userId }: { userId: string }) {
           photoStoragePaths={item.photoStoragePaths}
           initialReactions={item.reactions}
           initialRequested={item.requestedByMe}
+          note={item.note}
           caption={
             <>
               {item.profiles?.name ?? "러너"} · {formatKoreanDate(item.activity_date)}

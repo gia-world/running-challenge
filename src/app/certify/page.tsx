@@ -146,6 +146,7 @@ async function CertifyFormLoader({
       alreadyCertifiedToday={!!todaysActivity}
       achievedThisWeek={achievedThisWeek}
       weeklyGoal={WEEKLY_GOAL}
+      seasonStartDate={seasonStartDate}
       maxActivityDate={maxActivityDate}
       showRenewalPrompt={showRenewalPrompt}
     />

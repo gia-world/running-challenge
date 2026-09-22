@@ -28,6 +28,7 @@ export function FeedCard({
   initialRequested,
   infoRow,
   caption,
+  note,
 }: {
   activityId: string;
   currentUserId: string;
@@ -40,6 +41,7 @@ export function FeedCard({
   initialRequested: boolean;
   infoRow: ReactNode;
   caption: ReactNode;
+  note?: string | null;
 }) {
   const router = useRouter();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
@@ -86,10 +88,15 @@ export function FeedCard({
     onRequestedChange: setRequested,
   };
 
+  const noteBlock = note && (
+    <p className="whitespace-pre-wrap px-4 pb-2 text-sm text-ink-secondary">{note}</p>
+  );
+
   return (
     <article className="overflow-hidden rounded-2xl border border-border bg-surface">
       <FeedPhotoThumbnail photoUrls={photoUrls} alt="인증샷" onOpen={() => setIsViewerOpen(true)} />
       {infoRow}
+      {noteBlock}
       {!isViewerOpen && <ReactionBar {...reactionBarProps} />}
 
       {isViewerOpen && (
@@ -99,7 +106,12 @@ export function FeedCard({
           canDelete={canDelete}
           onClose={() => setIsViewerOpen(false)}
           onDelete={deleteActivity}
-          footer={<ReactionBar {...reactionBarProps} />}
+          footer={
+            <>
+              {noteBlock}
+              <ReactionBar {...reactionBarProps} />
+            </>
+          }
         />
       )}
     </article>

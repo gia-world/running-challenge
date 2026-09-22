@@ -6,11 +6,15 @@ import { createClient } from "@/lib/supabase/client";
 import { compressImage } from "@/lib/image";
 import { CERTIFICATIONS_BUCKET } from "@/lib/photos";
 import { todayInSeoul } from "@/lib/week";
+import { formatKoreanDate } from "@/lib/format";
 import { ErrorBanner } from "@/components/ErrorBanner";
 import { BottomSheet } from "@/components/BottomSheet";
 import { RenewalToggle } from "@/components/RenewalToggle";
 import { Input } from "@/components/Input";
+import { Textarea } from "@/components/Textarea";
 import { Button } from "@/components/Button";
+
+const NOTE_MAX_LENGTH = 300;
 
 type PendingPhoto = { file: File; previewUrl: string };
 
@@ -23,6 +27,7 @@ export function CertifyForm({
   alreadyCertifiedToday,
   achievedThisWeek,
   weeklyGoal,
+  seasonStartDate,
   maxActivityDate,
   showRenewalPrompt,
 }: {
@@ -31,6 +36,7 @@ export function CertifyForm({
   alreadyCertifiedToday: boolean;
   achievedThisWeek: number;
   weeklyGoal: number;
+  seasonStartDate: string;
   maxActivityDate: string;
   showRenewalPrompt: boolean;
 }) {
@@ -40,6 +46,7 @@ export function CertifyForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activityDate, setActivityDate] = useState(maxActivityDate);
   const [distanceKm, setDistanceKm] = useState("");
+  const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDone, setIsDone] = useState(false);
@@ -77,6 +84,13 @@ export function CertifyForm({
 
     if (isBlocked) {
       setError(ALREADY_CERTIFIED_MESSAGE);
+      return;
+    }
+
+    if (activityDate < seasonStartDate || activityDate > maxActivityDate) {
+      setError(
+        `${formatKoreanDate(seasonStartDate)}~${formatKoreanDate(maxActivityDate)} 사이 날짜만 선택할 수 있어요.`,
+      );
       return;
     }
 
@@ -124,6 +138,7 @@ export function CertifyForm({
         season_id: seasonId,
         activity_date: activityDate,
         distance_km: distance,
+        note: note.trim() || null,
         status: "approved",
       })
       .select("id")
@@ -272,6 +287,7 @@ export function CertifyForm({
         label="날짜"
         labelClassName="text-base font-medium text-ink"
         value={activityDate}
+        min={seasonStartDate}
         max={maxActivityDate}
         onChange={(e) => setActivityDate(e.target.value)}
       />
@@ -288,6 +304,18 @@ export function CertifyForm({
         placeholder="5.0"
         disabled={isBlocked}
       />
+
+      <label className="flex flex-col gap-2">
+        <span className="text-base font-medium text-ink">
+          하고 싶은 말 (선택)
+        </span>
+        <Textarea
+          value={note}
+          onChange={setNote}
+          maxLength={NOTE_MAX_LENGTH}
+          placeholder="나눠서 뛰었어요 등 남기고 싶은 말이 있으면 적어주세요"
+        />
+      </label>
 
       {error && <ErrorBanner>{error}</ErrorBanner>}
 

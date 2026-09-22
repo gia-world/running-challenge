@@ -98,7 +98,7 @@ rounded-2xl border border-border bg-surface px-4 py-3
 `<form className="flex flex-col gap-4">`처럼 필드들을 세로로 쌓는 폼의 최상위 컨테이너는 전부 `gap-4`. 필드 개수에 따라 `gap-3`/`gap-5`로 조금씩 다르게 쓰던 걸 통일했다 — 눈으로 봤을 때 특정 폼이 너무 빽빽하거나 헐렁해 보이면 그때 다시 조정.
 - `font-size`는 16px 미만이면 iOS Safari가 자동 확대하므로, `globals.css`의 전역 규칙(`input, select, textarea { font-size: 16px; }`)이 항상 이긴다 — 개별 인풋에 `text-sm`을 줘도 실제 렌더링은 16px.
 - 여러 필드가 몰려 있는 화면에서 `bg-muted`(인풋 채움)가 다른 `bg-muted` 요소(세그먼트 탭 트랙, 칩)와 바로 붙으면 구분이 안 간다 — 인풋 옆/위에 놓이는 트랙·칩 종류는 전부 한 단계 진한 `bg-muted-strong`을 쓴다 (아래 세그먼트 탭 섹션 참고).
-- `src/components/Textarea.tsx` — 여러 줄 입력이 필요할 때 쓰는 filled 텍스트에어리어. `Input`과 같은 배경/보더/포커스 스타일이고, 추가로 내용에 따라 자동으로 높이가 늘어나고(`scrollHeight` 기반) `maxLength`를 주면 우측 하단에 `n/max` 카운터가 뜬다. 아직 실제로 쓰는 화면은 없음.
+- `src/components/Textarea.tsx` — 여러 줄 입력이 필요할 때 쓰는 filled 텍스트에어리어. `Input`과 같은 배경/보더/포커스 스타일이고, 추가로 내용에 따라 자동으로 높이가 늘어나고(`scrollHeight` 기반) `maxLength`를 주면 우측 하단에 `n/max` 카운터가 뜬다. CertifyForm의 "하고 싶은 말(선택)"에서 처음 실사용.
 
 ## 체크박스 / 라디오 / 토글
 
@@ -196,7 +196,7 @@ rounded-2xl border border-border bg-surface px-4 py-3
 - 삭제는 `canDelete` prop 하나로 노출 여부를 정한다 — 호출부(서버 컴포넌트)가 본인 활동인지 + 시즌 그레이스 기간(`isWithinCertificationGrace`)인지를 미리 계산해서 넘긴다.
 - `footer` prop으로 리액션 바(`ReactionBar`)를 사진 아래에 끼워 넣을 수 있다 — 피드에서만 쓰고, 리액션이 없는 홈/시즌 전체 기록에서는 생략한다.
 
-`src/components/FeedCard.tsx` — 피드 목록의 접힌 카드(사진 썸네일 + 정보 줄 + 리액션 바). `isViewerOpen` 상태를 들고 있다가 사진을 탭하면 `PhotoViewerModal`을 띄운다. 리액션(`reactions`/`requested`)도 이 컴포넌트가 들고 있는 controlled 값이라, 접힌 카드에서 반응을 남기고 모달을 열어도(또는 그 반대도) 항상 같은 값을 보여준다 — 모달이 열려 있는 동안은 접힌 카드 쪽 `ReactionBar`를 숨기고(`{!isViewerOpen && ...}`) 모달의 `footer`에만 렌더링해서 리액션 UI가 동시에 두 군데 마운트되는 걸 막는다.
+`src/components/FeedCard.tsx` — 피드 목록의 접힌 카드(사진 썸네일 + 정보 줄 + 리액션 바). `isViewerOpen` 상태를 들고 있다가 사진을 탭하면 `PhotoViewerModal`을 띄운다. 리액션(`reactions`/`requested`)도 이 컴포넌트가 들고 있는 controlled 값이라, 접힌 카드에서 반응을 남기고 모달을 열어도(또는 그 반대도) 항상 같은 값을 보여준다 — 모달이 열려 있는 동안은 접힌 카드 쪽 `ReactionBar`를 숨기고(`{!isViewerOpen && ...}`) 모달의 `footer`에만 렌더링해서 리액션 UI가 동시에 두 군데 마운트되는 걸 막는다. 선택 항목인 `note`(인증 시 "하고 싶은 말")는 인스타 캡션처럼 `infoRow`와 `ReactionBar` 사이에 끼워 넣고, 모달을 열었을 때도 같은 자리(footer 안, ReactionBar 위)에 그대로 보여준다.
 
 `src/components/ReactionBar.tsx` — 이모지 리액션 + 재인증요청 UI. `reactions`/`requested`는 호출부가 주는 controlled 값이고, 픽커 열림 상태·pending 상태처럼 일시적인 UI 상태만 내부에서 관리한다. 크기·톤 분기 없이 접힌 피드 카드와 `PhotoViewerModal`의 `footer` 어디서든 완전히 같은 모습(`text-sm`)으로 렌더링한다 — "모달 안에서 리액션 바를 키울 필요 없다, 원래 카드 크기 그대로"라는 피드백으로, 한때 있었던 `size="large"` 변형은 다시 걷어냈다.
 
