@@ -8,9 +8,12 @@ import { createClient } from "@/lib/supabase/client";
 // TODO: 실제 카톡 수다방 링크로 교체.
 const CHAT_URL = "#";
 
-const ROW_CLASS = "rounded-xl px-3 py-2.5 text-left text-base font-medium hover:bg-muted";
-const SUB_ROW_CLASS = "rounded-xl py-2.5 pl-6 pr-3 text-left text-base font-medium hover:bg-muted";
-const GROUP_LABEL_CLASS = "px-3 pt-3 pb-1 text-sm font-semibold text-ink-tertiary";
+const ROW_CLASS =
+  "rounded-xl px-3 py-2.5 text-left text-base font-medium hover:bg-muted";
+const SUB_ROW_CLASS =
+  "rounded-xl py-2.5 pl-6 pr-3 text-left text-base font-medium hover:bg-muted";
+const GROUP_LABEL_CLASS =
+  "px-3 pt-3 pb-1 text-sm font-semibold text-ink-tertiary";
 
 const ADMIN_ITEMS = [
   { href: "/admin/review", label: "재인증 요청함" },
@@ -74,7 +77,9 @@ export function HamburgerMenu({ isAdmin = false }: { isAdmin?: boolean }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-base font-semibold text-ink-strong">메뉴</span>
+              <span className="text-base font-semibold text-ink-strong">
+                메뉴
+              </span>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
@@ -84,6 +89,18 @@ export function HamburgerMenu({ isAdmin = false }: { isAdmin?: boolean }) {
                 ✕
               </button>
             </div>
+
+            <p className={GROUP_LABEL_CLASS}>my 인증</p>
+            {MY_CERTIFICATIONS_ITEMS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={`${SUB_ROW_CLASS} text-ink`}
+              >
+                {item.label}
+              </Link>
+            ))}
 
             <a
               href={CHAT_URL}
@@ -95,6 +112,13 @@ export function HamburgerMenu({ isAdmin = false }: { isAdmin?: boolean }) {
               챌린지 수다방
             </a>
 
+            <Link
+              href="/mypage"
+              onClick={() => setIsOpen(false)}
+              className={`${ROW_CLASS} text-ink`}
+            >
+              설정
+            </Link>
             {isAdmin && (
               <>
                 <p className={GROUP_LABEL_CLASS}>관리자</p>
@@ -110,26 +134,6 @@ export function HamburgerMenu({ isAdmin = false }: { isAdmin?: boolean }) {
                 ))}
               </>
             )}
-
-            <Link
-              href="/mypage"
-              onClick={() => setIsOpen(false)}
-              className={`${ROW_CLASS} text-ink`}
-            >
-              설정
-            </Link>
-
-            <p className={GROUP_LABEL_CLASS}>my 인증</p>
-            {MY_CERTIFICATIONS_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={`${SUB_ROW_CLASS} text-ink`}
-              >
-                {item.label}
-              </Link>
-            ))}
 
             <div className="mt-auto border-t border-border-subtle pt-2">
               <button
