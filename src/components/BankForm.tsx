@@ -56,7 +56,7 @@ export function BankForm({
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          className="rounded-xl bg-primary px-3 py-2 font-semibold text-white"
+          className="shrink-0 rounded-xl bg-primary px-3 py-2 font-semibold text-white"
         >
           변경
         </button>

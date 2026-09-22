@@ -63,7 +63,7 @@ export function RenewalToggle({
           type="button"
           onClick={() => setChoice(null)}
           disabled={isSubmitting}
-          className="rounded-xl bg-primary px-3 py-2 font-semibold text-white disabled:opacity-60"
+          className="shrink-0 rounded-xl bg-primary px-3 py-2 font-semibold text-white disabled:opacity-60"
         >
           변경
         </button>
