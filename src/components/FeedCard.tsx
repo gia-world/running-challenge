@@ -99,7 +99,7 @@ export function FeedCard({
           canDelete={canDelete}
           onClose={() => setIsViewerOpen(false)}
           onDelete={deleteActivity}
-          footer={<ReactionBar {...reactionBarProps} size="large" />}
+          footer={<ReactionBar {...reactionBarProps} />}
         />
       )}
     </article>

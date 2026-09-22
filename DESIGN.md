@@ -198,7 +198,7 @@ rounded-2xl border border-border bg-surface px-4 py-3
 
 `src/components/FeedCard.tsx` — 피드 목록의 접힌 카드(사진 썸네일 + 정보 줄 + 리액션 바). `isViewerOpen` 상태를 들고 있다가 사진을 탭하면 `PhotoViewerModal`을 띄운다. 리액션(`reactions`/`requested`)도 이 컴포넌트가 들고 있는 controlled 값이라, 접힌 카드에서 반응을 남기고 모달을 열어도(또는 그 반대도) 항상 같은 값을 보여준다 — 모달이 열려 있는 동안은 접힌 카드 쪽 `ReactionBar`를 숨기고(`{!isViewerOpen && ...}`) 모달의 `footer`에만 렌더링해서 리액션 UI가 동시에 두 군데 마운트되는 걸 막는다.
 
-`src/components/ReactionBar.tsx` — 이모지 리액션 + 재인증요청 UI. `reactions`/`requested`는 호출부가 주는 controlled 값이고, 픽커 열림 상태·pending 상태처럼 일시적인 UI 상태만 내부에서 관리한다. `size` prop(`"compact"`(기본) | `"large"`)으로 크기만 다르게 쓴다 — 색/톤은 둘 다 완전히 같은 라이트 카드 톤이고(다크 배경 없음), 접힌 피드 카드는 `compact`(`text-sm`, 좁은 padding), `PhotoViewerModal`의 `footer`는 `large`(`text-base`, 넓은 padding·큰 피커 버튼)로 렌더링한다 — 모달 헤더/푸터 글씨가 너무 작다는 피드백은 이 사이즈 분기로 해결하고, 대신 피드 카드는 원래 크기 그대로 유지한다.
+`src/components/ReactionBar.tsx` — 이모지 리액션 + 재인증요청 UI. `reactions`/`requested`는 호출부가 주는 controlled 값이고, 픽커 열림 상태·pending 상태처럼 일시적인 UI 상태만 내부에서 관리한다. 크기·톤 분기 없이 접힌 피드 카드와 `PhotoViewerModal`의 `footer` 어디서든 완전히 같은 모습(`text-sm`)으로 렌더링한다 — "모달 안에서 리액션 바를 키울 필요 없다, 원래 카드 크기 그대로"라는 피드백으로, 한때 있었던 `size="large"` 변형은 다시 걷어냈다.
 
 - 고정된 10종 이모지 중 여러 개를 동시에 선택할 수 있다(다중 선택, 눌렀다고 닫히지 않음).
 - **두 가지 표시 모드가 절대 같이 안 보인다**: 평소엔 실제로 반응이 달린 이모지만 칩(`rounded-full border`)으로 나열되고, "+" 버튼을 누르면 이 칩 줄이 통째로 사라지고 그 자리에 10개짜리 고정 그리드가 뜬다. 칩 줄은 반응 개수에 따라 폭이 계속 바뀌는 가변 크기라, 피커가 열려 있는 동안 같이 보이게 두면 선택할 때마다 레이아웃이 흔들린다 — 그래서 열려 있을 땐 아예 숨긴다.
