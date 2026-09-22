@@ -18,34 +18,44 @@ const REACTION_EMOJIS = [
   "🫢",
 ] as const;
 
-type ReactionState = { count: number; reactedByMe: boolean };
+export type ReactionState = { count: number; reactedByMe: boolean };
 
-export function FeedCardActions({
+/**
+ * The feed card's reaction/재인증 요청 row — a controlled component so the
+ * same reaction data can be shown both in the collapsed feed card and
+ * inside PhotoViewerModal without the two drifting out of sync. `reactions`
+ * and `requested` live in the parent (FeedCard); only picker-open/pending
+ * state, which resets harmlessly whenever this remounts, stays local here.
+ */
+export function ReactionBar({
   activityId,
   currentUserId,
   isOwnActivity,
   isSeasonSettled,
-  initialReactions,
-  initialRequested,
+  reactions,
+  onReactionsChange,
+  requested,
+  onRequestedChange,
+  dark = false,
 }: {
   activityId: string;
   currentUserId: string;
   isOwnActivity: boolean;
   isSeasonSettled: boolean;
-  initialReactions: { emoji: string; count: number; reactedByMe: boolean }[];
-  initialRequested: boolean;
+  reactions: Record<string, ReactionState>;
+  onReactionsChange: (next: Record<string, ReactionState>) => void;
+  requested: boolean;
+  onRequestedChange: (next: boolean) => void;
+  /** The modal renders this against a dark backdrop — swaps text/border colors to match. */
+  dark?: boolean;
 }) {
-  const [reactions, setReactions] = useState<Record<string, ReactionState>>(
-    () =>
-      Object.fromEntries(
-        initialReactions.map((r) => [r.emoji, { count: r.count, reactedByMe: r.reactedByMe }]),
-      ),
-  );
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   // A set, not a single value — multi-select means several emoji requests
   // can be in flight at once, and each toggle must only block repeat taps
   // on its own emoji, not on whichever one happened to be picked first.
   const [pendingEmojis, setPendingEmojis] = useState<ReadonlySet<string>>(new Set());
+  const [isRequesting, setIsRequesting] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -65,10 +75,6 @@ export function FeedCardActions({
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [isPickerOpen]);
 
-  const [requested, setRequested] = useState(initialRequested);
-  const [isRequesting, setIsRequesting] = useState(false);
-  const [requestError, setRequestError] = useState<string | null>(null);
-
   async function toggleReaction(emoji: string) {
     if (pendingEmojis.has(emoji)) return;
     setPendingEmojis((prev) => new Set(prev).add(emoji));
@@ -77,10 +83,10 @@ export function FeedCardActions({
     const nextReactedByMe = !current.reactedByMe;
     const nextCount = current.count + (nextReactedByMe ? 1 : -1);
 
-    setReactions((prev) => ({
-      ...prev,
+    onReactionsChange({
+      ...reactions,
       [emoji]: { count: nextCount, reactedByMe: nextReactedByMe },
-    }));
+    });
 
     try {
       const supabase = createClient();
@@ -100,10 +106,7 @@ export function FeedCardActions({
       }
     } catch (err) {
       console.error("[feed] reaction toggle failed:", err);
-      setReactions((prev) => ({
-        ...prev,
-        [emoji]: current,
-      }));
+      onReactionsChange({ ...reactions, [emoji]: current });
     } finally {
       setPendingEmojis((prev) => {
         const next = new Set(prev);
@@ -128,13 +131,13 @@ export function FeedCardActions({
           .eq("requested_by", currentUserId)
           .eq("status", "pending");
         if (error) throw error;
-        setRequested(false);
+        onRequestedChange(false);
       } else {
         const { error } = await supabase
           .from("activity_review_requests")
           .insert({ activity_id: activityId, requested_by: currentUserId });
         if (error && error.code !== UNIQUE_VIOLATION) throw error;
-        setRequested(true);
+        onRequestedChange(true);
 
         // Best-effort — a missed KakaoTalk notification shouldn't affect
         // the request itself, which already succeeded above.
@@ -154,10 +157,28 @@ export function FeedCardActions({
 
   const activeReactions = REACTION_EMOJIS.filter((emoji) => (reactions[emoji]?.count ?? 0) > 0);
 
+  const chipInactive = dark
+    ? "flex items-center gap-1 rounded-full border border-white/20 px-2 py-1 text-white/70"
+    : "flex items-center gap-1 rounded-full border border-border px-2 py-1 text-ink-secondary";
+  const addButtonClass = dark
+    ? "flex items-center justify-center rounded-full border border-dashed border-white/30 px-2 py-1 text-white/60"
+    : "flex items-center justify-center rounded-full border border-dashed border-border-strong px-2 py-1 text-ink-tertiary";
+  const requestInactiveClass = dark
+    ? "ml-auto text-white/60 hover:text-white"
+    : "ml-auto text-ink-tertiary hover:text-ink";
+  const pickerWrapClass = dark ? "flex flex-wrap gap-1.5 rounded-xl bg-white/10 p-2" : "flex flex-wrap gap-1.5 rounded-xl bg-subtle p-2";
+  const pickerInactiveClass = dark
+    ? "flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-base"
+    : "flex h-8 w-8 items-center justify-center rounded-full bg-surface text-base";
+
   return (
     <div
       ref={containerRef}
-      className="flex flex-col gap-2 border-t border-border-subtle px-4 py-2 text-sm"
+      className={
+        dark
+          ? "flex flex-col gap-2 px-4 py-3 text-sm"
+          : "flex flex-col gap-2 border-t border-border-subtle px-4 py-2 text-sm"
+      }
     >
       <div className="flex flex-wrap items-center gap-1.5">
         {/* Hidden while the picker's open so picking emojis (which changes
@@ -175,7 +196,7 @@ export function FeedCardActions({
                 className={
                   state.reactedByMe
                     ? "flex items-center gap-1 rounded-full border border-primary-400 bg-primary-50 px-2 py-1 font-semibold text-primary-600"
-                    : "flex items-center gap-1 rounded-full border border-border px-2 py-1 text-ink-secondary"
+                    : chipInactive
                 }
               >
                 <span>{emoji}</span>
@@ -187,7 +208,7 @@ export function FeedCardActions({
         <button
           type="button"
           onClick={() => setIsPickerOpen((open) => !open)}
-          className="flex items-center justify-center rounded-full border border-dashed border-border-strong px-2 py-1 text-ink-tertiary"
+          className={addButtonClass}
           aria-label="반응 추가"
         >
           {isPickerOpen ? "✕" : "+"}
@@ -198,11 +219,7 @@ export function FeedCardActions({
             type="button"
             onClick={toggleRequest}
             disabled={isRequesting}
-            className={
-              requested
-                ? "ml-auto font-semibold text-danger"
-                : "ml-auto text-ink-tertiary hover:text-ink"
-            }
+            className={requested ? "ml-auto font-semibold text-danger" : requestInactiveClass}
           >
             {requested ? "재인증 요청 취소" : "재인증 요청"}
           </button>
@@ -210,7 +227,7 @@ export function FeedCardActions({
       </div>
 
       {isPickerOpen && (
-        <div className="flex flex-wrap gap-1.5 rounded-xl bg-subtle p-2">
+        <div className={pickerWrapClass}>
           {REACTION_EMOJIS.map((emoji) => {
             const reactedByMe = reactions[emoji]?.reactedByMe ?? false;
             return (
@@ -222,7 +239,7 @@ export function FeedCardActions({
                 className={
                   reactedByMe
                     ? "flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-base ring-2 ring-primary-400"
-                    : "flex h-8 w-8 items-center justify-center rounded-full bg-surface text-base"
+                    : pickerInactiveClass
                 }
               >
                 {emoji}

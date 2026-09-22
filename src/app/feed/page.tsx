@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { FeedCardActions } from "@/components/FeedCardActions";
+import { FeedCard } from "@/components/FeedCard";
 import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
-import { FeedPhotoThumbnail } from "@/components/FeedPhotoThumbnail";
 import { SeasonGate } from "@/components/SeasonGate";
 import { formatKoreanDate } from "@/lib/format";
 import { describeSeasonOccurrence } from "@/lib/season";
@@ -182,51 +181,45 @@ async function Feed({ userId }: { userId: string }) {
   return (
     <>
       {items.map((item) => (
-        <article
+        <FeedCard
           key={item.id}
-          className="overflow-hidden rounded-2xl border border-border bg-surface"
-        >
-          <FeedPhotoThumbnail
-            activityId={item.id}
-            photoUrls={item.photoUrls}
-            photoStoragePaths={item.photoStoragePaths}
-            canDelete={item.canDelete}
-            alt="인증샷"
-            caption={
-              <>
-                {item.profiles?.name ?? "러너"} · {formatKoreanDate(item.activity_date)}
-                {item.occurrenceLabel && ` · ${item.occurrenceLabel}`}
-              </>
-            }
-          />
-          <div className="flex items-center justify-between px-4 py-3 text-base">
-            <p>
-              <span className="font-semibold text-ink-strong">
-                {item.profiles?.name ?? "러너"}
-              </span>
-              {" · "}
-              {item.occurrenceLabel && (
-                <span className="text-sm font-medium text-primary">
-                  {item.occurrenceLabel}
+          activityId={item.id}
+          currentUserId={userId}
+          isOwnActivity={item.user_id === userId}
+          isSeasonSettled={item.isSeasonSettled}
+          canDelete={item.canDelete}
+          photoUrls={item.photoUrls}
+          photoStoragePaths={item.photoStoragePaths}
+          initialReactions={item.reactions}
+          initialRequested={item.requestedByMe}
+          caption={
+            <>
+              {item.profiles?.name ?? "러너"} · {formatKoreanDate(item.activity_date)}
+              {item.occurrenceLabel && ` · ${item.occurrenceLabel}`}
+            </>
+          }
+          infoRow={
+            <div className="flex items-center justify-between px-4 py-3 text-base">
+              <p>
+                <span className="font-semibold text-ink-strong">
+                  {item.profiles?.name ?? "러너"}
                 </span>
-              )}
-            </p>
-            <div className="flex flex-col items-end gap-0.5">
-              <span className="text-ink-secondary">
-                {formatKoreanDate(item.activity_date)} ·{" "}
-                {Number(item.distance_km).toFixed(2)}km
-              </span>
+                {" · "}
+                {item.occurrenceLabel && (
+                  <span className="text-sm font-medium text-primary">
+                    {item.occurrenceLabel}
+                  </span>
+                )}
+              </p>
+              <div className="flex flex-col items-end gap-0.5">
+                <span className="text-ink-secondary">
+                  {formatKoreanDate(item.activity_date)} ·{" "}
+                  {Number(item.distance_km).toFixed(2)}km
+                </span>
+              </div>
             </div>
-          </div>
-          <FeedCardActions
-            activityId={item.id}
-            currentUserId={userId}
-            isOwnActivity={item.user_id === userId}
-            isSeasonSettled={item.isSeasonSettled}
-            initialReactions={item.reactions}
-            initialRequested={item.requestedByMe}
-          />
-        </article>
+          }
+        />
       ))}
     </>
   );

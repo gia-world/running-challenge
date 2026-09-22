@@ -154,6 +154,17 @@ textarea {
   font-size: 16px;
 }
 
+/* Hides the scrollbar on a scroll-snap carousel (PhotoViewerModal) without
+   disabling scrolling itself — the snap/swipe gesture is the whole
+   interaction, a visible scrollbar track under it just looks broken. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Certification success screen: a rubber-stamp "슬램" landing... */
 @keyframes stamp-in {
   0% {

@@ -169,7 +169,7 @@ rounded-2xl border border-border bg-surface px-4 py-3
 ## 그림자
 
 - 카드에는 그림자를 쓰지 않는다 (위 "카드" 항목 참고) — `shadow-sm`은 세그먼트 탭의 선택된 알약, 작은 원형 배지처럼 카드가 아닌 요소에만 남아 있다.
-- 진짜로 화면 위에 떠 있는 요소만 `shadow-lg`: 바텀시트(`BottomSheet`), StatusBoard의 주차별 인증 모달(떠 있는 흰 카드, `rounded-2xl bg-surface shadow-lg`). `PhotoViewerModal`은 예외 — 화면 전체를 검은 배경으로 채우는 전체화면 뷰어라 "떠 있는 카드"가 아니고, 그림자도 없다.
+- 진짜로 화면 위에 떠 있는 요소만 `shadow-lg`: 바텀시트(`BottomSheet`), StatusBoard의 주차별 인증 모달(떠 있는 흰 카드, `rounded-2xl bg-surface shadow-lg`). `PhotoViewerModal`은 예외 — 화면 전체를 짙은 배경(`bg-inverse`)으로 채우는 전체화면 뷰어라 "떠 있는 카드"가 아니고, 그림자도 없다.
 
 ## 타이포그래피
 
@@ -183,30 +183,36 @@ rounded-2xl border border-border bg-surface px-4 py-3
 - 배경 딤 `bg-black/40` + 카드 `rounded-t-2xl bg-surface shadow-lg`, 하단에서 슬라이드업(`animate-sheet-up`, `globals.css`).
 - 필수 입력(계좌 등록처럼 정산에 꼭 필요한 값)은 "나중에"로 닫아도 값이 채워지기 전까지 다음 방문마다 다시 뜨게 한다 — 로컬스토리지 등으로 영구 스킵시키지 않는다.
 
-## 사진 뷰어 & 피드 콜라주
+## 사진 뷰어 & 피드 카드
 
-`src/components/PhotoViewerModal.tsx` — 인증샷을 자세히 보는 전체화면 뷰어. 한 활동의 사진을 다루는 화면(피드, 홈의 이번 주 인증 기록, 시즌 전체 기록)이 전부 이 하나를 공유한다. StatusBoard의 주차별 모달(여러 사람·여러 활동을 한 번에 훑어보는 용도)과는 별개 — 이건 "활동 하나"의 사진만 본다.
+`src/components/PhotoViewerModal.tsx` — 인증샷을 자세히 보는 전체화면 뷰어. 한 활동의 사진을 다루는 화면(피드, 홈의 이번 주 인증 기록, 시즌 전체 기록)이 전부 이 하나를 공유한다. "피드 카드 하나를 크게 본다"는 게 이 뷰어의 컨셉 — 사진만 보여주는 게 아니라 피드에서는 리액션·재인증요청·삭제까지 그대로 딸려온다. StatusBoard의 주차별 모달(여러 사람·여러 활동을 한 번에 훑어보는 용도)과는 별개.
 
-- 배경은 `bg-black` 전체화면(`fixed inset-0`) — 바텀시트의 옅은 딤(`bg-black/40`)과 다르다. 사진 자체에 집중하는 화면이라 완전히 어둡게 깐다.
-- 사진이 여러 장이면 `snap-x` 가로 캐러셀, 상단에 "n / N" 카운터.
-- **확대는 브라우저 기본 핀치줌을 그대로 쓴다** — `touch-action`을 막지 않고 이미지에 별도 줌 로직을 넣지 않는다. `globals.css`의 `body { touch-action: manipulation }`이 더블탭 줌만 막고 핀치줌은 그대로 허용하므로, 뷰어 안에서 직접 손가락으로 확대/축소가 된다. 커스텀 제스처 코드를 추가하지 않는다.
+- 배경은 `bg-inverse`(짙은 회색, 순검정 아님) 전체화면(`fixed inset-0`) — 바텀시트의 옅은 딤(`bg-black/40`)과 다르고, 사진 뒤로 완전한 무채색 검정도 아니다.
+- 뷰어가 열려 있는 동안 `document.body.style.overflow = "hidden"`으로 배경 페이지 스크롤을 잠근다(마운트 시 잠그고 언마운트 시 원복) — 이게 없으면 모달 안에서 세로로 스와이프할 때 뒤에 깔린 피드가 같이 스크롤돼서 모달이 안 고정된 것처럼 보인다.
+- 사진이 여러 장이면 `snap-x snap-mandatory` 가로 캐러셀, 상단에 "n / N" 카운터. 캐러셀 컨테이너는 `overflow-x-auto`와 함께 **`overflow-y-hidden`을 명시**해야 한다 — 한쪽 축만 `auto`로 주면 CSS 스펙상 반대 축도 자동으로 `auto`가 돼버려서(둘 다 명시 안 하면 브라우저가 임의로 세로 스크롤을 만들어버림), 이걸 빠뜨리면 손대지도 않은 세로 스크롤이 생긴다. 스크롤바 자체는 `no-scrollbar`(`globals.css`)로 숨긴다.
+- 이미지는 `object-contain`으로 가로/세로 중 짧은 쪽에 맞춰 뷰포트를 최대한 채운다.
+- **확대는 브라우저 기본 핀치줌을 그대로 쓴다** — `touch-action`을 막지 않고 이미지에 별도 줌 로직을 넣지 않는다. `globals.css`의 `body { touch-action: manipulation }`이 더블탭 줌만 막고 핀치줌은 그대로 허용하므로, 뷰어 안에서 직접 손가락으로 확대/축소가 된다.
+- **길게 눌러 저장하는 것만 막는다, 화면 캡처는 막지 않는다(못 막는다)** — 각 `<img>`에 `onContextMenu` preventDefault, `draggable={false}`, 인라인 스타일로 `WebkitTouchCallout: "none"`을 준다. 스크린샷 차단은 웹에서 애초에 불가능한 영역이라 시도하지 않는다.
 - 삭제 버튼과 확인 단계(Button danger/secondary auto 페어)가 뷰어 하단에 있다 — `canDelete` prop 하나로 노출 여부를 정한다. 피드는 활동 주인인지까지 서버에서 미리 계산해 넘기고, 홈/전체기록은 항상 본인 기록만 보여주므로 시즌의 그레이스 기간 여부 하나면 충분하다 (`isWithinCertificationGrace`).
+- `footer` prop으로 델리게이트된 컨텐츠(피드의 리액션 바)를 캐러셀과 삭제 버튼 사이에 끼워 넣을 수 있다 — 홈/전체기록의 `ActivityStatusList`는 이 prop을 안 쓴다(리액션 개념 자체가 없는 화면).
 
-`src/components/FeedPhotoThumbnail.tsx` — 피드 카드의 1:1 정사각형 썸네일. 탭하면 `PhotoViewerModal`이 열린다.
+`src/components/FeedCard.tsx` — 피드 카드 전체(사진 + 정보 줄 + 리액션 바)를 감싸는 클라이언트 컴포넌트. 리액션(`reactions`)과 재인증요청(`requested`) 상태를 여기서 소유한다 — 접힌 카드의 리액션 바와 뷰어 안의 리액션 바가 "같은 카드를 다르게 보여줄 뿐"이라 같은 상태를 읽고 써야 어긋나지 않는다. 뷰어가 열려 있을 땐 접힌 카드 쪽 리액션 바를 렌더링하지 않는다(`{!isViewerOpen && ...}`) — 픽커의 바깥클릭감지 `ref`가 한 시점에 한 곳에만 붙어 있게 하기 위해서다.
 
-- 사진 1장은 꽉 채운 정사각형, 2장은 좌우 반반, 3장은 왼쪽 큰 사각형 + 오른쪽 위아래 2장, 4장 이상은 2x2 그리드 — 5장째부터는 마지막 칸에 반투명 오버레이로 `+N` 표시.
-- `ActivityStatusList`(홈/전체기록의 인증 기록 목록)도 같은 `PhotoViewerModal`을 쓴다 — 목록 항목을 통째로 버튼으로 감싸서 탭하면 열리고, 사진이 없는 항목(있을 수 없지만 방어적으로)은 탭 자체가 비활성화된다.
+`src/components/ReactionBar.tsx` — 이모지 리액션 + 재인증요청 UI. `reactions`/`requested`는 부모(`FeedCard`)가 주는 controlled 값이고, 픽커 열림 상태·pending 상태처럼 일시적인 UI 상태만 내부에서 관리한다. `dark` prop으로 카드(밝은 배경)/뷰어(어두운 배경) 두 톤을 다 지원한다.
 
-## 리액션 피커 (피드 카드)
-
-`src/components/FeedCardActions.tsx` — 피드 카드에서 이모지로 반응을 남기는 컨트롤. 고정된 10종 이모지 중 여러 개를 동시에 선택할 수 있다(다중 선택, 눌렀다고 닫히지 않음).
-
+- 고정된 10종 이모지 중 여러 개를 동시에 선택할 수 있다(다중 선택, 눌렀다고 닫히지 않음).
 - **두 가지 표시 모드가 절대 같이 안 보인다**: 평소엔 실제로 반응이 달린 이모지만 칩(`rounded-full border`)으로 나열되고, "+" 버튼을 누르면 이 칩 줄이 통째로 사라지고 그 자리에 10개짜리 고정 그리드가 뜬다. 칩 줄은 반응 개수에 따라 폭이 계속 바뀌는 가변 크기라, 피커가 열려 있는 동안 같이 보이게 두면 선택할 때마다 레이아웃이 흔들린다 — 그래서 열려 있을 땐 아예 숨긴다.
-- **피커는 열리자마자 스스로 스크롤해서 보인다**: 카드 맨 아래에 렌더링되는데, 피드 아래쪽 카드에서 열면 화면 밖으로 잘릴 수 있어서 `scrollIntoView({ behavior: "smooth", block: "nearest" })`로 항상 뷰포트 안으로 끌어온다.
+- **피커는 열리자마자 스스로 스크롤해서 보인다**: `scrollIntoView({ behavior: "smooth", block: "nearest" })`로 항상 뷰포트 안으로 끌어온다.
 - **선택은 즉시 반영, 피커는 안 닫힘** — 하나 고르고 바로 다음 걸 고를 수 있어야 하므로, 이모지를 선택해도 피커가 자동으로 닫히지 않는다. 바깥을 탭하거나 "✕" 버튼을 눌러야 닫힌다.
 - **동시 선택 잠금은 이모지별로 따로** — 하나의 이모지에 연타를 막는 pending 상태를 전체가 아니라 이모지 단위(`Set`)로 관리한다. 서로 다른 이모지는 각각 별개의 DB row라 동시에 눌러도 서로 막을 이유가 없다.
-- 칩: 기본 `border border-border text-ink-secondary`, 본인이 누른 반응만 `border-primary-400 bg-primary-50 text-primary-600`로 강조.
-- 피커 그리드 버튼: `h-8 w-8 rounded-full bg-surface`, 본인이 누른 반응만 `ring-2 ring-primary-400 bg-primary-100`로 강조.
+- 칩: 기본(light) `border border-border text-ink-secondary` / (dark) `border-white/20 text-white/70`, 본인이 누른 반응만 톤 무관하게 `border-primary-400 bg-primary-50 text-primary-600`로 강조.
+- 피커 그리드 버튼: (light) `bg-surface` / (dark) `bg-white/10`, 본인이 누른 반응만 `ring-2 ring-primary-400 bg-primary-100`로 강조.
+
+`src/components/FeedPhotoThumbnail.tsx` — 피드 카드의 1:1 정사각형 썸네일. 순수 프레젠테이션 컴포넌트(상태 없음, `onOpen` 콜백만 받음) — 탭하면 `FeedCard`가 소유한 뷰어 열림 상태가 바뀐다.
+
+- 사진 1장은 꽉 채운 정사각형, 2장은 좌우 반반, 3장은 왼쪽 큰 사각형 + 오른쪽 위아래 2장, 4장 이상은 2x2 그리드 — 5장째부터는 마지막 칸에 반투명 오버레이로 `+N` 표시.
+
+`ActivityStatusList`(홈/전체기록의 인증 기록 목록)도 같은 `PhotoViewerModal`을 쓴다(리액션 없이) — 목록 항목을 통째로 버튼으로 감싸서 탭하면 열리고, 사진이 없는 항목(있을 수 없지만 방어적으로)은 탭 자체가 비활성화된다.
 
 ## 공통 컴포넌트로 뽑는 기준
 
