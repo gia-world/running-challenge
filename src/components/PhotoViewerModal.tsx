@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode, type TouchEvent as ReactTouchEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type TouchEvent as ReactTouchEvent,
+} from "react";
 import { Button } from "@/components/Button";
 
 const MIN_SCALE = 1;
@@ -52,8 +58,15 @@ export function PhotoViewerModal({
   const scrollerRef = useRef<HTMLDivElement>(null);
   // Refs, not state — updated every touchmove, so re-rendering on every one
   // would be wasteful; only `zoom` (what's actually drawn) needs to.
-  const pinchRef = useRef<{ startDist: number; startScale: number } | null>(null);
-  const panRef = useRef<{ startX: number; startY: number; originX: number; originY: number } | null>(null);
+  const pinchRef = useRef<{ startDist: number; startScale: number } | null>(
+    null,
+  );
+  const panRef = useRef<{
+    startX: number;
+    startY: number;
+    originX: number;
+    originY: number;
+  } | null>(null);
 
   // A zoomed-in photo you swiped away from would be a confusing thing to
   // swipe back to, so every slide starts fresh at scale 1 — adjusted here
@@ -91,7 +104,10 @@ export function PhotoViewerModal({
 
   function handleTouchStart(e: ReactTouchEvent<HTMLDivElement>) {
     if (e.touches.length === 2) {
-      pinchRef.current = { startDist: touchDistance(e.touches), startScale: zoom.scale };
+      pinchRef.current = {
+        startDist: touchDistance(e.touches),
+        startScale: zoom.scale,
+      };
     } else if (e.touches.length === 1 && zoom.scale > 1) {
       panRef.current = {
         startX: e.touches[0].clientX,
@@ -107,7 +123,10 @@ export function PhotoViewerModal({
       const { startDist, startScale } = pinchRef.current;
       const scale = Math.min(
         MAX_SCALE,
-        Math.max(MIN_SCALE, startScale * (touchDistance(e.touches) / startDist)),
+        Math.max(
+          MIN_SCALE,
+          startScale * (touchDistance(e.touches) / startDist),
+        ),
       );
       setZoom((z) => ({ ...z, scale }));
     } else if (e.touches.length === 1 && panRef.current) {
@@ -156,13 +175,13 @@ export function PhotoViewerModal({
             type="button"
             onClick={onClose}
             aria-label="닫기"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-lg text-ink"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-lg text-ink"
           >
             ✕
           </button>
         </div>
 
-        <div className="relative h-[60vh] shrink-0 bg-muted">
+        <div className="relative h-[60vh] shrink-0">
           <div
             ref={scrollerRef}
             onScroll={handleScroll}
@@ -184,7 +203,10 @@ export function PhotoViewerModal({
                   WebkitTouchCallout: "none",
                   WebkitUserSelect: "none",
                   userSelect: "none",
-                  transform: i === index ? `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})` : undefined,
+                  transform:
+                    i === index
+                      ? `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})`
+                      : undefined,
                 }}
                 className="h-full w-full shrink-0 snap-center object-contain"
               />
@@ -239,7 +261,9 @@ export function PhotoViewerModal({
                   <p className="text-sm text-ink-secondary">
                     삭제하면 인증샷과 기록이 모두 사라져요. 정말 삭제할까요?
                   </p>
-                  {deleteError && <span className="text-sm text-danger">{deleteError}</span>}
+                  {deleteError && (
+                    <span className="text-sm text-danger">{deleteError}</span>
+                  )}
                   <div className="flex gap-2">
                     <Button
                       variant="danger"
