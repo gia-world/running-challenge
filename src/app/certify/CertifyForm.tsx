@@ -161,13 +161,8 @@ export function CertifyForm({
         <div className="animate-stamp-in flex h-24 w-24 items-center justify-center rounded-full border-4 border-primary text-base font-extrabold text-primary">
           인증완료
         </div>
-        <p className="text-lg font-bold text-ink-strong">
-          인증샷을 올렸어요!
-        </p>
-        <p className="text-base text-ink-secondary">
-          바로 이번 주 기록에 반영돼요. 팀원이 이상하다고 느끼면
-          <br /> 재인증을 요청할 수 있어요.
-        </p>
+        <p className="text-lg font-bold text-ink-strong">인증샷을 올렸어요!</p>
+        <p className="text-base text-ink-secondary">오늘도 수고 많았어요👏</p>
         {completedWeekGoal && (
           <p className="animate-badge-pop rounded-full bg-primary-50 px-4 py-2 text-sm font-bold text-primary-600">
             🎉 이번 주 목표 {weeklyGoal}/{weeklyGoal} 달성!
@@ -181,16 +176,18 @@ export function CertifyForm({
           홈으로 가기
         </button>
 
-        {activityDate === today && showRenewalPrompt && !renewalSheetDismissed && (
-          <BottomSheet onClose={() => setRenewalSheetDismissed(true)}>
-            <RenewalToggle
-              seasonId={seasonId}
-              userId={userId}
-              initialChoice={null}
-              onAnswered={() => setRenewalSheetDismissed(true)}
-            />
-          </BottomSheet>
-        )}
+        {activityDate === today &&
+          showRenewalPrompt &&
+          !renewalSheetDismissed && (
+            <BottomSheet onClose={() => setRenewalSheetDismissed(true)}>
+              <RenewalToggle
+                seasonId={seasonId}
+                userId={userId}
+                initialChoice={null}
+                onAnswered={() => setRenewalSheetDismissed(true)}
+              />
+            </BottomSheet>
+          )}
       </div>
     );
   }
