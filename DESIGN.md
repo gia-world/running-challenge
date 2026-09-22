@@ -169,7 +169,7 @@ rounded-2xl border border-border bg-surface px-4 py-3
 ## 그림자
 
 - 카드에는 그림자를 쓰지 않는다 (위 "카드" 항목 참고) — `shadow-sm`은 세그먼트 탭의 선택된 알약, 작은 원형 배지처럼 카드가 아닌 요소에만 남아 있다.
-- 진짜로 화면 위에 떠 있는 요소만 `shadow-lg`: 바텀시트(`BottomSheet`), 포토 뷰어 모달.
+- 진짜로 화면 위에 떠 있는 요소만 `shadow-lg`: 바텀시트(`BottomSheet`), StatusBoard의 주차별 인증 모달(떠 있는 흰 카드, `rounded-2xl bg-surface shadow-lg`). `PhotoViewerModal`은 예외 — 화면 전체를 검은 배경으로 채우는 전체화면 뷰어라 "떠 있는 카드"가 아니고, 그림자도 없다.
 
 ## 타이포그래피
 
@@ -182,6 +182,20 @@ rounded-2xl border border-border bg-surface px-4 py-3
 - 새로운 정보 입력/확인이 "지금 이 화면에서 필요해진 순간"에만 쓴다 (계좌 등록, 자동연장 응답처럼). 마이페이지 같은 별도 설정 화면을 만들어 몰아두지 않는다.
 - 배경 딤 `bg-black/40` + 카드 `rounded-t-2xl bg-surface shadow-lg`, 하단에서 슬라이드업(`animate-sheet-up`, `globals.css`).
 - 필수 입력(계좌 등록처럼 정산에 꼭 필요한 값)은 "나중에"로 닫아도 값이 채워지기 전까지 다음 방문마다 다시 뜨게 한다 — 로컬스토리지 등으로 영구 스킵시키지 않는다.
+
+## 사진 뷰어 & 피드 콜라주
+
+`src/components/PhotoViewerModal.tsx` — 인증샷을 자세히 보는 전체화면 뷰어. 한 활동의 사진을 다루는 화면(피드, 홈의 이번 주 인증 기록, 시즌 전체 기록)이 전부 이 하나를 공유한다. StatusBoard의 주차별 모달(여러 사람·여러 활동을 한 번에 훑어보는 용도)과는 별개 — 이건 "활동 하나"의 사진만 본다.
+
+- 배경은 `bg-black` 전체화면(`fixed inset-0`) — 바텀시트의 옅은 딤(`bg-black/40`)과 다르다. 사진 자체에 집중하는 화면이라 완전히 어둡게 깐다.
+- 사진이 여러 장이면 `snap-x` 가로 캐러셀, 상단에 "n / N" 카운터.
+- **확대는 브라우저 기본 핀치줌을 그대로 쓴다** — `touch-action`을 막지 않고 이미지에 별도 줌 로직을 넣지 않는다. `globals.css`의 `body { touch-action: manipulation }`이 더블탭 줌만 막고 핀치줌은 그대로 허용하므로, 뷰어 안에서 직접 손가락으로 확대/축소가 된다. 커스텀 제스처 코드를 추가하지 않는다.
+- 삭제 버튼과 확인 단계(Button danger/secondary auto 페어)가 뷰어 하단에 있다 — `canDelete` prop 하나로 노출 여부를 정한다. 피드는 활동 주인인지까지 서버에서 미리 계산해 넘기고, 홈/전체기록은 항상 본인 기록만 보여주므로 시즌의 그레이스 기간 여부 하나면 충분하다 (`isWithinCertificationGrace`).
+
+`src/components/FeedPhotoThumbnail.tsx` — 피드 카드의 1:1 정사각형 썸네일. 탭하면 `PhotoViewerModal`이 열린다.
+
+- 사진 1장은 꽉 채운 정사각형, 2장은 좌우 반반, 3장은 왼쪽 큰 사각형 + 오른쪽 위아래 2장, 4장 이상은 2x2 그리드 — 5장째부터는 마지막 칸에 반투명 오버레이로 `+N` 표시.
+- `ActivityStatusList`(홈/전체기록의 인증 기록 목록)도 같은 `PhotoViewerModal`을 쓴다 — 목록 항목을 통째로 버튼으로 감싸서 탭하면 열리고, 사진이 없는 항목(있을 수 없지만 방어적으로)은 탭 자체가 비활성화된다.
 
 ## 리액션 피커 (피드 카드)
 

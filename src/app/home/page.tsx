@@ -5,6 +5,7 @@ import {
   todayInSeoul,
   isBeforeNoonInSeoul,
   yesterdayInSeoul,
+  isWithinCertificationGrace,
 } from "@/lib/week";
 import {
   seasonWeekIndexForDate,
@@ -14,6 +15,7 @@ import {
 } from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
 import { requireTeamViewer } from "@/lib/viewer";
+import { getSignedPhotoUrls } from "@/lib/photos";
 import { WeeklyDots } from "@/components/WeeklyDots";
 import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
@@ -117,7 +119,7 @@ async function SeasonProgress({
   const { data: seasonActivitiesRaw } = await supabase
     .from("activities")
     .select(
-      "id, activity_date, distance_km, created_at, status, rejected_reason",
+      "id, activity_date, distance_km, created_at, status, rejected_reason, activity_photos(storage_path, sort_order)",
     )
     .eq("user_id", userId)
     .eq("season_id", season.id)
@@ -131,6 +133,7 @@ async function SeasonProgress({
         created_at: string;
         status: ActivityStatus;
         rejected_reason: string | null;
+        activity_photos: { storage_path: string; sort_order: number }[];
       }[]
     >();
 
@@ -162,10 +165,18 @@ async function SeasonProgress({
 
   // Not deduped by date: a rejected submission and the resubmission that
   // replaced it can share a date, and both are worth showing.
-  const weekActivities = seasonActivities.filter(
+  const weekActivitiesRaw = seasonActivities.filter(
     (activity) =>
       activity.activity_date >= start && activity.activity_date <= end,
   );
+  const weekActivities = await Promise.all(
+    weekActivitiesRaw.map(async (activity) => ({
+      ...activity,
+      photoUrls: await getSignedPhotoUrls(supabase, activity.activity_photos),
+      photoStoragePaths: activity.activity_photos.map((p) => p.storage_path),
+    })),
+  );
+  const canDeleteThisSeason = isWithinCertificationGrace(season.end_date);
 
   return (
     <>
@@ -211,6 +222,7 @@ async function SeasonProgress({
         <ActivityStatusList
           activities={weekActivities}
           emptyMessage="아직 이번 주 인증 기록이 없어요."
+          canDelete={canDeleteThisSeason}
         />
         <Link
           href="/history"

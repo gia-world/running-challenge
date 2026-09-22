@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { FeedCardActions } from "@/components/FeedCardActions";
 import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
-import { PhotoCarousel } from "@/components/PhotoCarousel";
+import { FeedPhotoThumbnail } from "@/components/FeedPhotoThumbnail";
 import { SeasonGate } from "@/components/SeasonGate";
 import { formatKoreanDate } from "@/lib/format";
 import { describeSeasonOccurrence } from "@/lib/season";
@@ -165,7 +165,8 @@ async function Feed({ userId }: { userId: string }) {
         ),
         requestedByMe: requestedByMe.has(row.id),
         isSeasonSettled: settledSeasonIds.has(row.season_id),
-        canDelete: !!seasonEnd && isWithinCertificationGrace(seasonEnd),
+        canDelete:
+          row.user_id === userId && !!seasonEnd && isWithinCertificationGrace(seasonEnd),
       };
     }),
   );
@@ -185,9 +186,19 @@ async function Feed({ userId }: { userId: string }) {
           key={item.id}
           className="overflow-hidden rounded-2xl border border-border bg-surface"
         >
-          {item.photoUrls.length > 0 && (
-            <PhotoCarousel photoUrls={item.photoUrls} alt="인증샷" />
-          )}
+          <FeedPhotoThumbnail
+            activityId={item.id}
+            photoUrls={item.photoUrls}
+            photoStoragePaths={item.photoStoragePaths}
+            canDelete={item.canDelete}
+            alt="인증샷"
+            caption={
+              <>
+                {item.profiles?.name ?? "러너"} · {formatKoreanDate(item.activity_date)}
+                {item.occurrenceLabel && ` · ${item.occurrenceLabel}`}
+              </>
+            }
+          />
           <div className="flex items-center justify-between px-4 py-3 text-base">
             <p>
               <span className="font-semibold text-ink-strong">
@@ -212,8 +223,6 @@ async function Feed({ userId }: { userId: string }) {
             currentUserId={userId}
             isOwnActivity={item.user_id === userId}
             isSeasonSettled={item.isSeasonSettled}
-            canDelete={item.canDelete}
-            photoStoragePaths={item.photoStoragePaths}
             initialReactions={item.reactions}
             initialRequested={item.requestedByMe}
           />
