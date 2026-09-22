@@ -183,25 +183,22 @@ rounded-2xl border border-border bg-surface px-4 py-3
 - 배경 딤 `bg-black/40` + 카드 `rounded-t-2xl bg-surface shadow-lg`, 하단에서 슬라이드업(`animate-sheet-up`, `globals.css`).
 - 필수 입력(계좌 등록처럼 정산에 꼭 필요한 값)은 "나중에"로 닫아도 값이 채워지기 전까지 다음 방문마다 다시 뜨게 한다 — 로컬스토리지 등으로 영구 스킵시키지 않는다.
 
-## 활동 상세 페이지 & 피드 카드
+## 사진 뷰어 모달 & 피드 카드
 
-인증샷을 자세히 보는 화면은 **오버레이 모달이 아니라 진짜 라우트**(`src/app/activities/[activityId]/page.tsx`)다 — 처음엔 전체화면 모달로 만들었는데, 앱에 다크 모드가 없다는 원칙(맨 위 참고)과 부딪혀서 톤이 붕 떴고, 뒤로가기도 브라우저 히스토리가 아니라 JS 상태라 어색했다. "피드 카드 하나를 크게 본다"를 문자 그대로 구현 — 같은 흰 캔버스/카드 스타일을 그대로 쓰고, 사진만 크게, 리액션·재인증요청·삭제도 그대로 딸려온다. 피드/홈의 이번 주 인증 기록/시즌 전체 기록 어디서 들어와도 같은 페이지를 쓴다. StatusBoard의 주차별 모달(여러 사람·여러 활동을 한 번에 훑어보는 용도, 진짜 모달이 맞는 케이스)과는 별개.
+인증샷을 자세히 보는 화면은 `src/components/PhotoViewerModal.tsx` — 피드, 홈의 이번 주 인증 기록, 시즌 전체 기록 어디서 열어도 같은 컴포넌트를 쓴다. 처음엔 전체화면 다크 모달로 만들었는데, 앱에 다크 모드가 없다는 원칙(맨 위 참고)과 부딪혀서 톤이 붕 떴다 — 라우트로 바꿔봤지만 모달 자체가 문제가 아니라 다크 톤이 문제였던 것으로 확인돼, 다시 모달로 돌아오되 스타일만 다른 카드들과 같은 흰 캔버스 톤으로 맞췄다. StatusBoard의 주차별 모달과 같은 컨벤션(`bg-black/60` 딤 배경 + 중앙 정렬된 `rounded-2xl bg-surface shadow-lg` 카드)을 그대로 따르되, 사진을 크게 봐야 하는 용도라 카드 자체는 `max-w-md`로 더 크고 `max-h-[90vh]`까지 뷰포트를 채운다.
 
-`src/components/ActivityDetailView.tsx` — 상세 페이지의 본문. 사진 + 정보 줄 + 리액션 바 + (본인/그레이스 기간 내면) 삭제까지 전부 **하나의 카드**(`rounded-2xl border border-border bg-surface`) 안에 있다 — 사진 영역만 `bg-muted` 레터박스로 크게, 나머지는 다른 카드들과 똑같은 톤.
-
-- 사진이 여러 장이면 가로 캐러셀 + **화살표(‹ ›) + 닷 인디케이터** — "n / N" 텍스트 카운터가 아니라 실제 스와이퍼처럼. 화살표는 `bg-white/90` 원형 버튼, 닷은 활성 `bg-primary` / 비활성 `bg-white/80 ring-1 ring-black/10`(사진 위에 얹혀도 눈에 띄게).
-- 캐러셀 컨테이너는 `overflow-x-auto`와 함께 **`overflow-y-hidden`을 명시**해야 한다 — 한쪽 축만 `auto`로 주면 CSS 스펙상 반대 축도 자동으로 `auto`가 돼버려서(둘 다 명시 안 하면 브라우저가 임의로 세로 스크롤을 만들어버림), 이걸 빠뜨리면 손대지도 않은 세로 스크롤이 생긴다. 스크롤바 자체는 `no-scrollbar`(`globals.css`)로 숨긴다.
-- 사진은 `object-contain`, 높이 `h-[60vh]`로 뷰포트를 최대한 채운다.
-- **확대는 브라우저 기본 핀치줌을 그대로 쓴다** — `touch-action`을 막지 않고 이미지에 별도 줌 로직을 넣지 않는다. `globals.css`의 `body { touch-action: manipulation }`이 더블탭 줌만 막고 핀치줌은 그대로 허용하므로, 손가락으로 바로 확대/축소가 된다.
+- 사진 영역은 `flex-1 min-h-0`로 카드 안에서 남는 세로 공간을 전부 차지해서, 뷰포트가 허락하는 한 최대한 크게 보인다.
+- 사진이 여러 장이면 가로 캐러셀 + **화살표(‹ ›) + 닷 인디케이터** — "n / N" 텍스트 카운터가 아니라 실제 스와이퍼처럼. 화살표는 `bg-white/90` 원형 버튼, 닷은 활성 `bg-primary` / 비활성 `bg-white/80 ring-1 ring-black/10`(사진 위에 얹혀도 눈에 띄게) — 둘 다 사진 영역 위에 `absolute`로 얹는다.
+- 캐러셀 컨테이너는 `overflow-x-auto`와 함께 **`overflow-y-hidden`을 명시**해야 한다 — 한쪽 축만 `auto`로 주면 CSS 스펙상 반대 축도 자동으로 `auto`가 돼버려서(둘 다 명시 안 하면 브라우저가 임의로 세로 스크롤을 만들어버림), 이걸 빠뜨리면 손대지도 않은 세로 스크롤이 생기고 그 스크롤이 모달 밑 페이지까지 넘어가는 것처럼 보인다. 스크롤바 자체는 `no-scrollbar`(`globals.css`)로 숨긴다.
+- 모달이 열려 있는 동안 `document.body.style.overflow = "hidden"`으로 배경 스크롤을 잠근다(mount/unmount `useEffect`) — 안 그러면 모달 안에서 세로로 스와이프할 때 모달 뒤 피드 페이지가 같이 스크롤된다.
+- 사진은 `object-contain`. **확대는 브라우저 기본 핀치줌을 그대로 쓴다** — `touch-action`을 막지 않고 이미지에 별도 줌 로직을 넣지 않는다. `globals.css`의 `body { touch-action: manipulation }`이 더블탭 줌만 막고 핀치줌은 그대로 허용하므로, 손가락으로 바로 확대/축소가 된다.
 - **길게 눌러 저장하는 것만 막는다, 화면 캡처는 막지 않는다(못 막는다)** — 각 `<img>`에 `onContextMenu` preventDefault, `draggable={false}`, 인라인 스타일로 `WebkitTouchCallout: "none"`을 준다. 스크린샷 차단은 웹에서 애초에 불가능한 영역이라 시도하지 않는다.
-- 삭제는 `canDelete` prop 하나로 노출 여부를 정한다 — 페이지(서버 컴포넌트)가 본인 활동인지 + 시즌 그레이스 기간(`isWithinCertificationGrace`)인지를 미리 계산해서 넘긴다.
-- 텍스트는 전부 `text-base` 이상 — 리액션 칩/정보 줄에 `text-sm`을 썼다가 너무 작다는 피드백을 받고 전부 키웠다. `text-sm`은 정말 보조 정보(반려 사유, 타임스탬프)에만 남겨둔다.
+- 삭제는 `canDelete` prop 하나로 노출 여부를 정한다 — 호출부(서버 컴포넌트)가 본인 활동인지 + 시즌 그레이스 기간(`isWithinCertificationGrace`)인지를 미리 계산해서 넘긴다.
+- `footer` prop으로 리액션 바(`ReactionBar`)를 사진 아래에 끼워 넣을 수 있다 — 피드에서만 쓰고, 리액션이 없는 홈/시즌 전체 기록에서는 생략한다.
 
-`src/components/BackButton.tsx` — `BackLink`와 똑같이 생겼지만 고정 `href` 대신 `router.back()`을 쓴다. 활동 상세 페이지는 피드/홈/전체기록 어디서든 들어올 수 있어서 "뒤로"가 항상 같은 곳을 가리키지 않는다 — 라우터 히스토리를 그대로 따라가는 게 맞다.
+`src/components/FeedCard.tsx` — 피드 목록의 접힌 카드(사진 썸네일 + 정보 줄 + 리액션 바). `isViewerOpen` 상태를 들고 있다가 사진을 탭하면 `PhotoViewerModal`을 띄운다. 리액션(`reactions`/`requested`)도 이 컴포넌트가 들고 있는 controlled 값이라, 접힌 카드에서 반응을 남기고 모달을 열어도(또는 그 반대도) 항상 같은 값을 보여준다 — 모달이 열려 있는 동안은 접힌 카드 쪽 `ReactionBar`를 숨기고(`{!isViewerOpen && ...}`) 모달의 `footer`에만 렌더링해서 리액션 UI가 동시에 두 군데 마운트되는 걸 막는다.
 
-`src/components/FeedCard.tsx` — 피드 목록의 접힌 카드(사진 썸네일 + 정보 줄 + 리액션 바). 사진을 탭하면 `<Link href={\`/activities/${id}\`}>`로 상세 페이지에 진짜 네비게이션한다 — 리액션 상태를 여러 곳에 복제해서 동기화를 신경 쓸 필요가 없다(상세 페이지는 독립된 라우트라 자기 데이터를 서버에서 새로 읽는다).
-
-`src/components/ReactionBar.tsx` — 이모지 리액션 + 재인증요청 UI. `reactions`/`requested`는 호출부가 주는 controlled 값이고, 픽커 열림 상태·pending 상태처럼 일시적인 UI 상태만 내부에서 관리한다. 접힌 카드(`FeedCard`)와 상세 페이지(`ActivityDetailView`) 둘 다 이걸 쓰지만 각자 자기 상태를 갖는 독립된 인스턴스 — 다크 톤은 없다(앱 전체가 흰 캔버스 하나만 지원).
+`src/components/ReactionBar.tsx` — 이모지 리액션 + 재인증요청 UI. `reactions`/`requested`는 호출부가 주는 controlled 값이고, 픽커 열림 상태·pending 상태처럼 일시적인 UI 상태만 내부에서 관리한다. `size` prop(`"compact"`(기본) | `"large"`)으로 크기만 다르게 쓴다 — 색/톤은 둘 다 완전히 같은 라이트 카드 톤이고(다크 배경 없음), 접힌 피드 카드는 `compact`(`text-sm`, 좁은 padding), `PhotoViewerModal`의 `footer`는 `large`(`text-base`, 넓은 padding·큰 피커 버튼)로 렌더링한다 — 모달 헤더/푸터 글씨가 너무 작다는 피드백은 이 사이즈 분기로 해결하고, 대신 피드 카드는 원래 크기 그대로 유지한다.
 
 - 고정된 10종 이모지 중 여러 개를 동시에 선택할 수 있다(다중 선택, 눌렀다고 닫히지 않음).
 - **두 가지 표시 모드가 절대 같이 안 보인다**: 평소엔 실제로 반응이 달린 이모지만 칩(`rounded-full border`)으로 나열되고, "+" 버튼을 누르면 이 칩 줄이 통째로 사라지고 그 자리에 10개짜리 고정 그리드가 뜬다. 칩 줄은 반응 개수에 따라 폭이 계속 바뀌는 가변 크기라, 피커가 열려 있는 동안 같이 보이게 두면 선택할 때마다 레이아웃이 흔들린다 — 그래서 열려 있을 땐 아예 숨긴다.
@@ -211,11 +208,11 @@ rounded-2xl border border-border bg-surface px-4 py-3
 - 칩: 기본 `border border-border text-ink-secondary`, 본인이 누른 반응만 `border-primary-400 bg-primary-50 text-primary-600`로 강조.
 - 피커 그리드 버튼: `bg-surface`, 본인이 누른 반응만 `ring-2 ring-primary-400 bg-primary-100`로 강조.
 
-`src/components/FeedPhotoThumbnail.tsx` — 피드 카드의 1:1 정사각형 썸네일. 순수 프레젠테이션 컴포넌트(상태·이벤트 핸들러 없음) — `FeedCard`가 `<Link>`로 감싼다.
+`src/components/FeedPhotoThumbnail.tsx` — 피드 카드의 1:1 정사각형 썸네일. 순수 프레젠테이션 컴포넌트(상태·이벤트 핸들러 없음) — `onOpen` 콜백을 받아 `FeedCard`가 모달을 열지 결정한다.
 
 - 사진 1장은 꽉 채운 정사각형, 2장은 좌우 반반, 3장은 왼쪽 큰 사각형 + 오른쪽 위아래 2장, 4장 이상은 2x2 그리드 — 5장째부터는 마지막 칸에 반투명 오버레이로 `+N` 표시.
 
-`ActivityStatusList`(홈/전체기록의 인증 기록 목록)도 각 항목이 같은 `/activities/[id]`로 링크한다 — 목록 자체는 사진이나 리액션 데이터를 들고 있지 않고, 상세 페이지가 독립적으로 다시 읽는다.
+`ActivityStatusList`(홈/전체기록의 인증 기록 목록)도 각 항목을 탭하면 같은 `PhotoViewerModal`을 연다(리액션은 없으니 `footer` 없이) — 목록 자체는 `canDelete` 하나만 시즌 단위로 받고, 열린 항목의 사진/삭제만 모달에 넘긴다.
 
 ## 공통 컴포넌트로 뽑는 기준
 

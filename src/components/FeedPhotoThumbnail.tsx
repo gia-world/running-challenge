@@ -1,19 +1,25 @@
 /**
  * 1:1 square thumbnail for a feed card — one photo fills the square, more
- * than one lays out as a collage. Purely presentational; the caller wraps
- * it in whatever makes it navigate to the activity's detail page.
+ * than one lays out as a collage. Purely presentational; FeedCard owns
+ * whether tapping it opens the viewer.
  */
 export function FeedPhotoThumbnail({
   photoUrls,
+  onOpen,
   alt,
 }: {
   photoUrls: string[];
+  onOpen: () => void;
   alt: string;
 }) {
   if (photoUrls.length === 0) return null;
 
   return (
-    <div className="grid aspect-square w-full grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden bg-muted">
+    <button
+      type="button"
+      onClick={onOpen}
+      className="grid aspect-square w-full grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden bg-muted"
+    >
       {photoUrls.length === 1 ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={photoUrls[0]} alt={alt} className="col-span-2 row-span-2 h-full w-full object-cover" />
@@ -44,6 +50,6 @@ export function FeedPhotoThumbnail({
           </div>
         ))
       )}
-    </div>
+    </button>
   );
 }

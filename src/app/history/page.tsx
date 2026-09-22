@@ -6,7 +6,8 @@ import {
   seasonWeekCount,
 } from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
-import { todayInSeoul } from "@/lib/week";
+import { todayInSeoul, isWithinCertificationGrace } from "@/lib/week";
+import { getSignedPhotoUrls } from "@/lib/photos";
 import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
 import { SectionTitle } from "@/components/SectionTitle";
@@ -52,15 +53,32 @@ async function SeasonHistory({
   const { data } = await supabase
     .from("activities")
     .select(
-      "id, activity_date, distance_km, created_at, status, rejected_reason",
+      "id, activity_date, distance_km, created_at, status, rejected_reason, activity_photos(storage_path, sort_order)",
     )
     .eq("user_id", userId)
     .eq("season_id", season.id)
     .order("activity_date", { ascending: true })
     .order("created_at", { ascending: true })
-    .returns<(ActivityListItem & { created_at: string })[]>();
+    .returns<
+      {
+        id: string;
+        activity_date: string;
+        distance_km: number;
+        created_at: string;
+        status: ActivityListItem["status"];
+        rejected_reason: string | null;
+        activity_photos: { storage_path: string; sort_order: number }[];
+      }[]
+    >();
 
-  const activities = data ?? [];
+  const activities = await Promise.all(
+    (data ?? []).map(async (activity) => ({
+      ...activity,
+      photoUrls: await getSignedPhotoUrls(supabase, activity.activity_photos),
+      photoStoragePaths: activity.activity_photos.map((p) => p.storage_path),
+    })),
+  );
+  const canDeleteThisSeason = isWithinCertificationGrace(season.end_date);
   const weekCount = seasonWeekCount(season.start_date, season.end_date);
   const weeks: ActivityListItem[][] = Array.from(
     { length: weekCount },
@@ -97,6 +115,7 @@ async function SeasonHistory({
                   ? `${index + 1}주차도 화이팅!`
                   : "이번 주에는 아직 인증 기록이 없어요."
               }
+              canDelete={canDeleteThisSeason}
             />
           </section>
         );
