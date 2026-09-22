@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
-import { seasonWeekIndexForDate, seasonWeekRange, seasonWeekCount } from "@/lib/season";
+import {
+  seasonWeekIndexForDate,
+  seasonWeekRange,
+  seasonWeekCount,
+} from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
 import { todayInSeoul } from "@/lib/week";
 import { PageShell } from "@/components/PageShell";
@@ -8,7 +12,10 @@ import { PageTitle } from "@/components/PageTitle";
 import { SectionTitle } from "@/components/SectionTitle";
 import { BackLink } from "@/components/BackLink";
 import { SeasonGate } from "@/components/SeasonGate";
-import { ActivityStatusList, type ActivityListItem } from "@/components/ActivityStatusList";
+import {
+  ActivityStatusList,
+  type ActivityListItem,
+} from "@/components/ActivityStatusList";
 
 export default async function HistoryPage() {
   const { user, viewer } = await requireTeamViewer();
@@ -26,7 +33,9 @@ export default async function HistoryPage() {
       bottomNav={{ active: "home", isAdmin: viewer.teamRole === "admin" }}
     >
       <SeasonGate viewer={viewer}>
-        {viewer.activeSeason && <SeasonHistory userId={user.id} season={viewer.activeSeason} />}
+        {viewer.activeSeason && (
+          <SeasonHistory userId={user.id} season={viewer.activeSeason} />
+        )}
       </SeasonGate>
     </PageShell>
   );
@@ -42,7 +51,9 @@ async function SeasonHistory({
   const supabase = await createClient();
   const { data } = await supabase
     .from("activities")
-    .select("id, activity_date, distance_km, created_at, status, rejected_reason")
+    .select(
+      "id, activity_date, distance_km, created_at, status, rejected_reason",
+    )
     .eq("user_id", userId)
     .eq("season_id", season.id)
     .order("activity_date", { ascending: true })
@@ -51,9 +62,15 @@ async function SeasonHistory({
 
   const activities = data ?? [];
   const weekCount = seasonWeekCount(season.start_date, season.end_date);
-  const weeks: ActivityListItem[][] = Array.from({ length: weekCount }, () => []);
+  const weeks: ActivityListItem[][] = Array.from(
+    { length: weekCount },
+    () => [],
+  );
   for (const activity of activities) {
-    const weekIndex = seasonWeekIndexForDate(season.start_date, activity.activity_date);
+    const weekIndex = seasonWeekIndexForDate(
+      season.start_date,
+      activity.activity_date,
+    );
     if (weekIndex !== null && weekIndex < weekCount) {
       weeks[weekIndex].push(activity);
     }
@@ -70,11 +87,16 @@ async function SeasonHistory({
         return (
           <section key={index}>
             <SectionTitle>
-              {index + 1}주차 ({formatKoreanDate(start)}~{formatKoreanDate(end)})
+              {index + 1}주차 ({formatKoreanDate(start)}~{formatKoreanDate(end)}
+              )
             </SectionTitle>
             <ActivityStatusList
               activities={weekActivities}
-              emptyMessage={isFutureWeek ? `${index + 1}주차도 화이팅!` : "이 주에는 인증 기록이 없어요."}
+              emptyMessage={
+                isFutureWeek
+                  ? `${index + 1}주차도 화이팅!`
+                  : "이번 주에는 아직 인증 기록이 없어요."
+              }
             />
           </section>
         );
