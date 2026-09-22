@@ -168,6 +168,17 @@ rounded-2xl border border-border bg-surface px-4 py-3
 - 배경 딤 `bg-black/40` + 카드 `rounded-t-2xl bg-surface shadow-lg`, 하단에서 슬라이드업(`animate-sheet-up`, `globals.css`).
 - 필수 입력(계좌 등록처럼 정산에 꼭 필요한 값)은 "나중에"로 닫아도 값이 채워지기 전까지 다음 방문마다 다시 뜨게 한다 — 로컬스토리지 등으로 영구 스킵시키지 않는다.
 
+## 리액션 피커 (피드 카드)
+
+`src/components/FeedCardActions.tsx` — 피드 카드에서 이모지로 반응을 남기는 컨트롤. 고정된 10종 이모지 중 여러 개를 동시에 선택할 수 있다(다중 선택, 눌렀다고 닫히지 않음).
+
+- **두 가지 표시 모드가 절대 같이 안 보인다**: 평소엔 실제로 반응이 달린 이모지만 칩(`rounded-full border`)으로 나열되고, "+" 버튼을 누르면 이 칩 줄이 통째로 사라지고 그 자리에 10개짜리 고정 그리드가 뜬다. 칩 줄은 반응 개수에 따라 폭이 계속 바뀌는 가변 크기라, 피커가 열려 있는 동안 같이 보이게 두면 선택할 때마다 레이아웃이 흔들린다 — 그래서 열려 있을 땐 아예 숨긴다.
+- **피커는 열리자마자 스스로 스크롤해서 보인다**: 카드 맨 아래에 렌더링되는데, 피드 아래쪽 카드에서 열면 화면 밖으로 잘릴 수 있어서 `scrollIntoView({ behavior: "smooth", block: "nearest" })`로 항상 뷰포트 안으로 끌어온다.
+- **선택은 즉시 반영, 피커는 안 닫힘** — 하나 고르고 바로 다음 걸 고를 수 있어야 하므로, 이모지를 선택해도 피커가 자동으로 닫히지 않는다. 바깥을 탭하거나 "✕" 버튼을 눌러야 닫힌다.
+- **동시 선택 잠금은 이모지별로 따로** — 하나의 이모지에 연타를 막는 pending 상태를 전체가 아니라 이모지 단위(`Set`)로 관리한다. 서로 다른 이모지는 각각 별개의 DB row라 동시에 눌러도 서로 막을 이유가 없다.
+- 칩: 기본 `border border-border text-ink-secondary`, 본인이 누른 반응만 `border-primary-400 bg-primary-50 text-primary-600`로 강조.
+- 피커 그리드 버튼: `h-8 w-8 rounded-full bg-surface`, 본인이 누른 반응만 `ring-2 ring-primary-400 bg-primary-100`로 강조.
+
 ## 공통 컴포넌트로 뽑는 기준
 
 - 두 군데 이상에서 같은 입력 필드/버튼 조합이 반복되면 즉시 `src/components/`로 분리한다 (예: `SeasonFeeFields`, `BankForm`, `RenewalToggle`).
