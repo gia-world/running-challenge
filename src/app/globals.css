@@ -118,9 +118,11 @@
 body {
   background: var(--color-canvas);
   color: var(--color-ink);
-  /* Stops double-tap-to-zoom on mobile (buttons/taps feel laggy without
-     this, since the browser waits to see if a second tap is coming).
-     Pinch-zoom still works since "manipulation" keeps pan-x/pan-y/pinch. */
+  /* Removes the ~300ms tap delay on mobile (buttons/taps feel laggy
+     without this, since the browser waits to see if a second tap is
+     coming). Pinch-zoom itself is blocked app-wide via the viewport meta
+     (see layout.tsx) — PhotoViewerModal is the one place it's re-enabled,
+     with its own gesture handling. */
   touch-action: manipulation;
   font-family:
     "Pretendard Variable",

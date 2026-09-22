@@ -1,7 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode, type TouchEvent as ReactTouchEvent } from "react";
 import { Button } from "@/components/Button";
+
+const MIN_SCALE = 1;
+const MAX_SCALE = 4;
+
+function touchDistance(touches: React.TouchList) {
+  const [a, b] = [touches[0], touches[1]];
+  return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+}
 
 /**
  * Photo viewer shared by the feed, home's 이번 주 인증 기록, and 시즌 전체
@@ -9,9 +17,16 @@ import { Button } from "@/components/Button";
  * card tone as everywhere else in the app (no dark mode) — think of it as
  * one feed card, just bigger, floating over a dimmed backdrop like
  * StatusBoard's week modal. Multiple photos scroll as a snap carousel with
- * arrow + dot controls. Zooming in on a photo is just the browser's native
- * pinch-zoom — nothing here blocks it (no touch-action override), so
- * there's no custom gesture code to maintain.
+ * arrow + dot controls.
+ *
+ * Pinch-zoom is disabled for the app as a whole (viewport meta in
+ * layout.tsx) so a stray pinch elsewhere doesn't resize the page — this is
+ * the one place it's re-enabled, with its own two-finger pinch + one-finger
+ * pan handling (see handleTouch*). Below, `touch-action` on the carousel
+ * switches between `pan-x` (scale 1 — let the browser handle the normal
+ * swipe-between-photos carousel natively) and `none` (scale > 1 — hand
+ * every touch to our own pan/zoom math instead, so the two don't fight
+ * over the same gesture).
  */
 export function PhotoViewerModal({
   photos,
@@ -33,7 +48,23 @@ export function PhotoViewerModal({
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [zoom, setZoom] = useState({ scale: 1, x: 0, y: 0 });
   const scrollerRef = useRef<HTMLDivElement>(null);
+  // Refs, not state — updated every touchmove, so re-rendering on every one
+  // would be wasteful; only `zoom` (what's actually drawn) needs to.
+  const pinchRef = useRef<{ startDist: number; startScale: number } | null>(null);
+  const panRef = useRef<{ startX: number; startY: number; originX: number; originY: number } | null>(null);
+
+  // A zoomed-in photo you swiped away from would be a confusing thing to
+  // swipe back to, so every slide starts fresh at scale 1 — adjusted here
+  // (during render, React's documented pattern for "reset state when a
+  // prop/derived value changes") rather than in an effect, which would
+  // cost an extra post-commit render pass for the same result.
+  const [prevIndex, setPrevIndex] = useState(index);
+  if (index !== prevIndex) {
+    setPrevIndex(index);
+    setZoom({ scale: 1, x: 0, y: 0 });
+  }
 
   // Without this, a vertical swipe meant for the modal (or just a stray
   // touch) scrolls the feed page sitting behind it, which is visible
@@ -56,6 +87,47 @@ export function PhotoViewerModal({
     const el = scrollerRef.current;
     if (!el) return;
     el.scrollTo({ left: nextIndex * el.clientWidth, behavior: "smooth" });
+  }
+
+  function handleTouchStart(e: ReactTouchEvent<HTMLDivElement>) {
+    if (e.touches.length === 2) {
+      pinchRef.current = { startDist: touchDistance(e.touches), startScale: zoom.scale };
+    } else if (e.touches.length === 1 && zoom.scale > 1) {
+      panRef.current = {
+        startX: e.touches[0].clientX,
+        startY: e.touches[0].clientY,
+        originX: zoom.x,
+        originY: zoom.y,
+      };
+    }
+  }
+
+  function handleTouchMove(e: ReactTouchEvent<HTMLDivElement>) {
+    if (e.touches.length === 2 && pinchRef.current) {
+      const { startDist, startScale } = pinchRef.current;
+      const scale = Math.min(
+        MAX_SCALE,
+        Math.max(MIN_SCALE, startScale * (touchDistance(e.touches) / startDist)),
+      );
+      setZoom((z) => ({ ...z, scale }));
+    } else if (e.touches.length === 1 && panRef.current) {
+      const { startX, startY, originX, originY } = panRef.current;
+      setZoom((z) => ({
+        ...z,
+        x: originX + (e.touches[0].clientX - startX),
+        y: originY + (e.touches[0].clientY - startY),
+      }));
+    }
+  }
+
+  function handleTouchEnd(e: ReactTouchEvent<HTMLDivElement>) {
+    if (e.touches.length < 2) pinchRef.current = null;
+    if (e.touches.length < 1) {
+      panRef.current = null;
+      // Pinching back below 1x would otherwise leave the photo permanently
+      // shrunk inside its frame — snap back to a clean 1x/centered state.
+      setZoom((z) => (z.scale <= MIN_SCALE ? { scale: 1, x: 0, y: 0 } : z));
+    }
   }
 
   async function handleDelete() {
@@ -94,6 +166,10 @@ export function PhotoViewerModal({
           <div
             ref={scrollerRef}
             onScroll={handleScroll}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            style={{ touchAction: zoom.scale > 1 ? "none" : "pan-x" }}
             className="no-scrollbar flex h-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden"
           >
             {photos.map((url, i) => (
@@ -104,7 +180,12 @@ export function PhotoViewerModal({
                 alt={`인증샷 ${i + 1}/${photos.length}`}
                 draggable={false}
                 onContextMenu={(e) => e.preventDefault()}
-                style={{ WebkitTouchCallout: "none", WebkitUserSelect: "none", userSelect: "none" }}
+                style={{
+                  WebkitTouchCallout: "none",
+                  WebkitUserSelect: "none",
+                  userSelect: "none",
+                  transform: i === index ? `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})` : undefined,
+                }}
                 className="h-full w-full shrink-0 snap-center object-contain"
               />
             ))}
