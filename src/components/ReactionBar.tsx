@@ -188,7 +188,7 @@ export function ReactionBar({
         <button
           type="button"
           onClick={() => setIsPickerOpen((open) => !open)}
-          className="flex items-center justify-center rounded-full border border-dashed border-border-strong px-2 py-1 text-ink-tertiary"
+          className="flex h-7 w-7 items-center justify-center rounded-full border border-dashed border-border-strong text-base leading-none text-ink-tertiary"
           aria-label="반응 추가"
         >
           {isPickerOpen ? "✕" : "+"}
