@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
-import { EmptyState } from "@/components/EmptyState";
 import { SegmentedTabs } from "@/components/SegmentedTabs";
+import { SeasonGate } from "@/components/SeasonGate";
 import { requireTeamViewer } from "@/lib/viewer";
 import { todayInSeoul, WEEKLY_GOAL } from "@/lib/week";
 import { formatKoreanDate } from "@/lib/format";
@@ -60,32 +60,19 @@ export default async function CertifyPage({
         </div>
       )}
 
-      {!selectedSeason ? (
-        <EmptyState>
-          지금 진행 중인 시즌이 없어요.
-          <br />
-          관리자가 시즌을 만들면 시작할 수 있어요.
-        </EmptyState>
-      ) : !isSelectedSeasonMember ? (
-        <EmptyState>
-          <p className="text-sm text-ink-tertiary">
-            {formatKoreanDate(selectedSeason.start_date)} ~{" "}
-            {formatKoreanDate(selectedSeason.end_date)}
-          </p>
-          <p className="mt-2">
-            이 시즌에는 참여 중이 아니에요.
-            <br />
-            관리자에게 참여 승인을 요청해주세요.
-          </p>
-        </EmptyState>
-      ) : (
-        <CertifyFormLoader
-          userId={user.id}
-          seasonId={selectedSeason.id}
-          seasonStartDate={selectedSeason.start_date}
-          seasonEndDate={selectedSeason.end_date}
-        />
-      )}
+      <SeasonGate
+        viewer={{ activeSeason: selectedSeason, isSeasonMember: isSelectedSeasonMember }}
+        seasonLabel="이 시즌"
+      >
+        {selectedSeason && (
+          <CertifyFormLoader
+            userId={user.id}
+            seasonId={selectedSeason.id}
+            seasonStartDate={selectedSeason.start_date}
+            seasonEndDate={selectedSeason.end_date}
+          />
+        )}
+      </SeasonGate>
     </PageShell>
   );
 }

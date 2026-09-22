@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { BottomSheet } from "@/components/BottomSheet";
 import { SegmentedTabs } from "@/components/SegmentedTabs";
 import { SectionTitle } from "@/components/SectionTitle";
+import { SeasonGate } from "@/components/SeasonGate";
 import type { WeekStat } from "@/lib/seasonStats";
 import type { SeasonHistoryEntry } from "@/lib/seasonHistory";
 
@@ -47,7 +48,6 @@ function cellClassName(week: WeekStat, isCurrentWeek: boolean) {
 }
 
 export function StatusBoard({
-  hasActiveSeason,
   isSeasonMember,
   activeSeasonRange,
   members,
@@ -59,9 +59,8 @@ export function StatusBoard({
   history,
   badgeMembers,
 }: {
-  hasActiveSeason: boolean;
   isSeasonMember: boolean;
-  activeSeasonRange: { start: string; end: string } | null;
+  activeSeasonRange: { start_date: string; end_date: string } | null;
   members: Member[];
   currentWeekIndex: number;
   weekCount: number;
@@ -149,27 +148,7 @@ export function StatusBoard({
         ]}
       >
         {view === "season" ? (
-          !hasActiveSeason ? (
-            <EmptyState>
-              지금 진행 중인 시즌이 없어요.
-              <br />
-              관리자가 시즌을 만들면 시작할 수 있어요.
-            </EmptyState>
-          ) : !isSeasonMember ? (
-            <EmptyState>
-              {activeSeasonRange && (
-                <p className="text-sm text-ink-tertiary">
-                  {formatKoreanDate(activeSeasonRange.start)} ~{" "}
-                  {formatKoreanDate(activeSeasonRange.end)}
-                </p>
-              )}
-              <p className="mt-2">
-                이번 시즌에는 참여 중이 아니에요.
-                <br />
-                관리자에게 참여 승인을 요청해주세요.
-              </p>
-            </EmptyState>
-          ) : (
+          <SeasonGate viewer={{ activeSeason: activeSeasonRange, isSeasonMember }}>
             <div className="flex flex-col gap-3">
               <div className="flex justify-end gap-2 text-sm">
                 <button
@@ -254,7 +233,7 @@ export function StatusBoard({
                 </table>
               </div>
             </div>
-          )
+          </SeasonGate>
         ) : (
           <div className="flex flex-col gap-6">
             <section className="flex flex-col gap-2">

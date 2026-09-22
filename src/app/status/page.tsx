@@ -86,13 +86,8 @@ export default async function StatusPage() {
       bottomNav={{ active: "status", isAdmin: viewer.teamRole === "admin" }}
     >
       <StatusBoard
-        hasActiveSeason={!!viewer.activeSeason}
         isSeasonMember={viewer.isSeasonMember}
-        activeSeasonRange={
-          viewer.activeSeason
-            ? { start: viewer.activeSeason.start_date, end: viewer.activeSeason.end_date }
-            : null
-        }
+        activeSeasonRange={viewer.activeSeason}
         members={currentSeasonMembers}
         currentWeekIndex={currentWeekIndex}
         weekCount={weekCount}
