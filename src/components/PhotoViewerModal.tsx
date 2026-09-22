@@ -90,7 +90,7 @@ export function PhotoViewerModal({
           </button>
         </div>
 
-        <div className="relative min-h-0 flex-1 bg-muted">
+        <div className="relative h-[60vh] shrink-0 bg-muted">
           <div
             ref={scrollerRef}
             onScroll={handleScroll}
