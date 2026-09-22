@@ -40,7 +40,7 @@ export default async function HomePage() {
       header={<PageTitle>{displayName}님, 안녕하세요 👋</PageTitle>}
       mainClassName="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10"
       isAdmin={viewer.teamRole === "admin"}
-      bottomNav={{ active: "home" }}
+      activeTab="home"
     >
       {viewer.graceSeason && viewer.isGraceSeasonMember && (
         <Link

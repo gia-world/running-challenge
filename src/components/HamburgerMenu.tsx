@@ -48,11 +48,11 @@ export function HamburgerMenu({ isAdmin = false }: { isAdmin?: boolean }) {
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex bg-black/60"
+          className="fixed inset-0 z-50 flex justify-end bg-black/60"
           onClick={() => setIsOpen(false)}
         >
           <div
-            className="animate-drawer-in flex h-full w-64 flex-col gap-1 rounded-r-2xl bg-surface p-4 shadow-lg"
+            className="animate-drawer-in flex h-full w-64 flex-col gap-1 rounded-l-2xl bg-surface p-4 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-2 flex items-center justify-between">

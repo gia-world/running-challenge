@@ -11,7 +11,6 @@ import { getSignedPhotoUrls } from "@/lib/photos";
 import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
 import { SectionTitle } from "@/components/SectionTitle";
-import { BackLink } from "@/components/BackLink";
 import { SeasonGate } from "@/components/SeasonGate";
 import {
   ActivityStatusList,
@@ -24,12 +23,7 @@ export default async function HistoryPage() {
   return (
     <PageShell
       teamName={viewer.teamName}
-      header={
-        <>
-          <BackLink href="/home">← 홈</BackLink>
-          <PageTitle className="mt-1">시즌 전체 기록</PageTitle>
-        </>
-      }
+      header={<PageTitle>시즌 전체 기록</PageTitle>}
       mainClassName="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-6"
       isAdmin={viewer.teamRole === "admin"}
     >

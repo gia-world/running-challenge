@@ -3,7 +3,6 @@ import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
 import { SectionTitle } from "@/components/SectionTitle";
-import { BackLink } from "@/components/BackLink";
 import { requireTeamViewer } from "@/lib/viewer";
 import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
@@ -60,8 +59,6 @@ export default async function MyPage() {
       mainClassName="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-8"
       isAdmin={viewer.teamRole === "admin"}
     >
-      <BackLink href="/home">← 홈으로</BackLink>
-
       {showRenewalPrompt && viewer.activeSeason && (
         <div className="flex flex-col gap-2">
           <SectionTitle size="lg">자동 연장</SectionTitle>

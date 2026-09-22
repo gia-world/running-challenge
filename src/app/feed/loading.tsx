@@ -8,7 +8,7 @@ export default function Loading() {
       eyebrowSkeleton
       header={<PageTitle>피드</PageTitle>}
       mainClassName="mx-auto flex w-full max-w-md flex-1 items-center justify-center px-6 py-6"
-      bottomNav={{ active: "feed" }}
+      activeTab="feed"
     >
       <LoadingSpinner />
     </PageShell>

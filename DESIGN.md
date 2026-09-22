@@ -130,30 +130,32 @@ rounded-2xl border border-border bg-surface px-4 py-3
 
 ## 페이지 레이아웃
 
-로그인 상태의 모든 화면은 헤더+메인(+바텀네비) 뼈대를 직접 짜지 않고 `src/components/PageShell.tsx`를 쓴다:
+로그인 상태의 모든 화면은 헤더+메인+바텀네비 뼈대를 직접 짜지 않고 `src/components/PageShell.tsx`를 쓴다:
 
 ```tsx
 <PageShell
   teamName={viewer.teamName}
   header={<PageTitle>피드</PageTitle>}
   isAdmin={viewer.teamRole === "admin"}
-  bottomNav={{ active: "feed" }}
+  activeTab="feed"
 >
   {/* 페이지 본문 */}
 </PageShell>
 ```
 
-- `header`는 `PageHeader`의 children 슬롯 그대로 — 보통 `<PageTitle>`, 뒤로가기가 있는 화면은 `<BackLink>` + `<PageTitle className="mt-1">` 조합(`시즌 전체 기록`, `마이페이지`, `관리자`, 시즌 상세 페이지 참고), 로딩 화면은 스켈레톤 placeholder.
-- `isAdmin`은 헤더의 햄버거 메뉴(아래 "글로벌 내비게이션" 참고)에 "관리자" 항목을 보여줄지만 결정한다 — `bottomNav`와 무관하게 독립적으로 넘긴다.
-- `bottomNav`는 홈/인증하기/피드/현황판, 즉 크루원이 매일 누르는 4개 화면에서만 넘긴다. 생략하면(마이페이지/시즌 전체 기록/관리자처럼) 바텀 네비 없이, `pb-20` 없이 렌더링되고 — 대신 `header`에 `<BackLink>`를 두고 헤더의 햄버거 메뉴로 다른 화면을 오간다.
+- `header`는 `PageHeader`의 children 슬롯 그대로 — 보통 `<PageTitle>`, 로딩 화면은 스켈레톤 placeholder. 뒤로가기가 필요한 건 계층형으로 파고드는 화면(관리자 안 시즌 상세 페이지처럼 목록→상세)뿐이라 `<BackLink>` + `<PageTitle className="mt-1">` 조합은 그런 곳에만 쓴다 — 마이페이지/시즌 전체 기록/관리자처럼 최상위 화면끼리 오가는 건 바텀 네비나 햄버거 메뉴로 이미 항상 가능해서 `<BackLink>`가 필요 없다.
+- `isAdmin`은 헤더의 햄버거 메뉴(아래 "글로벌 내비게이션" 참고)에 "관리자" 항목을 보여줄지만 결정한다.
+- `activeTab`은 바텀 네비 4개 아이콘(홈/인증하기/피드/현황판) 중 어느 걸 켤지만 정한다 — 바텀 네비 자체는 `PageShell`이 모든 화면에서 항상 렌더링하니, 그 4개에 안 속하는 화면(마이페이지/시즌 전체 기록/관리자)은 그냥 생략한다. 그러면 네비는 그대로 뜨고 아무 아이콘도 안 켜진다.
 - `main`의 기본 클래스는 `gap-4 py-6`(피드/현황판/인증하기와 동일) — 다른 간격이 필요하면(홈의 `gap-8 py-10`, 마이페이지/시즌 전체 기록의 `gap-6`) `mainClassName`으로 넘긴다.
 - 로그인/온보딩/참여하기처럼 헤더·바텀네비가 아예 없는 가운데 정렬 화면은 대신 `CenteredPage`를 쓴다.
 
 ## 글로벌 내비게이션 (바텀 네비 + 햄버거 메뉴)
 
-`src/components/BottomNav.tsx`는 홈/피드/인증/현황판 4개 고정 탭만 가진다 — 크루원이 하루에도 몇 번씩 누르는 "핵심 액션" 화면만 바텀 네비 자리를 차지한다는 원칙. 관리자는 원래 조건부 5번째 탭이었는데, 그 안에 다시 재인증요청함/팀원관리/시즌관리 세 개의 하위 메뉴(`AdminTabs`)가 있어서 다른 탭들과 무게가 안 맞았다 — "가끔 들어가서 더 들여다보는 화면"이라 바텀 네비보다는 아래 햄버거 메뉴 쪽이 맞다고 판단해 옮겼다.
+`src/components/BottomNav.tsx`는 홈/피드/인증/현황판 4개 고정 탭만 가지고, **모든 화면에서 항상 렌더링**된다 — 한때는 화면별로 있다 없다 했는데(마이페이지처럼 바텀 네비가 아예 없는 화면들), 그 화면들에서 다른 곳으로 가려면 매번 "← 홈"부터 눌러야 해서 답답했다. 지금은 어디서든 바텀 네비 4개 중 하나를 바로 누를 수 있고, 그 4개 중 하나가 아닌 화면(마이페이지/시즌 전체 기록/관리자)에 있을 때는 `active`를 안 넘겨서 네비는 뜨되 아무 아이콘도 안 켜진다.
 
-`src/components/HamburgerMenu.tsx` — `PageHeader`가 `bottomNav` 유무와 무관하게 **항상** 렌더링하는 전역 메뉴(`isAdmin` prop만 받음). `bg-black/60` 딤 배경 + 왼쪽에서 슬라이드인하는 `w-64 rounded-r-2xl bg-surface shadow-lg` 드로어(`animate-drawer-in`, `globals.css`) — 다른 모달들의 중앙 정렬 카드 컨벤션과 달리 이것만 왼쪽 고정인 건, 왼쪽 위 햄버거 아이콘에서 열리는 걸 시각적으로 이어 보이게 하기 위해서다. 열려있는 동안 `document.body.style.overflow = "hidden"`으로 배경 스크롤을 잠근다 (모달과 동일 패턴).
+관리자는 원래 조건부 5번째 탭이었는데, 그 안에 다시 재인증요청함/팀원관리/시즌관리 세 개의 하위 메뉴(`AdminTabs`)가 있어서 다른 탭들과 무게가 안 맞았다 — "가끔 들어가서 더 들여다보는 화면"이라 바텀 네비보다는 헤더의 햄버거 메뉴 쪽이 맞다고 판단해 옮겼다.
+
+`src/components/HamburgerMenu.tsx` — `PageHeader`가 항상 렌더링하는 전역 메뉴(`isAdmin` prop만 받음). `bg-black/60` 딤 배경 + 오른쪽에서 슬라이드인하는 `w-64 rounded-l-2xl bg-surface shadow-lg` 드로어(`animate-drawer-in`, `globals.css`) — 오른쪽인 건 헤더의 햄버거 아이콘 자체가 오른쪽에 있어서다(왼쪽에서 열리면 아이콘 위치와 열리는 방향이 안 맞아 어색했음). 열려있는 동안 `document.body.style.overflow = "hidden"`으로 배경 스크롤을 잠근다 (모달과 동일 패턴).
 
 - 항목: (관리자는 `isAdmin`일 때만) → 마이페이지 → 시즌 전체 기록, 그 아래 구분선 다음 로그아웃. 전부 페이지 이동이라 `<Link>`(로그아웃만 인증 처리가 필요해 `<button>`)이고, 클릭하면 `onClick`으로 드로어를 바로 닫는다 — 내비게이션이 끝나길 기다리지 않고 즉시 피드백을 준다.
 - 로그아웃은 원래 홈 화면 헤더에 `마이페이지` 링크와 나란히 어색하게 붙어있었다 — 계정 관련 액션인데 정작 계정 화면(마이페이지)이 아니라 홈에만 있었던 것. 햄버거 메뉴가 생기면서 다른 화면 전환 항목들과 같은 자리(전역 메뉴)로 옮기는 게 자연스러워 같이 정리했다.

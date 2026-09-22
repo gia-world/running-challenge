@@ -84,7 +84,7 @@ export default async function StatusPage() {
       teamName={viewer.teamName}
       header={<PageTitle>현황판</PageTitle>}
       isAdmin={viewer.teamRole === "admin"}
-      bottomNav={{ active: "status" }}
+      activeTab="status"
     >
       <StatusBoard
         isSeasonMember={viewer.isSeasonMember}
