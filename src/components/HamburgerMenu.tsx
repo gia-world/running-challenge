@@ -101,7 +101,7 @@ export function HamburgerMenu({ isAdmin = false }: { isAdmin?: boolean }) {
                 {item.label}
               </Link>
             ))}
-
+            {/* 
             <a
               href={CHAT_URL}
               target="_blank"
@@ -110,7 +110,7 @@ export function HamburgerMenu({ isAdmin = false }: { isAdmin?: boolean }) {
               className={`${ROW_CLASS} text-ink`}
             >
               챌린지 수다방
-            </a>
+            </a> */}
 
             <Link
               href="/mypage"
