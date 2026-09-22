@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "러닝 인증 앱",
-  description: "주 3회 5km 러닝을 자동으로 집계하는 러닝 인증 앱",
+  title: "런챌",
+  description: "주 3회 러닝을 자동으로 집계하는 러닝 인증 챌린지 앱",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

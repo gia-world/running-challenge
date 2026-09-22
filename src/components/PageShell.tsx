@@ -45,7 +45,7 @@ export function PageShell({
 }) {
   return (
     <div className="flex flex-1 flex-col bg-canvas pb-20">
-      <h1 className="sr-only">러닝 인증 챌린지</h1>
+      <h1 className="sr-only">런챌</h1>
 
       <PageHeader
         teamName={teamName}
