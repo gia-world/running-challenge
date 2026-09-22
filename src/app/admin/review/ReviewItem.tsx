@@ -139,7 +139,7 @@ export function ReviewItem({ activityId }: { activityId: string }) {
             disabled={isSubmitting}
             className="flex-1 rounded-xl bg-muted-strong py-2 text-base font-semibold text-ink"
           >
-            취소
+            닫기
           </button>
         </div>
       </div>

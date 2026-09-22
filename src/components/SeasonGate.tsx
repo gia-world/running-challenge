@@ -44,7 +44,7 @@ export function SeasonGate({
         <p className="mt-2">
           {seasonLabel}에는 참여 중이 아니에요.
           <br />
-          관리자에게 말씀해주시면 입금 확인 후 참여가 승인돼요.
+          관리자에게 말해주시면 입금 확인 후 참여가 승인돼요.
         </p>
       </EmptyState>
     );
