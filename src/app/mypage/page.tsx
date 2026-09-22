@@ -55,7 +55,7 @@ export default async function MyPage() {
   return (
     <PageShell
       teamName={viewer.teamName}
-      header={<PageTitle>마이페이지</PageTitle>}
+      header={<PageTitle>설정</PageTitle>}
       mainClassName="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-8"
       isAdmin={viewer.teamRole === "admin"}
     >

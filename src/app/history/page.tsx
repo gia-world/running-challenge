@@ -4,6 +4,7 @@ import {
   seasonWeekIndexForDate,
   seasonWeekRange,
   seasonWeekCount,
+  cappedTodayForSeason,
 } from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
 import { todayInSeoul, isWithinCertificationGrace } from "@/lib/week";
@@ -17,19 +18,25 @@ import {
   type ActivityListItem,
 } from "@/components/ActivityStatusList";
 
-export default async function HistoryPage() {
+export default async function HistoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ scope?: string }>;
+}) {
   const { user, viewer } = await requireTeamViewer();
+  const { scope } = await searchParams;
+  const weekOnly = scope === "week";
 
   return (
     <PageShell
       teamName={viewer.teamName}
-      header={<PageTitle>시즌 전체 기록</PageTitle>}
+      header={<PageTitle>{weekOnly ? "이번 주 인증 기록" : "시즌 전체 기록"}</PageTitle>}
       mainClassName="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-6"
       isAdmin={viewer.teamRole === "admin"}
     >
       <SeasonGate viewer={viewer}>
         {viewer.activeSeason && (
-          <SeasonHistory userId={user.id} season={viewer.activeSeason} />
+          <SeasonHistory userId={user.id} season={viewer.activeSeason} weekOnly={weekOnly} />
         )}
       </SeasonGate>
     </PageShell>
@@ -39,9 +46,11 @@ export default async function HistoryPage() {
 async function SeasonHistory({
   userId,
   season,
+  weekOnly,
 }: {
   userId: string;
   season: { id: string; start_date: string; end_date: string };
+  weekOnly: boolean;
 }) {
   const supabase = await createClient();
   const { data } = await supabase
@@ -89,10 +98,17 @@ async function SeasonHistory({
   }
 
   const today = todayInSeoul();
+  // Grace-period capped, same as home's weekly progress card — a day into
+  // the grace window still belongs to the season's real last week, not a
+  // nonexistent week beyond it.
+  const currentWeekIndex =
+    seasonWeekIndexForDate(season.start_date, cappedTodayForSeason(season.end_date, today)) ?? 0;
+  const weekIndexes = weekOnly ? [currentWeekIndex] : weeks.map((_, index) => index);
 
   return (
     <>
-      {weeks.map((weekActivities, index) => {
+      {weekIndexes.map((index) => {
+        const weekActivities = weeks[index] ?? [];
         const { start, end } = seasonWeekRange(season.start_date, index);
         const isFutureWeek = start > today;
 
