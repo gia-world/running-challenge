@@ -4,7 +4,9 @@ import { DropoutRequestItem } from "./DropoutRequestItem";
 
 type DropoutRequestRow = {
   id: string;
-  reason: string;
+  season_id: string;
+  user_id: string;
+  reason: string | null;
   created_at: string;
   profiles: { name: string } | null;
   seasons: { start_date: string; end_date: string; settled_at: string | null } | null;
@@ -16,7 +18,7 @@ export default async function AdminDropoutPage() {
   const { data: requests, error } = await supabase
     .from("season_dropout_requests")
     .select(
-      "id, reason, created_at, profiles!user_id(name), seasons(start_date, end_date, settled_at)",
+      "id, season_id, user_id, reason, created_at, profiles!user_id(name), seasons(start_date, end_date, settled_at)",
     )
     .eq("status", "pending")
     .order("created_at", { ascending: true })
@@ -54,8 +56,14 @@ export default async function AdminDropoutPage() {
                 </span>
               )}
             </div>
-            <p className="mt-1 text-sm text-ink-secondary">{item.reason}</p>
-            <DropoutRequestItem requestId={item.id} />
+            {item.reason && (
+              <p className="mt-1 text-sm text-ink-secondary">{item.reason}</p>
+            )}
+            <DropoutRequestItem
+              requestId={item.id}
+              seasonId={item.season_id}
+              userId={item.user_id}
+            />
           </div>
         ))
       )}

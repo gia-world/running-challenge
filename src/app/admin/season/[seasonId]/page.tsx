@@ -62,7 +62,7 @@ export default async function AdminSeasonDetailPage({
 
   const { data: dropoutRequests } = await supabase
     .from("season_dropout_requests")
-    .select("user_id, status, settlement_amount, reason")
+    .select("id, user_id, status, settlement_amount, reason")
     .eq("season_id", season.id)
     .order("created_at", { ascending: false });
 
@@ -71,7 +71,7 @@ export default async function AdminSeasonDetailPage({
   // doesn't block them from requesting again later).
   const dropoutByUserId = new Map<
     string,
-    { status: string; settlement_amount: number | null; reason: string }
+    { id: string; status: string; settlement_amount: number | null; reason: string }
   >();
   for (const r of dropoutRequests ?? []) {
     if (!dropoutByUserId.has(r.user_id)) dropoutByUserId.set(r.user_id, r);
@@ -135,7 +135,14 @@ export default async function AdminSeasonDetailPage({
   const settlements = hasFees
     ? new Map(
         members
-          .filter((m) => participantIds.has(m.id))
+          // Approving a dropout removes the season_membership row (they're
+          // no longer a current participant), but their settlement still
+          // needs to show — so include anyone with an approved dropout
+          // alongside actual current participants.
+          .filter(
+            (m) =>
+              participantIds.has(m.id) || dropoutByUserId.get(m.id)?.status === "approved",
+          )
           .map((m) => {
             // An approved dropout's refund is whatever the admin decided,
             // not the per-certification formula — they may have stopped
@@ -241,7 +248,7 @@ export default async function AdminSeasonDetailPage({
               key={member.id}
               className="flex flex-col gap-2 rounded-2xl border border-border bg-surface px-4 py-3"
             >
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-1.5">
                     <span className="font-semibold text-ink-strong">
@@ -258,7 +265,7 @@ export default async function AdminSeasonDetailPage({
                       </span>
                     )}
                   </div>
-                  {isParticipant && (
+                  {(isParticipant || dropout?.status === "approved") && (
                     <div className="flex gap-1">
                       {weeks.map((week, index) => (
                         <span
@@ -281,6 +288,9 @@ export default async function AdminSeasonDetailPage({
                     seasonId={season.id}
                     userId={member.id}
                     initialIsParticipant={isParticipant}
+                    pendingDropoutRequestId={
+                      dropout?.status === "pending" ? dropout.id : null
+                    }
                   />
                 )}
               </div>

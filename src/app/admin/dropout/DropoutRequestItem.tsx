@@ -13,7 +13,15 @@ import { Button } from "@/components/Button";
  * settlement doesn't follow the normal per-certification formula, so the
  * admin types the refund amount themselves rather than the app computing it.
  */
-export function DropoutRequestItem({ requestId }: { requestId: string }) {
+export function DropoutRequestItem({
+  requestId,
+  seasonId,
+  userId,
+}: {
+  requestId: string;
+  seasonId: string;
+  userId: string;
+}) {
   const router = useRouter();
   const [mode, setMode] = useState<"idle" | "approving" | "rejecting">("idle");
   const [settlementAmount, setSettlementAmount] = useState("");
@@ -44,7 +52,7 @@ export function DropoutRequestItem({ requestId }: { requestId: string }) {
       setIsSubmitting(false);
       return;
     }
-    router.refresh();
+    return supabase;
   }
 
   async function approve() {
@@ -54,10 +62,26 @@ export function DropoutRequestItem({ requestId }: { requestId: string }) {
       setError("정산액을 올바르게 입력해주세요.");
       return;
     }
-    await decide("approved", {
+    const supabase = await decide("approved", {
       settlement_amount: amount,
       admin_note: adminNote.trim() || null,
     });
+    if (!supabase) return;
+
+    // Approving ends their participation too — same as an admin directly
+    // hitting "참여 취소" on ParticipantToggle.
+    const { error: deleteError } = await supabase
+      .from("season_memberships")
+      .delete()
+      .eq("season_id", seasonId)
+      .eq("user_id", userId);
+
+    if (deleteError) {
+      setError("참여 취소 처리에 실패했어요. 다시 시도해주세요.");
+      setIsSubmitting(false);
+      return;
+    }
+    router.refresh();
   }
 
   async function reject() {
@@ -65,7 +89,8 @@ export function DropoutRequestItem({ requestId }: { requestId: string }) {
       setError("반려 사유를 입력해주세요.");
       return;
     }
-    await decide("rejected", { admin_note: adminNote.trim() });
+    const supabase = await decide("rejected", { admin_note: adminNote.trim() });
+    if (supabase) router.refresh();
   }
 
   if (mode === "approving") {
