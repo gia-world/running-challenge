@@ -215,6 +215,8 @@ export default async function AdminSeasonDetailPage({
 
       <SeasonFeeForm
         seasonId={season.id}
+        seasonStartDate={season.start_date}
+        seasonEndDate={season.end_date}
         initialEntryFee={season.entry_fee}
         initialRefundPerCertification={season.refund_per_certification}
         readOnly={status === "closed"}

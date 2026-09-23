@@ -24,6 +24,30 @@ export function computeParticipantSettlement(
   return { refundableCount, refund, isCompleted };
 }
 
+/** How many certifications a full completer (every week at WEEKLY_GOAL) racks up across a season of this length. */
+export function maxRefundableCertifications(weekCount: number): number {
+  return WEEKLY_GOAL * weekCount;
+}
+
+/**
+ * Suggests the sibling of whichever fee field an admin just typed into, so
+ * a full completer's refund comes out to exactly the entry fee (the
+ * relationship the app's own defaults already follow: 24,000원 참가비 ÷
+ * 2,000원 단가 = 12회, a 4주 시즌의 3회×4주). Rounded to each field's own
+ * input step so the suggestion stays a clean number — not meant to be
+ * exact, just a starting point the admin can still overwrite (e.g. to
+ * build in a base amount that's never refunded on top of the per-cert rate).
+ */
+export function deriveRefundPerCertification(entryFee: number, weekCount: number): number {
+  const maxCerts = maxRefundableCertifications(weekCount);
+  if (maxCerts <= 0) return 0;
+  return Math.round(entryFee / maxCerts / 500) * 500;
+}
+
+export function deriveEntryFee(refundPerCertification: number, weekCount: number): number {
+  return Math.round((refundPerCertification * maxRefundableCertifications(weekCount)) / 1000) * 1000;
+}
+
 /**
  * Prize pool is what non-완주자 leave on the table (entryFee - their refund),
  * split evenly among 완주자. A completer's own leftover is always 0, so

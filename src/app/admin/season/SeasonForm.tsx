@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { defaultSeasonEndDate } from "@/lib/season";
+import { defaultSeasonEndDate, seasonWeekCount } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
 import {
   SeasonFeeFields,
@@ -39,6 +39,7 @@ export function SeasonForm({
   const today = todayInSeoul();
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(defaultSeasonEndDate(today));
+  const [feeEnabled, setFeeEnabled] = useState(true);
   const [entryFee, setEntryFee] = useState(DEFAULT_ENTRY_FEE);
   const [refundPerCertification, setRefundPerCertification] = useState(
     DEFAULT_REFUND_PER_CERTIFICATION,
@@ -65,10 +66,8 @@ export function SeasonForm({
         team_id: teamId,
         start_date: startDate,
         end_date: endDate,
-        entry_fee: entryFee ? Number(entryFee) : null,
-        refund_per_certification: refundPerCertification
-          ? Number(refundPerCertification)
-          : null,
+        entry_fee: feeEnabled ? Number(entryFee) : null,
+        refund_per_certification: feeEnabled ? Number(refundPerCertification) : null,
       })
       .select("id")
       .single();
@@ -103,6 +102,17 @@ export function SeasonForm({
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    setError(null);
+
+    if (feeEnabled) {
+      const entryFeeValue = Number(entryFee);
+      const refundValue = Number(refundPerCertification);
+      if (!entryFee || !refundPerCertification || entryFeeValue <= 0 || refundValue <= 0) {
+        setError("참가비와 환급 단가를 모두 입력하거나, 정산 기능을 꺼주세요.");
+        return;
+      }
+    }
+
     const overlap = existingSeasons.some((s) =>
       rangesOverlap(startDate, endDate, s.start_date, s.end_date),
     );
@@ -135,10 +145,13 @@ export function SeasonForm({
       />
 
       <SeasonFeeFields
+        enabled={feeEnabled}
+        onEnabledChange={setFeeEnabled}
         entryFee={entryFee}
         onEntryFeeChange={setEntryFee}
         refundPerCertification={refundPerCertification}
         onRefundPerCertificationChange={setRefundPerCertification}
+        weekCount={seasonWeekCount(startDate, endDate)}
       />
 
       {previousSeasonId && (
