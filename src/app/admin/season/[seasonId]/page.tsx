@@ -132,46 +132,44 @@ export default async function AdminSeasonDetailPage({
   const entryFee = Number(season.entry_fee);
   const refundPerCertification = Number(season.refund_per_certification);
 
-  const settlements = hasFees
-    ? new Map(
-        members
-          // Approving a dropout removes the season_membership row (they're
-          // no longer a current participant), but their settlement still
-          // needs to show — so include anyone with an approved dropout
-          // alongside actual current participants.
-          .filter(
-            (m) =>
-              participantIds.has(m.id) || dropoutByUserId.get(m.id)?.status === "approved",
-          )
-          .map((m) => {
-            // An approved dropout's refund is whatever the admin decided,
-            // not the per-certification formula — they may have stopped
-            // certifying mid-week, which the formula has no notion of.
-            const dropout = dropoutByUserId.get(m.id);
-            if (dropout?.status === "approved") {
-              return [
-                m.id,
-                {
-                  refundableCount: 0,
-                  refund: Number(dropout.settlement_amount ?? 0),
-                  isCompleted: false,
-                },
-              ] as const;
-            }
-            return [
-              m.id,
-              computeParticipantSettlement(
-                weeklyStats.get(m.id) ?? emptyWeekStats(weekCount),
-                entryFee,
-                refundPerCertification,
-              ),
-            ] as const;
-          }),
+  const settlements = new Map(
+    members
+      // Approving a dropout removes the season_membership row (they're no
+      // longer a current participant), but their settlement still needs to
+      // show — so include anyone with an approved dropout alongside actual
+      // current participants. Unlike the per-certification formula below,
+      // an approved dropout's admin-decided amount doesn't depend on the
+      // season having entry_fee/refund_per_certification set at all (a
+      // season with 정산 기능 off can still record one-off dropout
+      // settlements), so this filter/branch runs regardless of hasFees.
+      .filter(
+        (m) =>
+          dropoutByUserId.get(m.id)?.status === "approved" ||
+          (hasFees && participantIds.has(m.id)),
       )
-    : new Map();
-  const prizeShare = hasFees
-    ? computePrizeShare(Array.from(settlements.values()), entryFee)
-    : 0;
+      .map((m) => {
+        const dropout = dropoutByUserId.get(m.id);
+        if (dropout?.status === "approved") {
+          return [
+            m.id,
+            {
+              refundableCount: 0,
+              refund: Number(dropout.settlement_amount ?? 0),
+              isCompleted: false,
+            },
+          ] as const;
+        }
+        return [
+          m.id,
+          computeParticipantSettlement(
+            weeklyStats.get(m.id) ?? emptyWeekStats(weekCount),
+            entryFee,
+            refundPerCertification,
+          ),
+        ] as const;
+      }),
+  );
+  const prizeShare = computePrizeShare(Array.from(settlements.values()), entryFee);
 
   return (
     <div className="flex flex-col gap-4">
