@@ -1,3 +1,5 @@
+import { DAYS_PER_WEEK, WEEKLY_GOAL } from "./week";
+
 export const SEASON_WEEKS = 4;
 export const SEASON_LENGTH_DAYS = SEASON_WEEKS * 7;
 
@@ -78,13 +80,15 @@ export function seasonWeekIndexForDate(
 
 /**
  * Last day (inclusive) an admin can add someone to a season after it
- * starts — the season's 5th day. From day 5 through week 1's last day
- * (day 7) is exactly 3 days, the minimum needed to still hit WEEKLY_GOAL
- * (3 certifications) at one a day; day 6 onward only leaves 2.
+ * starts, derived from DAYS_PER_WEEK/WEEKLY_GOAL rather than hardcoded:
+ * the day offset with exactly WEEKLY_GOAL days left until week 1 ends is
+ * the minimum needed to still hit WEEKLY_GOAL certifications at one a day.
+ * With the current 7-day week / 3-certification goal that's day 5 — one
+ * day later only leaves 2.
  */
 export function seasonParticipantJoinDeadlineDate(startDate: string): string {
   const start = parseISODate(startDate);
-  start.setUTCDate(start.getUTCDate() + 4);
+  start.setUTCDate(start.getUTCDate() + (DAYS_PER_WEEK - WEEKLY_GOAL));
   return toISODate(start);
 }
 

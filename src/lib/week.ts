@@ -1,4 +1,5 @@
 const TIME_ZONE = "Asia/Seoul";
+export const DAYS_PER_WEEK = 7;
 export const WEEKLY_GOAL = 3;
 
 /** Today's date in Asia/Seoul as YYYY-MM-DD, regardless of server locale. */
