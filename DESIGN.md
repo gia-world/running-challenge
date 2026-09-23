@@ -237,3 +237,4 @@ rounded-2xl border border-border bg-surface px-4 py-3
 
 - 두 군데 이상에서 같은 입력 필드/버튼 조합이 반복되면 즉시 `src/components/`로 분리한다 (예: `SeasonFeeFields`, `BankForm`, `RenewalToggle`).
 - 조회(값 있음)/입력(값 없음 또는 수정 중) 두 모드가 있는 데이터는 한 컴포넌트 안에서 `isEditing` 상태로 분기한다 — 별도 컴포넌트로 쪼개지 않는다. 조회 모드는 값 한 줄 + "변경" 버튼, 입력 모드는 폼 전체를 보여주고 저장 성공 시 조회 모드로 자동 전환 (저장 확인 문구를 따로 안 둬도 모드 전환 자체가 확인 역할을 함).
+- **`src/components/CopyButton.tsx`** — `navigator.clipboard.writeText` + 클릭 후 잠깐 "복사됨"으로 라벨이 바뀌는 로직을 뽑아놓은 공통 버튼. 원래 `InviteCodeCard`(초대 코드/링크 복사) 안에 있던 로직이었는데, 시즌 리포트의 계좌번호 복사(팀 정산 계좌, 내 계좌)에서 두 번째로 필요해져서 분리했다. `Button`과 같은 `variant`/`size` prop을 그대로 받아 어디서든 톤을 맞춰 쓸 수 있다.
