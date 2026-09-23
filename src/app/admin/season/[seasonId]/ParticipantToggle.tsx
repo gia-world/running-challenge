@@ -21,12 +21,15 @@ export function ParticipantToggle({
   memberName,
   initialIsParticipant,
   pendingDropoutRequestId = null,
+  maxSettlementAmount = null,
 }: {
   seasonId: string;
   userId: string;
   memberName: string;
   initialIsParticipant: boolean;
   pendingDropoutRequestId?: string | null;
+  /** The season's own entry fee, when it has one — caps the settlement amount so it can't exceed it. */
+  maxSettlementAmount?: number | null;
 }) {
   const router = useRouter();
   const [isParticipant, setIsParticipant] = useState(initialIsParticipant);
@@ -100,6 +103,7 @@ export function ParticipantToggle({
           description="참여를 취소하면 정산액이 자동으로 계산되지 않아요. 직접 정해주세요."
           confirmLabel="취소 확정"
           confirmVariant="danger"
+          maxAmount={maxSettlementAmount}
           onConfirm={confirmCancel}
           onClose={() => setIsCancelling(false)}
         />

@@ -116,6 +116,14 @@ export default async function AdminSeasonDetailPage({
       hasPendingReviewRequests = (pendingRequests ?? []).length > 0;
     }
   }
+  // A pending dropout request drops out of admin/dropout's own queue the
+  // moment the season is settled (it filters out settled seasons), so
+  // settling with one still open leaves it stuck forever with no way to
+  // resolve it from the UI — worth the same settle-time warning as a
+  // pending review request.
+  const hasPendingDropoutRequests = (dropoutRequests ?? []).some(
+    (r) => r.status === "pending",
+  );
   // Mirrors the grace-period rule in loadViewerContext: a season that ended
   // yesterday still accepts certifications until noon KST today, so the
   // settlement totals below can still shift until that window closes.
@@ -132,24 +140,32 @@ export default async function AdminSeasonDetailPage({
   const entryFee = Number(season.entry_fee);
   const refundPerCertification = Number(season.refund_per_certification);
 
+  // "Approved dropout" only overrides settlement while they're actually
+  // gone — an admin can still re-add someone after approving their
+  // dropout (e.g. undoing a mistake within the join window), and once
+  // they're back as a real participant the stale old decision shouldn't
+  // keep overriding what they've actually certified since.
+  function isDroppedOut(memberId: string): boolean {
+    return (
+      dropoutByUserId.get(memberId)?.status === "approved" &&
+      !participantIds.has(memberId)
+    );
+  }
+
   const settlements = new Map(
     members
       // Approving a dropout removes the season_membership row (they're no
       // longer a current participant), but their settlement still needs to
-      // show — so include anyone with an approved dropout alongside actual
+      // show — so include anyone still-dropped-out alongside actual
       // current participants. Unlike the per-certification formula below,
       // an approved dropout's admin-decided amount doesn't depend on the
       // season having entry_fee/refund_per_certification set at all (a
       // season with 정산 기능 off can still record one-off dropout
       // settlements), so this filter/branch runs regardless of hasFees.
-      .filter(
-        (m) =>
-          dropoutByUserId.get(m.id)?.status === "approved" ||
-          (hasFees && participantIds.has(m.id)),
-      )
+      .filter((m) => isDroppedOut(m.id) || (hasFees && participantIds.has(m.id)))
       .map((m) => {
-        const dropout = dropoutByUserId.get(m.id);
-        if (dropout?.status === "approved") {
+        if (isDroppedOut(m.id)) {
+          const dropout = dropoutByUserId.get(m.id)!;
           return [
             m.id,
             {
@@ -208,6 +224,8 @@ export default async function AdminSeasonDetailPage({
         <SettleSeasonButton
           seasonId={season.id}
           hasPendingReviewRequests={hasPendingReviewRequests}
+          hasPendingDropoutRequests={hasPendingDropoutRequests}
+          isInGracePeriod={isInGracePeriod}
         />
       )}
 
@@ -259,13 +277,13 @@ export default async function AdminSeasonDetailPage({
                         중도하차 검토중
                       </span>
                     )}
-                    {dropout?.status === "approved" && (
+                    {isDroppedOut(member.id) && (
                       <span className="rounded-full bg-muted px-2 py-0.5 text-sm font-medium text-ink-secondary">
                         중도하차
                       </span>
                     )}
                   </div>
-                  {(isParticipant || dropout?.status === "approved") && (
+                  {(isParticipant || isDroppedOut(member.id)) && (
                     <div className="flex gap-1">
                       {weeks.map((week, index) => (
                         <span
@@ -292,6 +310,7 @@ export default async function AdminSeasonDetailPage({
                     pendingDropoutRequestId={
                       dropout?.status === "pending" ? dropout.id : null
                     }
+                    maxSettlementAmount={hasFees ? entryFee : null}
                   />
                 )}
               </div>

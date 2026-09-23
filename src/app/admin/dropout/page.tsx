@@ -9,7 +9,12 @@ type DropoutRequestRow = {
   reason: string | null;
   created_at: string;
   profiles: { name: string } | null;
-  seasons: { start_date: string; end_date: string; settled_at: string | null } | null;
+  seasons: {
+    start_date: string;
+    end_date: string;
+    settled_at: string | null;
+    entry_fee: number | null;
+  } | null;
 };
 
 export default async function AdminDropoutPage() {
@@ -18,7 +23,7 @@ export default async function AdminDropoutPage() {
   const { data: requests, error } = await supabase
     .from("season_dropout_requests")
     .select(
-      "id, season_id, user_id, reason, created_at, profiles!user_id(name), seasons(start_date, end_date, settled_at)",
+      "id, season_id, user_id, reason, created_at, profiles!user_id(name), seasons(start_date, end_date, settled_at, entry_fee)",
     )
     .eq("status", "pending")
     .order("created_at", { ascending: true })
@@ -64,6 +69,7 @@ export default async function AdminDropoutPage() {
               seasonId={item.season_id}
               userId={item.user_id}
               memberName={item.profiles?.name ?? "팀원"}
+              maxSettlementAmount={item.seasons?.entry_fee ?? null}
             />
           </div>
         ))

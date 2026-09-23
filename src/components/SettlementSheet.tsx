@@ -5,6 +5,7 @@ import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Textarea } from "@/components/Textarea";
 import { BottomSheet } from "@/components/BottomSheet";
+import { formatWon } from "@/lib/format";
 
 /**
  * Shared "누군가 시즌을 그만두는데 정산액을 관리자가 직접 정한다" modal —
@@ -19,6 +20,7 @@ export function SettlementSheet({
   description,
   confirmLabel,
   confirmVariant = "primary",
+  maxAmount = null,
   onConfirm,
   onClose,
 }: {
@@ -26,6 +28,15 @@ export function SettlementSheet({
   description: string;
   confirmLabel: string;
   confirmVariant?: "primary" | "danger";
+  /**
+   * Caps the amount at the season's own entry fee, when it has one — a
+   * dropout's refund is otherwise a free-typed number with no upper bound,
+   * and one bigger than the entry fee makes (entryFee - refund) negative
+   * for that person, dragging down (or flipping negative) the prize pool
+   * everyone else's share is computed from. `null` when the season has no
+   * entry fee to check against (정산 기능 off), where any amount is fine.
+   */
+  maxAmount?: number | null;
   /** Return an error message to show and keep the sheet open; return nothing on success (the caller closes/refreshes). */
   onConfirm: (settlementAmount: number | null, adminNote: string | null) => Promise<string | void>;
   onClose: () => void;
@@ -40,6 +51,10 @@ export function SettlementSheet({
     const amount = trimmed ? Number(trimmed) : null;
     if (trimmed && (Number.isNaN(amount) || (amount ?? 0) < 0)) {
       setError("정산액을 올바르게 입력해주세요.");
+      return;
+    }
+    if (amount != null && maxAmount != null && amount > maxAmount) {
+      setError(`정산액은 참가비(${formatWon(maxAmount)})를 넘을 수 없어요.`);
       return;
     }
     setIsSubmitting(true);

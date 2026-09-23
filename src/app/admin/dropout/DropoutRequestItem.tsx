@@ -19,11 +19,14 @@ export function DropoutRequestItem({
   seasonId,
   userId,
   memberName,
+  maxSettlementAmount = null,
 }: {
   requestId: string;
   seasonId: string;
   userId: string;
   memberName: string;
+  /** The season's own entry fee, when it has one — caps the settlement amount so it can't exceed it. */
+  maxSettlementAmount?: number | null;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<"idle" | "approving" | "rejecting">("idle");
@@ -148,6 +151,7 @@ export function DropoutRequestItem({
           title={`${memberName}님 중도하차 승인`}
           description="정산액은 계산되지 않아요. 직접 정해주세요."
           confirmLabel="승인 확정"
+          maxAmount={maxSettlementAmount}
           onConfirm={approve}
           onClose={() => setMode("idle")}
         />
