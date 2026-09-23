@@ -275,7 +275,7 @@ export default async function SeasonReportPage({
                     <p className="font-semibold text-ink-strong">
                       {settlement.isCompleted && prizeShare > 0
                         ? `상금 ${formatWon(prizeShare)}을 받아요`
-                        : "따로 받을 상금은 없어요"}
+                        : "따로 받을 상금은 없어요 😢"}
                     </p>
                     {ownAccountNote(settlement.isCompleted && prizeShare > 0 ? prizeShare : 0)}
                   </>
