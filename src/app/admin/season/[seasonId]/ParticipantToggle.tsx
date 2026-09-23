@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Textarea } from "@/components/Textarea";
+import { BottomSheet } from "@/components/BottomSheet";
 
 /**
  * "참여 취소" no longer just deletes the membership — since it ends someone's
@@ -13,16 +14,21 @@ import { Textarea } from "@/components/Textarea";
  * through the same admin-decides-settlement step. When the member already
  * has a pending dropout request, confirming here resolves that request
  * (approved) instead of creating a second, stray one; otherwise this
- * cancellation IS the (admin-initiated) dropout decision.
+ * cancellation IS the (admin-initiated) dropout decision. That step needs
+ * two fields, so it's a BottomSheet (per DESIGN.md: "새로운 정보 입력/확인이
+ * 지금 이 화면에서 필요해진 순간") rather than expanding inline in the
+ * participant row.
  */
 export function ParticipantToggle({
   seasonId,
   userId,
+  memberName,
   initialIsParticipant,
   pendingDropoutRequestId = null,
 }: {
   seasonId: string;
   userId: string;
+  memberName: string;
   initialIsParticipant: boolean;
   pendingDropoutRequestId?: string | null;
 }) {
@@ -41,6 +47,11 @@ export function ParticipantToggle({
     setIsParticipant(true);
     setIsSubmitting(false);
     router.refresh();
+  }
+
+  function closeCancelSheet() {
+    setIsCancelling(false);
+    setError(null);
   }
 
   async function confirmCancel() {
@@ -107,47 +118,58 @@ export function ParticipantToggle({
     );
   }
 
-  if (isCancelling) {
-    return (
-      <div className="flex min-w-[260px] flex-col gap-2">
-        <Input
-          type="number"
-          label="정산액 (원, 비워두면 정산 없음)"
-          value={settlementAmount}
-          onChange={(e) => setSettlementAmount(e.target.value)}
-          placeholder="예: 30000"
-        />
-        <Textarea
-          value={adminNote}
-          onChange={setAdminNote}
-          placeholder="메모 (선택)"
-          maxLength={200}
-        />
-        {error && <p className="text-sm text-danger">{error}</p>}
-        <div className="flex gap-2">
-          <Button variant="danger" size="auto" className="flex-1" onClick={confirmCancel} disabled={isSubmitting}>
-            취소 확정
-          </Button>
-          <Button
-            variant="secondary"
-            size="auto"
-            className="flex-1"
-            onClick={() => {
-              setIsCancelling(false);
-              setError(null);
-            }}
-            disabled={isSubmitting}
-          >
-            닫기
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <Button size="pill" variant="secondary" onClick={() => setIsCancelling(true)} disabled={isSubmitting}>
-      참여 취소
-    </Button>
+    <>
+      <Button size="pill" variant="secondary" onClick={() => setIsCancelling(true)} disabled={isSubmitting}>
+        참여 취소
+      </Button>
+
+      {isCancelling && (
+        <BottomSheet onClose={closeCancelSheet}>
+          <div className="flex flex-col gap-3">
+            <div>
+              <h2 className="text-lg font-bold text-ink-strong">{memberName}님 참여 취소</h2>
+              <p className="mt-1 text-base text-ink-secondary">
+                참여를 취소하면 정산액이 자동으로 계산되지 않아요. 직접 정해주세요.
+              </p>
+            </div>
+            <Input
+              type="number"
+              label="정산액 (원, 비워두면 정산 없음)"
+              value={settlementAmount}
+              onChange={(e) => setSettlementAmount(e.target.value)}
+              placeholder="예: 30000"
+            />
+            <Textarea
+              value={adminNote}
+              onChange={setAdminNote}
+              placeholder="메모 (선택)"
+              maxLength={200}
+            />
+            {error && <p className="text-sm text-danger">{error}</p>}
+            <div className="flex gap-2">
+              <Button
+                variant="danger"
+                size="auto"
+                className="flex-1"
+                onClick={confirmCancel}
+                disabled={isSubmitting}
+              >
+                취소 확정
+              </Button>
+              <Button
+                variant="secondary"
+                size="auto"
+                className="flex-1"
+                onClick={closeCancelSheet}
+                disabled={isSubmitting}
+              >
+                닫기
+              </Button>
+            </div>
+          </div>
+        </BottomSheet>
+      )}
+    </>
   );
 }

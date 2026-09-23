@@ -248,7 +248,7 @@ export default async function AdminSeasonDetailPage({
               key={member.id}
               className="flex flex-col gap-2 rounded-2xl border border-border bg-surface px-4 py-3"
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center justify-between gap-3">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-1.5">
                     <span className="font-semibold text-ink-strong">
@@ -287,6 +287,7 @@ export default async function AdminSeasonDetailPage({
                   <ParticipantToggle
                     seasonId={season.id}
                     userId={member.id}
+                    memberName={member.name}
                     initialIsParticipant={isParticipant}
                     pendingDropoutRequestId={
                       dropout?.status === "pending" ? dropout.id : null
