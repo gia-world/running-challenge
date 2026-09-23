@@ -17,16 +17,23 @@ export default async function AdminLayout({
   }
 
   const supabase = await createClient();
-  const { data: pendingRequests } = await supabase
-    .from("activity_review_requests")
-    .select("activity_id, activities(seasons(settled_at))")
-    .eq("status", "pending")
-    .returns<
-      {
-        activity_id: string;
-        activities: { seasons: { settled_at: string | null } | null } | null;
-      }[]
-    >();
+  const [{ data: pendingRequests }, { data: pendingDropoutRequests }] = await Promise.all([
+    supabase
+      .from("activity_review_requests")
+      .select("activity_id, activities(seasons(settled_at))")
+      .eq("status", "pending")
+      .returns<
+        {
+          activity_id: string;
+          activities: { seasons: { settled_at: string | null } | null } | null;
+        }[]
+      >(),
+    supabase
+      .from("season_dropout_requests")
+      .select("id, seasons(settled_at)")
+      .eq("status", "pending")
+      .returns<{ id: string; seasons: { settled_at: string | null } | null }[]>(),
+  ]);
   // A closed (settled) season no longer accepts review processing, so its
   // pending requests shouldn't inflate the badge either.
   const pendingCount = new Set(
@@ -34,6 +41,9 @@ export default async function AdminLayout({
       .filter((r) => !r.activities?.seasons?.settled_at)
       .map((r) => r.activity_id),
   ).size;
+  const dropoutPendingCount = (pendingDropoutRequests ?? []).filter(
+    (r) => !r.seasons?.settled_at,
+  ).length;
 
   return (
     <PageShell
@@ -41,7 +51,9 @@ export default async function AdminLayout({
       header={<PageTitle>ADMIN</PageTitle>}
       isAdmin
     >
-      <AdminTabs pendingCount={pendingCount}>{children}</AdminTabs>
+      <AdminTabs pendingCount={pendingCount} dropoutPendingCount={dropoutPendingCount}>
+        {children}
+      </AdminTabs>
     </PageShell>
   );
 }

@@ -17,6 +17,7 @@ const GROUP_LABEL_CLASS =
 
 const ADMIN_ITEMS = [
   { href: "/admin/review", label: "재인증 요청함" },
+  { href: "/admin/dropout", label: "중도하차 요청함" },
   { href: "/admin/members", label: "팀원 관리" },
   { href: "/admin/season", label: "시즌 관리" },
 ] as const;

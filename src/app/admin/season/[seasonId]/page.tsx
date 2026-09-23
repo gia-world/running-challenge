@@ -60,6 +60,23 @@ export default async function AdminSeasonDetailPage({
     .select("user_id, renew_next_season")
     .eq("season_id", season.id);
 
+  const { data: dropoutRequests } = await supabase
+    .from("season_dropout_requests")
+    .select("user_id, status, settlement_amount, reason")
+    .eq("season_id", season.id)
+    .order("created_at", { ascending: false });
+
+  // Latest request per user — rows are already newest-first, so the first
+  // one seen for a given user is the one that matters (a rejected request
+  // doesn't block them from requesting again later).
+  const dropoutByUserId = new Map<
+    string,
+    { status: string; settlement_amount: number | null; reason: string }
+  >();
+  for (const r of dropoutRequests ?? []) {
+    if (!dropoutByUserId.has(r.user_id)) dropoutByUserId.set(r.user_id, r);
+  }
+
   const participantIds = new Set(
     (seasonMemberships ?? []).map((m) => m.user_id),
   );
@@ -119,14 +136,30 @@ export default async function AdminSeasonDetailPage({
     ? new Map(
         members
           .filter((m) => participantIds.has(m.id))
-          .map((m) => [
-            m.id,
-            computeParticipantSettlement(
-              weeklyStats.get(m.id) ?? emptyWeekStats(weekCount),
-              entryFee,
-              refundPerCertification,
-            ),
-          ]),
+          .map((m) => {
+            // An approved dropout's refund is whatever the admin decided,
+            // not the per-certification formula — they may have stopped
+            // certifying mid-week, which the formula has no notion of.
+            const dropout = dropoutByUserId.get(m.id);
+            if (dropout?.status === "approved") {
+              return [
+                m.id,
+                {
+                  refundableCount: 0,
+                  refund: Number(dropout.settlement_amount ?? 0),
+                  isCompleted: false,
+                },
+              ] as const;
+            }
+            return [
+              m.id,
+              computeParticipantSettlement(
+                weeklyStats.get(m.id) ?? emptyWeekStats(weekCount),
+                entryFee,
+                refundPerCertification,
+              ),
+            ] as const;
+          }),
       )
     : new Map();
   const prizeShare = hasFees
@@ -189,6 +222,7 @@ export default async function AdminSeasonDetailPage({
       <ul className="flex flex-col gap-2">
         {members.map((member) => {
           const isParticipant = participantIds.has(member.id);
+          const dropout = dropoutByUserId.get(member.id);
           const weeks = weeklyStats.get(member.id) ?? emptyWeekStats(weekCount);
           const settlement = settlements.get(member.id);
           const total = settlement
@@ -209,9 +243,21 @@ export default async function AdminSeasonDetailPage({
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex flex-col gap-1">
-                  <span className="font-semibold text-ink-strong">
-                    {member.name}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-ink-strong">
+                      {member.name}
+                    </span>
+                    {dropout?.status === "pending" && (
+                      <span className="rounded-full bg-warning-subtle px-2 py-0.5 text-sm font-medium text-warning">
+                        중도하차 검토중
+                      </span>
+                    )}
+                    {dropout?.status === "approved" && (
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-sm font-medium text-ink-secondary">
+                        중도하차
+                      </span>
+                    )}
+                  </div>
                   {isParticipant && (
                     <div className="flex gap-1">
                       {weeks.map((week, index) => (

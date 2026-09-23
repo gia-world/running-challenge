@@ -8,6 +8,7 @@ import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
 import { BankForm } from "@/components/BankForm";
 import { RenewalToggle } from "@/components/RenewalToggle";
+import { SeasonDropoutSection } from "@/components/SeasonDropoutSection";
 
 export default async function MyPage() {
   const user = await getAuthUser();
@@ -52,6 +53,18 @@ export default async function MyPage() {
           .maybeSingle()
       : { data: null };
 
+  const { data: dropoutRequest } =
+    viewer.isSeasonMember && viewer.activeSeason
+      ? await supabase
+          .from("season_dropout_requests")
+          .select("id, status, reason, settlement_amount, admin_note")
+          .eq("season_id", viewer.activeSeason.id)
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : { data: null };
+
   return (
     <PageShell
       teamName={viewer.teamName}
@@ -83,6 +96,17 @@ export default async function MyPage() {
           initialAccountNumber={profile?.bank_account_number ?? ""}
         />
       </div>
+
+      {viewer.isSeasonMember && viewer.activeSeason && (
+        <div className="flex flex-col gap-2">
+          <SectionTitle size="lg">시즌 중도하차</SectionTitle>
+          <SeasonDropoutSection
+            seasonId={viewer.activeSeason.id}
+            userId={user.id}
+            initialRequest={dropoutRequest}
+          />
+        </div>
+      )}
     </PageShell>
   );
 }
