@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/Button";
+import { CopyButton } from "@/components/CopyButton";
 
 function randomInviteCode(): string {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 8);
@@ -19,21 +20,10 @@ export function InviteCodeCard({
   const router = useRouter();
   const [code, setCode] = useState(initialCode);
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [copied, setCopied] = useState<"code" | "link" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const inviteLink =
     typeof window !== "undefined" ? `${window.location.origin}/join?code=${code}` : "";
-
-  async function copy(text: string, kind: "code" | "link") {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(kind);
-      setTimeout(() => setCopied(null), 1500);
-    } catch {
-      setError("복사에 실패했어요.");
-    }
-  }
 
   async function regenerate() {
     setIsRegenerating(true);
@@ -64,15 +54,17 @@ export function InviteCodeCard({
         <p className="flex-1 rounded-lg bg-muted px-3 py-2 text-center font-mono text-lg font-bold tracking-widest text-ink-strong">
           {code}
         </p>
-        <Button size="pill" variant="secondary" onClick={() => copy(code, "code")}>
-          {copied === "code" ? "복사됨" : "복사"}
-        </Button>
+        <CopyButton value={code} />
       </div>
 
       <div className="mt-3 flex gap-2">
-        <Button size="pill" className="flex-1" onClick={() => copy(inviteLink, "link")}>
-          {copied === "link" ? "링크 복사됨" : "초대 링크 복사"}
-        </Button>
+        <CopyButton
+          value={inviteLink}
+          label="초대 링크 복사"
+          copiedLabel="링크 복사됨"
+          variant="primary"
+          className="flex-1"
+        />
         <Button size="pill" variant="secondary" onClick={regenerate} disabled={isRegenerating}>
           {isRegenerating ? "재발급 중..." : "재발급"}
         </Button>

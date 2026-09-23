@@ -3,6 +3,7 @@ import { requireTeamViewer } from "@/lib/viewer";
 import { SectionTitle } from "@/components/SectionTitle";
 import type { UserRole } from "@/lib/types";
 import { InviteCodeCard } from "./InviteCodeCard";
+import { SettlementAccountCard } from "./SettlementAccountCard";
 import { MemberRow } from "./MemberRow";
 
 type MembershipRow = {
@@ -18,7 +19,7 @@ export default async function AdminMembersPage() {
   const supabase = await createClient();
   const { data: team } = await supabase
     .from("teams")
-    .select("id, name, invite_code")
+    .select("id, name, invite_code, settlement_bank_name, settlement_account_number")
     .eq("id", teamId)
     .single();
 
@@ -34,7 +35,14 @@ export default async function AdminMembersPage() {
   return (
     <div className="flex flex-col gap-4">
       {team && (
-        <InviteCodeCard teamId={team.id} initialCode={team.invite_code} />
+        <>
+          <InviteCodeCard teamId={team.id} initialCode={team.invite_code} />
+          <SettlementAccountCard
+            teamId={team.id}
+            initialBankName={team.settlement_bank_name}
+            initialAccountNumber={team.settlement_account_number}
+          />
+        </>
       )}
 
       <div>

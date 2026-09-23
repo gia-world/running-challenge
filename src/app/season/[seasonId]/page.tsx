@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
 import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
@@ -12,6 +13,7 @@ import { PageTitle } from "@/components/PageTitle";
 import { SectionTitle } from "@/components/SectionTitle";
 import { BackLink } from "@/components/BackLink";
 import { EmptyState } from "@/components/EmptyState";
+import { CopyButton } from "@/components/CopyButton";
 
 export default async function SeasonReportPage({
   params,
@@ -83,12 +85,21 @@ export default async function SeasonReportPage({
   }
 
   const weekCount = seasonWeekCount(season.start_date, season.end_date);
-  const weeklyStats = await computeSeasonWeeklyStats(
-    supabase,
-    season.id,
-    season.start_date,
-    season.end_date,
-  );
+  const [weeklyStats, { data: team }, { data: profile }] = await Promise.all([
+    computeSeasonWeeklyStats(supabase, season.id, season.start_date, season.end_date),
+    supabase
+      .from("teams")
+      .select("settlement_bank_name, settlement_account_number")
+      .eq("id", season.team_id)
+      .single(),
+    supabase.from("profiles").select("bank_name, bank_account_number").eq("id", user.id).single(),
+  ]);
+  // 벌금(연장 시 이월되지 않는 몫)을 보낼 팀 계좌 — 참가비/상금이 개인에게
+  // 가는 profiles.bank_* 와는 반대 방향의 계좌라 따로 관리된다.
+  const teamBankName = team?.settlement_bank_name ?? null;
+  const teamAccountNumber = team?.settlement_account_number ?? null;
+  const viewerBankName = profile?.bank_name ?? null;
+  const viewerAccountNumber = profile?.bank_account_number ?? null;
   const viewerWeeks = weeklyStats.get(user.id) ?? emptyWeekStats(weekCount);
   const viewerCompleted = viewerWeeks.every((w) => w.isSuccess);
 
@@ -122,6 +133,48 @@ export default async function SeasonReportPage({
     ? settlement.refund + (settlement.isCompleted ? prizeShare : 0)
     : 0;
   const unpaidAmount = hasFees && settlement ? Math.max(entryFee - settlement.refund, 0) : 0;
+
+  // 참가비/상금이 나에게 오는 경우 — 내 계좌(설정에 등록한 계좌)로 입금될
+  // 예정이라는 확인 + 틀렸으면 고치라는 안내. amount가 0 이하면 아무것도
+  // 안 보여준다(줄 돈이 없으면 계좌 얘기를 할 이유가 없음).
+  function ownAccountNote(amount: number) {
+    if (amount <= 0) return null;
+    if (viewerBankName && viewerAccountNumber) {
+      return (
+        <div className="flex items-center justify-between gap-2 rounded-lg bg-subtle px-3 py-2 text-sm">
+          <span className="text-ink-secondary">
+            {viewerBankName} {viewerAccountNumber}로 입금될 예정이에요. 계좌가 다르면{" "}
+            <Link href="/mypage" className="underline">
+              설정
+            </Link>
+            에서 수정해주세요.
+          </span>
+          <CopyButton value={viewerAccountNumber} />
+        </div>
+      );
+    }
+    return (
+      <p className="text-sm text-warning">
+        등록된 계좌가 없어요.{" "}
+        <Link href="/mypage" className="underline">
+          설정
+        </Link>
+        에서 계좌를 등록해주세요.
+      </p>
+    );
+  }
+
+  // 벌금을 보낼 팀 계좌 안내 — 관리자가 아직 등록하지 않았으면 계좌 대신
+  // 직접 문의하라는 문구로 대체된다.
+  const teamAccountNote =
+    teamBankName && teamAccountNumber ? (
+      <div className="flex items-center justify-between gap-2 rounded-lg bg-subtle px-3 py-2 text-sm">
+        <span className="text-ink-secondary">{teamBankName} {teamAccountNumber}로 입금해주세요.</span>
+        <CopyButton value={teamAccountNumber} />
+      </div>
+    ) : (
+      <p className="text-sm text-ink-tertiary">정산 계좌는 관리자에게 확인해주세요.</p>
+    );
 
   return (
     <PageShell
@@ -186,6 +239,7 @@ export default async function SeasonReportPage({
               {viewerDropout.admin_note && (
                 <p className="text-sm text-ink-tertiary">{viewerDropout.admin_note}</p>
               )}
+              {ownAccountNote(Number(viewerDropout.settlement_amount ?? 0))}
             </>
           ) : !hasFees ? (
             <p className="text-ink-secondary">이 시즌은 정산 기능을 사용하지 않았어요.</p>
@@ -207,16 +261,20 @@ export default async function SeasonReportPage({
                       환급액은 다음 시즌 참가비로 이월돼요.
                     </p>
                     {unpaidAmount > 0 && (
-                      <p className="text-sm text-danger">
-                        목표를 채우지 못해서 참가비 중 {formatWon(unpaidAmount)}은 벌금으로
-                        나가요(이월되지 않아요).
-                      </p>
+                      <>
+                        <p className="text-sm text-danger">
+                          목표를 채우지 못해서 참가비 중 {formatWon(unpaidAmount)}은 벌금으로
+                          나가요(이월되지 않아요). 아래 계좌로 입금해주세요.
+                        </p>
+                        {teamAccountNote}
+                      </>
                     )}
                     <p className="font-semibold text-ink-strong">
                       {settlement.isCompleted && prizeShare > 0
                         ? `상금 ${formatWon(prizeShare)}을 받아요`
                         : "따로 받을 상금은 없어요"}
                     </p>
+                    {ownAccountNote(settlement.isCompleted && prizeShare > 0 ? prizeShare : 0)}
                   </>
                 ) : settlement.isCompleted && prizeShare > 0 ? (
                   <>
@@ -226,6 +284,7 @@ export default async function SeasonReportPage({
                     <p className="font-semibold text-ink-strong">
                       총 {formatWon(total)}을 받아요
                     </p>
+                    {ownAccountNote(total)}
                   </>
                 ) : (
                   <>
@@ -237,6 +296,7 @@ export default async function SeasonReportPage({
                         참가비 중 {formatWon(unpaidAmount)}은 돌려받지 못해요.
                       </p>
                     )}
+                    {ownAccountNote(total)}
                   </>
                 )}
               </>
