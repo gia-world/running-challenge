@@ -63,6 +63,7 @@ export default async function AdminDropoutPage() {
               requestId={item.id}
               seasonId={item.season_id}
               userId={item.user_id}
+              memberName={item.profiles?.name ?? "팀원"}
             />
           </div>
         ))

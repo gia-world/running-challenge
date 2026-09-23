@@ -3,33 +3,72 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Input } from "@/components/Input";
 import { Textarea } from "@/components/Textarea";
 import { Button } from "@/components/Button";
+import { SettlementSheet } from "@/components/SettlementSheet";
 
 /**
- * Approve/reject a dropout request. Unlike ReviewItem's "인정 유지" (a
- * direct action, no form), approving here still needs a form — dropout
- * settlement doesn't follow the normal per-certification formula, so the
- * admin types the refund amount themselves rather than the app computing it.
+ * Approve/reject a dropout request. Approving shares SettlementSheet with
+ * ParticipantToggle's admin-initiated cancel — both end in the same
+ * decision (settlement amount the admin types themselves, since dropout
+ * doesn't follow the normal per-certification formula). Rejecting doesn't
+ * involve a settlement at all, so it stays its own small inline form.
  */
 export function DropoutRequestItem({
   requestId,
   seasonId,
   userId,
+  memberName,
 }: {
   requestId: string;
   seasonId: string;
   userId: string;
+  memberName: string;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<"idle" | "approving" | "rejecting">("idle");
-  const [settlementAmount, setSettlementAmount] = useState("");
-  const [adminNote, setAdminNote] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function decide(status: "approved" | "rejected", extra: Record<string, unknown>) {
+  async function approve(settlementAmount: number | null, adminNote: string | null) {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const { error: updateError } = await supabase
+      .from("season_dropout_requests")
+      .update({
+        status: "approved",
+        settlement_amount: settlementAmount,
+        admin_note: adminNote,
+        decided_by: user?.id,
+        decided_at: new Date().toISOString(),
+      })
+      .eq("id", requestId);
+
+    if (updateError) return "처리에 실패했어요. 다시 시도해주세요.";
+
+    // Approving ends their participation too — same as an admin directly
+    // hitting "참여 취소" on ParticipantToggle.
+    const { error: deleteError } = await supabase
+      .from("season_memberships")
+      .delete()
+      .eq("season_id", seasonId)
+      .eq("user_id", userId);
+
+    if (deleteError) return "참여 취소 처리에 실패했어요. 다시 시도해주세요.";
+
+    setMode("idle");
+    router.refresh();
+  }
+
+  async function reject() {
+    if (!rejectReason.trim()) {
+      setError("반려 사유를 입력해주세요.");
+      return;
+    }
     setIsSubmitting(true);
     setError(null);
     const supabase = createClient();
@@ -40,10 +79,10 @@ export function DropoutRequestItem({
     const { error: updateError } = await supabase
       .from("season_dropout_requests")
       .update({
-        status,
+        status: "rejected",
+        admin_note: rejectReason.trim(),
         decided_by: user?.id,
         decided_at: new Date().toISOString(),
-        ...extra,
       })
       .eq("id", requestId);
 
@@ -52,91 +91,15 @@ export function DropoutRequestItem({
       setIsSubmitting(false);
       return;
     }
-    return supabase;
-  }
-
-  async function approve() {
-    const trimmed = settlementAmount.trim();
-    const amount = trimmed ? Number(trimmed) : null;
-    if (trimmed && (Number.isNaN(amount) || (amount ?? 0) < 0)) {
-      setError("정산액을 올바르게 입력해주세요.");
-      return;
-    }
-    const supabase = await decide("approved", {
-      settlement_amount: amount,
-      admin_note: adminNote.trim() || null,
-    });
-    if (!supabase) return;
-
-    // Approving ends their participation too — same as an admin directly
-    // hitting "참여 취소" on ParticipantToggle.
-    const { error: deleteError } = await supabase
-      .from("season_memberships")
-      .delete()
-      .eq("season_id", seasonId)
-      .eq("user_id", userId);
-
-    if (deleteError) {
-      setError("참여 취소 처리에 실패했어요. 다시 시도해주세요.");
-      setIsSubmitting(false);
-      return;
-    }
     router.refresh();
-  }
-
-  async function reject() {
-    if (!adminNote.trim()) {
-      setError("반려 사유를 입력해주세요.");
-      return;
-    }
-    const supabase = await decide("rejected", { admin_note: adminNote.trim() });
-    if (supabase) router.refresh();
-  }
-
-  if (mode === "approving") {
-    return (
-      <div className="mt-3 flex flex-col gap-2">
-        <Input
-          type="number"
-          label="정산액 (원, 비워두면 정산 없음)"
-          value={settlementAmount}
-          onChange={(e) => setSettlementAmount(e.target.value)}
-          placeholder="예: 30000"
-        />
-        <Textarea
-          value={adminNote}
-          onChange={setAdminNote}
-          placeholder="메모 (선택)"
-          maxLength={200}
-        />
-        {error && <p className="text-sm text-danger">{error}</p>}
-        <div className="flex gap-2">
-          <Button size="auto" className="flex-1" onClick={approve} disabled={isSubmitting}>
-            승인 확정
-          </Button>
-          <Button
-            variant="secondary"
-            size="auto"
-            className="flex-1"
-            onClick={() => {
-              setMode("idle");
-              setError(null);
-            }}
-            disabled={isSubmitting}
-          >
-            닫기
-          </Button>
-        </div>
-      </div>
-    );
   }
 
   if (mode === "rejecting") {
     return (
       <div className="mt-3 flex flex-col gap-2">
         <Textarea
-          value={adminNote}
-          onChange={setAdminNote}
+          value={rejectReason}
+          onChange={setRejectReason}
           placeholder="반려 사유를 입력해주세요"
           maxLength={200}
         />
@@ -163,22 +126,32 @@ export function DropoutRequestItem({
   }
 
   return (
-    <div className="mt-3 flex flex-col gap-2">
-      {error && <p className="text-sm text-danger">{error}</p>}
-      <div className="flex gap-2">
-        <Button size="auto" className="flex-1" onClick={() => setMode("approving")} disabled={isSubmitting}>
-          승인
-        </Button>
-        <Button
-          variant="secondary"
-          size="auto"
-          className="flex-1"
-          onClick={() => setMode("rejecting")}
-          disabled={isSubmitting}
-        >
-          반려
-        </Button>
+    <>
+      <div className="mt-3 flex flex-col gap-2">
+        <div className="flex gap-2">
+          <Button size="auto" className="flex-1" onClick={() => setMode("approving")}>
+            승인
+          </Button>
+          <Button
+            variant="secondary"
+            size="auto"
+            className="flex-1"
+            onClick={() => setMode("rejecting")}
+          >
+            반려
+          </Button>
+        </div>
       </div>
-    </div>
+
+      {mode === "approving" && (
+        <SettlementSheet
+          title={`${memberName}님 중도하차 승인`}
+          description="정산액은 계산되지 않아요. 직접 정해주세요."
+          confirmLabel="승인 확정"
+          onConfirm={approve}
+          onClose={() => setMode("idle")}
+        />
+      )}
+    </>
   );
 }
