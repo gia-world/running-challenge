@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { seasonWeekRange } from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
@@ -312,34 +313,51 @@ export function StatusBoard({
                 <EmptyState>아직 끝난 시즌이 없어요.</EmptyState>
               ) : (
                 <ul className="flex flex-col gap-2">
-                  {history.map((season) => (
-                    <li
-                      key={season.id}
-                      className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3"
-                    >
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-semibold text-ink-strong">
-                          {formatKoreanDate(season.start_date)} ~{" "}
-                          {formatKoreanDate(season.end_date)}
-                        </span>
-                        <span className="text-sm text-ink-tertiary">
-                          참가 {season.participantCount}명 · 완주{" "}
-                          {season.completedCount}명
-                        </span>
-                      </div>
-                      <span className="shrink-0 text-sm font-medium">
-                        {!season.viewerParticipated ? (
-                          <span className="text-ink-disabled">
-                            미참여
+                  {history.map((season) => {
+                    const rowContent = (
+                      <>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-semibold text-ink-strong">
+                            {formatKoreanDate(season.start_date)} ~{" "}
+                            {formatKoreanDate(season.end_date)}
                           </span>
-                        ) : season.viewerCompleted ? (
-                          <span className="text-success">완주</span>
+                          <span className="text-sm text-ink-tertiary">
+                            참가 {season.participantCount}명 · 완주{" "}
+                            {season.completedCount}명
+                          </span>
+                        </div>
+                        <span className="shrink-0 text-sm font-medium">
+                          {!season.viewerParticipated ? (
+                            <span className="text-ink-disabled">
+                              미참여
+                            </span>
+                          ) : season.viewerCompleted ? (
+                            <span className="text-success">완주</span>
+                          ) : (
+                            <span className="text-ink-tertiary">참여</span>
+                          )}
+                        </span>
+                      </>
+                    );
+                    // 참여한 시즌만 개인 리포트(성공 여부·정산 결과)로 들어갈 수
+                    // 있음 — 참여 안 한 시즌은 눌러봐야 보여줄 게 없다.
+                    return (
+                      <li key={season.id}>
+                        {season.viewerParticipated ? (
+                          <Link
+                            href={`/season/${season.id}`}
+                            className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3"
+                          >
+                            {rowContent}
+                          </Link>
                         ) : (
-                          <span className="text-ink-tertiary">참여</span>
+                          <div className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3">
+                            {rowContent}
+                          </div>
                         )}
-                      </span>
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </section>

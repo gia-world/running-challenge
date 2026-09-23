@@ -64,3 +64,54 @@ export function computePrizeShare(
   const pool = settlements.reduce((sum, s) => sum + (entryFee - s.refund), 0);
   return Math.floor(pool / completedCount);
 }
+
+export type SettlementParticipantInput = {
+  userId: string;
+  /** Currently a member of season_memberships (not a formula input on its own, but decides which branch applies below). */
+  isParticipant: boolean;
+  dropoutStatus: "pending" | "approved" | "rejected" | null;
+  dropoutSettlementAmount: number | null;
+  weeks: WeekStat[];
+};
+
+export type SeasonSettlements = {
+  byUserId: Map<string, ParticipantSettlement>;
+  prizeShare: number;
+};
+
+/**
+ * The whole-season settlement pass — every participant's refund plus the
+ * shared prize share, computed together since the pool is split across
+ * everyone at once. Single source of truth for both the admin season page
+ * and a participant's own season report, so the two can never drift.
+ *
+ * An "approved dropout" only overrides the formula while the person is
+ * actually gone (isParticipant false) — an admin can re-add someone after
+ * approving their dropout (undoing a mistake within the join window), and
+ * once they're back as a real participant the stale old decision shouldn't
+ * keep overriding what they've certified since.
+ */
+export function computeSeasonSettlements(
+  participants: SettlementParticipantInput[],
+  entryFee: number,
+  refundPerCertification: number,
+  hasFees: boolean,
+): SeasonSettlements {
+  const byUserId = new Map<string, ParticipantSettlement>();
+
+  for (const p of participants) {
+    const isDroppedOut = p.dropoutStatus === "approved" && !p.isParticipant;
+    if (isDroppedOut) {
+      byUserId.set(p.userId, {
+        refundableCount: 0,
+        refund: Number(p.dropoutSettlementAmount ?? 0),
+        isCompleted: false,
+      });
+    } else if (hasFees && p.isParticipant) {
+      byUserId.set(p.userId, computeParticipantSettlement(p.weeks, entryFee, refundPerCertification));
+    }
+  }
+
+  const prizeShare = computePrizeShare(Array.from(byUserId.values()), entryFee);
+  return { byUserId, prizeShare };
+}

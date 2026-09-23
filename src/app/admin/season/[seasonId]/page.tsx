@@ -2,10 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
 import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
-import {
-  computeParticipantSettlement,
-  computePrizeShare,
-} from "@/lib/settlement";
+import { computeSeasonSettlements } from "@/lib/settlement";
 import { formatKoreanDate, formatWon } from "@/lib/format";
 import { isBeforeNoonInSeoul, todayInSeoul, yesterdayInSeoul } from "@/lib/week";
 import { seasonParticipantJoinDeadlineDate, seasonWeekCount } from "@/lib/season";
@@ -144,7 +141,9 @@ export default async function AdminSeasonDetailPage({
   // gone — an admin can still re-add someone after approving their
   // dropout (e.g. undoing a mistake within the join window), and once
   // they're back as a real participant the stale old decision shouldn't
-  // keep overriding what they've actually certified since.
+  // keep overriding what they've actually certified since. (Same rule
+  // computeSeasonSettlements applies for the money itself — this local
+  // copy is just for the badge/weekly-dots rendering below.)
   function isDroppedOut(memberId: string): boolean {
     return (
       dropoutByUserId.get(memberId)?.status === "approved" &&
@@ -152,40 +151,21 @@ export default async function AdminSeasonDetailPage({
     );
   }
 
-  const settlements = new Map(
-    members
-      // Approving a dropout removes the season_membership row (they're no
-      // longer a current participant), but their settlement still needs to
-      // show — so include anyone still-dropped-out alongside actual
-      // current participants. Unlike the per-certification formula below,
-      // an approved dropout's admin-decided amount doesn't depend on the
-      // season having entry_fee/refund_per_certification set at all (a
-      // season with 정산 기능 off can still record one-off dropout
-      // settlements), so this filter/branch runs regardless of hasFees.
-      .filter((m) => isDroppedOut(m.id) || (hasFees && participantIds.has(m.id)))
-      .map((m) => {
-        if (isDroppedOut(m.id)) {
-          const dropout = dropoutByUserId.get(m.id)!;
-          return [
-            m.id,
-            {
-              refundableCount: 0,
-              refund: Number(dropout.settlement_amount ?? 0),
-              isCompleted: false,
-            },
-          ] as const;
-        }
-        return [
-          m.id,
-          computeParticipantSettlement(
-            weeklyStats.get(m.id) ?? emptyWeekStats(weekCount),
-            entryFee,
-            refundPerCertification,
-          ),
-        ] as const;
-      }),
+  const { byUserId: settlements, prizeShare } = computeSeasonSettlements(
+    members.map((m) => {
+      const dropout = dropoutByUserId.get(m.id);
+      return {
+        userId: m.id,
+        isParticipant: participantIds.has(m.id),
+        dropoutStatus: (dropout?.status as "pending" | "approved" | "rejected" | undefined) ?? null,
+        dropoutSettlementAmount: dropout?.settlement_amount ?? null,
+        weeks: weeklyStats.get(m.id) ?? emptyWeekStats(weekCount),
+      };
+    }),
+    entryFee,
+    refundPerCertification,
+    hasFees,
   );
-  const prizeShare = computePrizeShare(Array.from(settlements.values()), entryFee);
 
   return (
     <div className="flex flex-col gap-4">
