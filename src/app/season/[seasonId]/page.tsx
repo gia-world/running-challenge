@@ -197,10 +197,21 @@ export default async function SeasonReportPage({
             settlement && (
               <>
                 {isRenewing ? (
+                  // 대부분 연장 신청을 하는데, 연장하면 환급액은 현금으로
+                  // 받는 게 아니라 다음 시즌 참가비로 그대로 넘어갈 뿐이라
+                  // "환급 X를 받아요"라고 쓰면 실제로 돈을 손에 쥐는 것처럼
+                  // 오해할 수 있다. 그래서 환급액 자체는 헤드라인에서 뺐고,
+                  // 목표 미달로 이월 안 되는 몫만 "벌금"으로 짚어준다.
                   <>
                     <p className="text-ink-secondary">
-                      환급 {formatWon(settlement.refund)}은 다음 시즌 참가비로 이월돼요.
+                      환급액은 다음 시즌 참가비로 이월돼요.
                     </p>
+                    {unpaidAmount > 0 && (
+                      <p className="text-sm text-danger">
+                        목표를 채우지 못해서 참가비 중 {formatWon(unpaidAmount)}은 벌금으로
+                        나가요(이월되지 않아요).
+                      </p>
+                    )}
                     <p className="font-semibold text-ink-strong">
                       {settlement.isCompleted && prizeShare > 0
                         ? `상금 ${formatWon(prizeShare)}을 받아요`
@@ -217,14 +228,16 @@ export default async function SeasonReportPage({
                     </p>
                   </>
                 ) : (
-                  <p className="font-semibold text-ink-strong">
-                    {formatWon(total)}을 받아요
-                  </p>
-                )}
-                {unpaidAmount > 0 && (
-                  <p className="text-sm text-danger">
-                    참가비 중 {formatWon(unpaidAmount)}은 돌려받지 못해요.
-                  </p>
+                  <>
+                    <p className="font-semibold text-ink-strong">
+                      {formatWon(total)}을 받아요
+                    </p>
+                    {unpaidAmount > 0 && (
+                      <p className="text-sm text-danger">
+                        참가비 중 {formatWon(unpaidAmount)}은 돌려받지 못해요.
+                      </p>
+                    )}
+                  </>
                 )}
               </>
             )
