@@ -257,17 +257,20 @@ export default async function SeasonReportPage({
                   // 오해할 수 있다. 그래서 환급액 자체는 헤드라인에서 뺐고,
                   // 목표 미달로 이월 안 되는 몫만 "벌금"으로 짚어준다.
                   <>
-                    <p className="text-ink-secondary">
-                      환급액은 다음 시즌 참가비로 이월돼요.
-                    </p>
-                    {unpaidAmount > 0 && (
+                    {unpaidAmount > 0 ? (
                       <>
                         <p className="text-sm text-danger">
-                          목표를 채우지 못해서 참가비 중 {formatWon(unpaidAmount)}은 벌금으로
-                          나가요(이월되지 않아요). 아래 계좌로 입금해주세요.
+                          목표를 채우지 못해서 벌금 {formatWon(unpaidAmount)}이 있어요.
+                        </p>
+                        <p className="text-ink-secondary">
+                          환급액은 다음 시즌 참가비로 이월되니, 벌금은 계좌로 입금해주세요.
                         </p>
                         {teamAccountNote}
                       </>
+                    ) : (
+                      <p className="text-ink-secondary">
+                        환급액은 다음 시즌 참가비로 이월돼요.
+                      </p>
                     )}
                     <p className="font-semibold text-ink-strong">
                       {settlement.isCompleted && prizeShare > 0

@@ -60,9 +60,7 @@ export function SettlementAccountCard({
     return (
       <div className="rounded-2xl border border-border bg-surface px-4 py-3">
         <p className="text-base font-medium text-ink-secondary">정산 계좌</p>
-        <p className="mt-1 text-sm text-ink-tertiary">
-          팀원이 벌금을 낼 때 안내되는 계좌예요.
-        </p>
+        <p className="mt-1 text-sm text-ink-tertiary">챌린지용 계좌예요.</p>
         <div className="mt-2 flex items-center justify-between gap-2">
           <span className="text-base text-ink-strong">
             {initialBankName} {initialAccountNumber}
@@ -85,9 +83,7 @@ export function SettlementAccountCard({
     >
       <div>
         <p className="text-base font-medium text-ink-secondary">정산 계좌</p>
-        <p className="mt-1 text-sm text-ink-tertiary">
-          팀원이 벌금을 낼 때 안내되는 계좌예요.
-        </p>
+        <p className="mt-1 text-sm text-ink-tertiary">챌린지용 계좌예요.</p>
       </div>
 
       <Input
