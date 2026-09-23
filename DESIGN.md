@@ -143,7 +143,7 @@ rounded-2xl border border-border bg-surface px-4 py-3
 </PageShell>
 ```
 
-- `header`는 `PageHeader`의 children 슬롯 그대로 — 보통 `<PageTitle>`, 로딩 화면은 스켈레톤 placeholder. 뒤로가기가 필요한 건 계층형으로 파고드는 화면(관리자 안 시즌 상세 페이지처럼 목록→상세)뿐이라 `<BackLink>` + `<PageTitle className="mt-1">` 조합은 그런 곳에만 쓴다 — 마이페이지/시즌 전체 기록/관리자처럼 최상위 화면끼리 오가는 건 바텀 네비나 햄버거 메뉴로 이미 항상 가능해서 `<BackLink>`가 필요 없다.
+- `header`는 `PageHeader`의 children 슬롯 그대로 — 보통 `<PageTitle>`, 로딩 화면은 스켈레톤 placeholder. 뒤로가기가 필요한 건 계층형으로 파고드는 화면(관리자 안 시즌 상세 페이지, 현황판의 "전체 기록" 목록 → 개인 시즌 리포트 `/season/[seasonId]`처럼 목록→상세)뿐이라 `<BackLink>` + `<PageTitle className="mt-1">` 조합은 그런 곳에만 쓴다 — 마이페이지/시즌 전체 기록/관리자처럼 최상위 화면끼리 오가는 건 바텀 네비나 햄버거 메뉴로 이미 항상 가능해서 `<BackLink>`가 필요 없다.
 - `isAdmin`은 헤더의 햄버거 메뉴(아래 "글로벌 내비게이션" 참고)에 "관리자" 항목을 보여줄지만 결정한다.
 - `activeTab`은 바텀 네비 4개 아이콘(홈/인증하기/피드/현황판) 중 어느 걸 켤지만 정한다 — 바텀 네비 자체는 `PageShell`이 모든 화면에서 항상 렌더링하니, 그 4개에 안 속하는 화면(마이페이지/시즌 전체 기록/관리자)은 그냥 생략한다. 그러면 네비는 그대로 뜨고 아무 아이콘도 안 켜진다.
 - `main`의 기본 클래스는 `gap-4 py-6`(피드/현황판/인증하기와 동일) — 다른 간격이 필요하면(홈의 `gap-8 py-10`, 마이페이지/시즌 전체 기록의 `gap-6`) `mainClassName`으로 넘긴다.
