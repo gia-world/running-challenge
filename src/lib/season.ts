@@ -77,6 +77,18 @@ export function seasonWeekIndexForDate(
 }
 
 /**
+ * Last day (inclusive) an admin can add someone to a season after it
+ * starts — the season's 5th day. From day 5 through week 1's last day
+ * (day 7) is exactly 3 days, the minimum needed to still hit WEEKLY_GOAL
+ * (3 certifications) at one a day; day 6 onward only leaves 2.
+ */
+export function seasonParticipantJoinDeadlineDate(startDate: string): string {
+  const start = parseISODate(startDate);
+  start.setUTCDate(start.getUTCDate() + 4);
+  return toISODate(start);
+}
+
+/**
  * Labels a date as the Nth certification of its season week, among a
  * user's other approved certification dates (for display, e.g. feed
  * captions like "2주차 1회째"). `approvedDates` need not be sorted or

@@ -8,7 +8,7 @@ import {
 } from "@/lib/settlement";
 import { formatKoreanDate, formatWon } from "@/lib/format";
 import { isBeforeNoonInSeoul, todayInSeoul, yesterdayInSeoul } from "@/lib/week";
-import { seasonWeekCount } from "@/lib/season";
+import { seasonParticipantJoinDeadlineDate, seasonWeekCount } from "@/lib/season";
 import { computeSeasonStatus } from "@/lib/seasonStatus";
 import { PageTitle } from "@/components/PageTitle";
 import { SectionTitle } from "@/components/SectionTitle";
@@ -76,7 +76,11 @@ export default async function AdminSeasonDetailPage({
     season.end_date,
   );
   const weekCount = seasonWeekCount(season.start_date, season.end_date);
-  const status = computeSeasonStatus(season, todayInSeoul());
+  const today = todayInSeoul();
+  const status = computeSeasonStatus(season, today);
+  const joinDeadlineDate = seasonParticipantJoinDeadlineDate(season.start_date);
+  const canAddParticipant =
+    today < joinDeadlineDate || (today === joinDeadlineDate && isBeforeNoonInSeoul());
 
   let hasPendingReviewRequests = false;
   if (status === "settling") {
@@ -177,6 +181,11 @@ export default async function AdminSeasonDetailPage({
       />
 
       <SectionTitle className="mt-2">참여자</SectionTitle>
+      {status === "active" && !canAddParticipant && (
+        <p className="text-sm text-ink-tertiary">
+          참여 추가는 시즌 시작 5일째 정오까지만 가능해요.
+        </p>
+      )}
       <ul className="flex flex-col gap-2">
         {members.map((member) => {
           const isParticipant = participantIds.has(member.id);
@@ -221,7 +230,7 @@ export default async function AdminSeasonDetailPage({
                     </div>
                   )}
                 </div>
-                {status === "active" && (
+                {status === "active" && (isParticipant || canAddParticipant) && (
                   <ParticipantToggle
                     seasonId={season.id}
                     userId={member.id}
