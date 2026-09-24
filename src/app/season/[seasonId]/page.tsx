@@ -14,6 +14,7 @@ import { SectionTitle } from "@/components/SectionTitle";
 import { BackLink } from "@/components/BackLink";
 import { EmptyState } from "@/components/EmptyState";
 import { CopyButton } from "@/components/CopyButton";
+import { SettlementGuideButton } from "@/components/SettlementGuideButton";
 
 export default async function SeasonReportPage({
   params,
@@ -222,7 +223,10 @@ export default async function SeasonReportPage({
       </div>
 
       <div className="flex flex-col gap-2">
-        <SectionTitle>정산 결과</SectionTitle>
+        <div className="flex items-center gap-1.5">
+          <SectionTitle>정산 결과</SectionTitle>
+          <SettlementGuideButton />
+        </div>
         <div className="flex flex-col gap-1 rounded-2xl border border-border bg-surface px-4 py-3 text-base">
           {viewerDropout?.status === "pending" && (
             <p className="text-ink-secondary">중도하차 요청을 검토 중이에요.</p>
