@@ -4,6 +4,7 @@ import { AdminTabs } from "@/components/AdminTabs";
 import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
 import { requireTeamViewer } from "@/lib/viewer";
+import { autoSettleTeamSeasons } from "@/lib/autoSettle";
 
 export default async function AdminLayout({
   children,
@@ -17,6 +18,8 @@ export default async function AdminLayout({
   }
 
   const supabase = await createClient();
+  await autoSettleTeamSeasons(supabase, viewer.teamId);
+
   const [{ data: pendingRequests }, { data: pendingDropoutRequests }] = await Promise.all([
     supabase
       .from("activity_review_requests")
