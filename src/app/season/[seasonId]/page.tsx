@@ -219,6 +219,12 @@ export default async function SeasonReportPage({
               </span>
             ))}
           </div>
+          <Link
+            href={`/history?seasonId=${season.id}`}
+            className="self-end text-sm text-ink-secondary underline"
+          >
+            인증 기록 보기
+          </Link>
         </div>
       </div>
 

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
 import {
@@ -12,6 +13,7 @@ import { getSignedPhotoUrls } from "@/lib/photos";
 import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
 import { SectionTitle } from "@/components/SectionTitle";
+import { BackLink } from "@/components/BackLink";
 import { SeasonGate } from "@/components/SeasonGate";
 import {
   ActivityStatusList,
@@ -21,11 +23,46 @@ import {
 export default async function HistoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ scope?: string }>;
+  searchParams: Promise<{ scope?: string; seasonId?: string }>;
 }) {
   const { user, viewer } = await requireTeamViewer();
-  const { scope } = await searchParams;
+  const { scope, seasonId } = await searchParams;
   const weekOnly = scope === "week";
+
+  // 개인 시즌 리포트(/season/[seasonId])의 "인증 기록 보기"에서 넘어온
+  // 경로 — 그 시즌이 더 이상 viewer.activeSeason이 아니어도(그레이스가
+  // 끝난 지난 시즌이어도) 실제 인증 기록을 볼 수 있어야 한다. activeSeason
+  // 하나만 보던 아래 기본 경로와 달리, 임의의 과거 시즌 하나를 직접 조회.
+  if (seasonId) {
+    const supabase = await createClient();
+    const { data: season } = await supabase
+      .from("seasons")
+      .select("id, start_date, end_date, team_id")
+      .eq("id", seasonId)
+      .maybeSingle();
+
+    if (!season || season.team_id !== viewer.teamId) {
+      redirect("/status");
+    }
+
+    return (
+      <PageShell
+        teamName={viewer.teamName}
+        header={
+          <>
+            <BackLink href={`/season/${season.id}`}>← 시즌 리포트</BackLink>
+            <PageTitle className="mt-1">
+              {formatKoreanDate(season.start_date)} ~ {formatKoreanDate(season.end_date)}
+            </PageTitle>
+          </>
+        }
+        mainClassName="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-6"
+        isAdmin={viewer.teamRole === "admin"}
+      >
+        <SeasonHistory userId={user.id} season={season} weekOnly={false} />
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell
