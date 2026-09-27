@@ -5,7 +5,7 @@ export const BADGE_CATALOG: Badge[] = [
   {
     emoji: "🌱",
     label: "최초 참여",
-    criteria: "시즌에 처음 참여하면 획득 (최대 1개)",
+    criteria: "시즌에 처음 참여하면 획득 (메달이 생기면 사라짐)",
   },
   {
     emoji: "🎖️",
@@ -27,13 +27,17 @@ export const BADGE_CATALOG: Badge[] = [
  * a fifth medal, mirroring a real medal case). Only seasons that have
  * actually concluded count — `completedSeasonCount` must exclude the
  * currently active season, since badges are awarded once a season ends.
+ *
+ * 🌱 is a placeholder for "joined but hasn't finished a season yet" — the
+ * moment a medal (or anything above it) exists, it's served its purpose
+ * and drops off rather than sticking around forever.
  */
 export function earnedBadges(
   completedSeasonCount: number,
   hasParticipated: boolean,
 ): Badge[] {
   const earned: Badge[] = [];
-  if (hasParticipated) earned.push(BADGE_CATALOG[0]);
+  if (hasParticipated && completedSeasonCount === 0) earned.push(BADGE_CATALOG[0]);
 
   const dragons = Math.floor(completedSeasonCount / 25);
   const afterDragons = completedSeasonCount % 25;
