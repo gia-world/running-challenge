@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { UserRole } from "@/lib/types";
+import { BottomSheet } from "@/components/BottomSheet";
+import { Button } from "@/components/Button";
 
 export function MemberRow({
   membershipId,
@@ -15,6 +17,7 @@ export function MemberRow({
   role: UserRole;
 }) {
   const router = useRouter();
+  const [isConfirming, setIsConfirming] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,6 +37,8 @@ export function MemberRow({
       return;
     }
 
+    setIsSubmitting(false);
+    setIsConfirming(false);
     router.refresh();
   }
 
@@ -52,14 +57,47 @@ export function MemberRow({
         <div className="flex flex-col items-end gap-1">
           <button
             type="button"
-            onClick={promoteToAdmin}
-            disabled={isSubmitting}
-            className="text-base font-medium text-primary disabled:opacity-60"
+            onClick={() => setIsConfirming(true)}
+            className="text-base font-medium text-primary"
           >
-            {isSubmitting ? "처리 중..." : "관리자로 지정"}
+            관리자로 지정
           </button>
           {error && <span className="text-sm text-danger">{error}</span>}
         </div>
+      )}
+
+      {isConfirming && (
+        <BottomSheet onClose={() => setIsConfirming(false)}>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <span className="text-base font-semibold text-ink-strong">
+                {name}님을 관리자로 지정할까요?
+              </span>
+              <span className="text-sm text-ink-secondary">
+                관리자는 팀원과 시즌, 인증 요청을 관리할 수 있어요.
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                size="auto"
+                className="flex-1"
+                onClick={() => setIsConfirming(false)}
+                disabled={isSubmitting}
+              >
+                닫기
+              </Button>
+              <Button
+                size="auto"
+                className="flex-1"
+                onClick={promoteToAdmin}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "처리 중..." : "관리자로 지정"}
+              </Button>
+            </div>
+          </div>
+        </BottomSheet>
       )}
     </li>
   );
