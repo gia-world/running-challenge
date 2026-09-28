@@ -97,6 +97,8 @@ export default async function StatusPage() {
         seasonStartDate={viewer.activeSeason?.start_date ?? ""}
         history={seasons}
         badgeMembers={badgeMembers}
+        teamSettlementBankName={viewer.teamSettlementBankName}
+        teamSettlementAccountNumber={viewer.teamSettlementAccountNumber}
       />
     </PageShell>
   );

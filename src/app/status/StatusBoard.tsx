@@ -60,6 +60,8 @@ export function StatusBoard({
   seasonStartDate,
   history,
   badgeMembers,
+  teamSettlementBankName,
+  teamSettlementAccountNumber,
 }: {
   isSeasonMember: boolean;
   activeSeasonRange: { start_date: string; end_date: string } | null;
@@ -71,6 +73,8 @@ export function StatusBoard({
   seasonStartDate: string;
   history: SeasonHistoryEntry[];
   badgeMembers: BadgeMember[];
+  teamSettlementBankName: string | null;
+  teamSettlementAccountNumber: string | null;
 }) {
   const [view, setView] = useState<View>("season");
   const [sortKey, setSortKey] = useState<SortKey>("name");
@@ -150,7 +154,14 @@ export function StatusBoard({
         ]}
       >
         {view === "season" ? (
-          <SeasonGate viewer={{ activeSeason: activeSeasonRange, isSeasonMember }}>
+          <SeasonGate
+            viewer={{
+              activeSeason: activeSeasonRange,
+              isSeasonMember,
+              teamSettlementBankName,
+              teamSettlementAccountNumber,
+            }}
+          >
             <div className="flex flex-col gap-3">
               <div className="flex justify-end gap-2 text-sm">
                 <button

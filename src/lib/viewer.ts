@@ -15,6 +15,9 @@ export type ViewerContext = {
   teamId: string | null;
   teamName: string | null;
   teamRole: UserRole | null;
+  /** 참가비/벌금 등 팀에게 보낼 돈을 받는 계좌 — 관리자가 팀원 관리에서 등록. */
+  teamSettlementBankName: string | null;
+  teamSettlementAccountNumber: string | null;
   activeSeason: ActiveSeason | null;
   isSeasonMember: boolean;
   /**
@@ -41,15 +44,21 @@ export const loadViewerContext = cache(async (userId: string): Promise<ViewerCon
 
   const { data: membership } = await supabase
     .from("team_memberships")
-    .select("team_id, role, teams(name)")
+    .select("team_id, role, teams(name, settlement_bank_name, settlement_account_number)")
     .eq("user_id", userId)
-    .maybeSingle<{ team_id: string; role: UserRole; teams: { name: string } | null }>();
+    .maybeSingle<{
+      team_id: string;
+      role: UserRole;
+      teams: { name: string; settlement_bank_name: string | null; settlement_account_number: string | null } | null;
+    }>();
 
   if (!membership) {
     return {
       teamId: null,
       teamName: null,
       teamRole: null,
+      teamSettlementBankName: null,
+      teamSettlementAccountNumber: null,
       activeSeason: null,
       isSeasonMember: false,
       graceSeason: null,
@@ -103,6 +112,8 @@ export const loadViewerContext = cache(async (userId: string): Promise<ViewerCon
     teamId: membership.team_id,
     teamName: membership.teams?.name ?? null,
     teamRole: membership.role,
+    teamSettlementBankName: membership.teams?.settlement_bank_name ?? null,
+    teamSettlementAccountNumber: membership.teams?.settlement_account_number ?? null,
     activeSeason: season ?? null,
     isSeasonMember,
     graceSeason,

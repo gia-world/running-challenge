@@ -62,7 +62,12 @@ export default async function CertifyPage({
       )}
 
       <SeasonGate
-        viewer={{ activeSeason: selectedSeason, isSeasonMember: isSelectedSeasonMember }}
+        viewer={{
+          activeSeason: selectedSeason,
+          isSeasonMember: isSelectedSeasonMember,
+          teamSettlementBankName: viewer.teamSettlementBankName,
+          teamSettlementAccountNumber: viewer.teamSettlementAccountNumber,
+        }}
         seasonLabel="이 시즌"
       >
         {selectedSeason && (

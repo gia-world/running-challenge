@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { formatKoreanDate } from "@/lib/format";
 import { EmptyState } from "./EmptyState";
+import { CopyButton } from "./CopyButton";
 
 type GatedSeason = { start_date: string; end_date: string } | null;
 
@@ -19,7 +20,13 @@ export function SeasonGate({
   seasonLabel = "이번 시즌",
   children,
 }: {
-  viewer: { activeSeason: GatedSeason; isSeasonMember: boolean };
+  viewer: {
+    activeSeason: GatedSeason;
+    isSeasonMember: boolean;
+    /** 팀 정산 계좌 — 있으면 참가비 입금 안내에 같이 보여준다. */
+    teamSettlementBankName?: string | null;
+    teamSettlementAccountNumber?: string | null;
+  };
   /** Defaults to "이번 시즌" — certify passes "이 시즌" since either its grace or current-season tab can be selected. */
   seasonLabel?: string;
   children: ReactNode;
@@ -35,6 +42,7 @@ export function SeasonGate({
   }
 
   if (!viewer.isSeasonMember) {
+    const hasTeamAccount = viewer.teamSettlementBankName && viewer.teamSettlementAccountNumber;
     return (
       <EmptyState>
         <p className="text-sm text-ink-tertiary">
@@ -46,6 +54,16 @@ export function SeasonGate({
           <br />
           관리자가 입금 확인 후 참여가 승인돼요.
         </p>
+        {hasTeamAccount && (
+          <div className="mt-3 flex items-center justify-between gap-2 rounded-lg bg-subtle px-3 py-2 text-left text-sm">
+            <span className="text-ink-secondary">
+              참가비 입금 계좌
+              <br />
+              {viewer.teamSettlementBankName} {viewer.teamSettlementAccountNumber}
+            </span>
+            <CopyButton value={viewer.teamSettlementAccountNumber!} />
+          </div>
+        )}
       </EmptyState>
     );
   }
