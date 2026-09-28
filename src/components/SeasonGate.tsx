@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { formatKoreanDate } from "@/lib/format";
 import { EmptyState } from "./EmptyState";
-import { CopyButton } from "./CopyButton";
+import { AccountNote } from "./AccountNote";
 
 type GatedSeason = { start_date: string; end_date: string } | null;
 
@@ -55,14 +55,11 @@ export function SeasonGate({
           관리자가 입금 확인 후 참여가 승인돼요.
         </p>
         {hasTeamAccount && (
-          <div className="mt-3 flex items-center justify-between gap-2 rounded-lg bg-subtle px-3 py-2 text-left text-sm">
-            <span className="text-ink-secondary">
-              참가비 입금 계좌
-              <br />
-              {viewer.teamSettlementBankName} {viewer.teamSettlementAccountNumber}
-            </span>
-            <CopyButton value={viewer.teamSettlementAccountNumber!} />
-          </div>
+          <AccountNote accountNumber={viewer.teamSettlementAccountNumber!} className="mt-3 text-left">
+            참가비 입금 계좌
+            <br />
+            {viewer.teamSettlementBankName} {viewer.teamSettlementAccountNumber}
+          </AccountNote>
         )}
       </EmptyState>
     );

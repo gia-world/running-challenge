@@ -13,7 +13,7 @@ import { PageTitle } from "@/components/PageTitle";
 import { SectionTitle } from "@/components/SectionTitle";
 import { BackLink } from "@/components/BackLink";
 import { EmptyState } from "@/components/EmptyState";
-import { CopyButton } from "@/components/CopyButton";
+import { AccountNote } from "@/components/AccountNote";
 import { SettlementGuideButton } from "@/components/SettlementGuideButton";
 
 export default async function SeasonReportPage({
@@ -142,16 +142,13 @@ export default async function SeasonReportPage({
     if (amount <= 0) return null;
     if (viewerBankName && viewerAccountNumber) {
       return (
-        <div className="flex items-center justify-between gap-2 rounded-lg bg-subtle px-3 py-2 text-sm">
-          <span className="text-ink-secondary">
-            {viewerBankName} {viewerAccountNumber}로 입금될 예정이에요. 계좌가 다르면{" "}
-            <Link href="/mypage" className="underline">
-              설정
-            </Link>
-            에서 수정해주세요.
-          </span>
-          <CopyButton value={viewerAccountNumber} />
-        </div>
+        <AccountNote accountNumber={viewerAccountNumber}>
+          {viewerBankName} {viewerAccountNumber}로 입금될 예정이에요. 계좌가 다르면{" "}
+          <Link href="/mypage" className="underline">
+            설정
+          </Link>
+          에서 수정해주세요.
+        </AccountNote>
       );
     }
     return (
@@ -169,10 +166,9 @@ export default async function SeasonReportPage({
   // 직접 문의하라는 문구로 대체된다.
   const teamAccountNote =
     teamBankName && teamAccountNumber ? (
-      <div className="flex items-center justify-between gap-2 rounded-lg bg-subtle px-3 py-2 text-sm">
-        <span className="text-ink-secondary">{teamBankName} {teamAccountNumber}로 입금해주세요.</span>
-        <CopyButton value={teamAccountNumber} />
-      </div>
+      <AccountNote accountNumber={teamAccountNumber}>
+        {teamBankName} {teamAccountNumber}로 입금해주세요.
+      </AccountNote>
     ) : (
       <p className="text-sm text-ink-tertiary">정산 계좌는 관리자에게 확인해주세요.</p>
     );
