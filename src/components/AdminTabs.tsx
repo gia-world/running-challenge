@@ -38,7 +38,7 @@ export function AdminTabs({
             <span className="inline-flex items-center gap-1">
               {tab.label}
               {count > 0 && (
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-sm font-bold text-white">
+                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-sm font-semibold text-white">
                   {count}
                 </span>
               )}
