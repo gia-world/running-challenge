@@ -15,6 +15,7 @@ import { Textarea } from "@/components/Textarea";
 import { Button } from "@/components/Button";
 
 const NOTE_MAX_LENGTH = 300;
+const MAX_PHOTOS = 5;
 
 type PendingPhoto = { file: File; previewUrl: string };
 
@@ -67,9 +68,13 @@ export function CertifyForm({
       const deduped = selected.filter(
         (file) => !existingKeys.has(`${file.name}:${file.size}`),
       );
+      const room = MAX_PHOTOS - prev.length;
+      if (deduped.length > room) {
+        setError(`사진은 최대 ${MAX_PHOTOS}장까지 선택할 수 있어요.`);
+      }
       return [
         ...prev,
-        ...deduped.map((file) => ({ file, previewUrl: URL.createObjectURL(file) })),
+        ...deduped.slice(0, Math.max(room, 0)).map((file) => ({ file, previewUrl: URL.createObjectURL(file) })),
       ];
     });
   }
@@ -237,7 +242,7 @@ export function CertifyForm({
 
       <div className="flex flex-col gap-2">
         <span className="text-base font-medium text-ink">
-          인증샷 (여러 장 가능)
+          인증샷 (최대 {MAX_PHOTOS}장)
         </span>
         {photos.length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
@@ -259,7 +264,7 @@ export function CertifyForm({
                 </button>
               </div>
             ))}
-            {!isBlocked && (
+            {!isBlocked && photos.length < MAX_PHOTOS && (
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
