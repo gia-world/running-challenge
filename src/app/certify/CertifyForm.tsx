@@ -3,7 +3,7 @@
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { compressImage } from "@/lib/image";
+import { compressImage, compressThumbnail } from "@/lib/image";
 import { CERTIFICATIONS_BUCKET } from "@/lib/photos";
 import { todayInSeoul } from "@/lib/week";
 import { formatKoreanDate } from "@/lib/format";
@@ -107,8 +107,12 @@ export function CertifyForm({
     setIsSubmitting(true);
 
     let compressed: Blob[];
+    let thumbnails: Blob[];
     try {
-      compressed = await Promise.all(photos.map((p) => compressImage(p.file)));
+      [compressed, thumbnails] = await Promise.all([
+        Promise.all(photos.map((p) => compressImage(p.file))),
+        Promise.all(photos.map((p) => compressThumbnail(p.file))),
+      ]);
     } catch {
       setError("사진을 읽을 수 없어요. 다른 사진을 선택해주세요.");
       setIsSubmitting(false);
@@ -116,19 +120,23 @@ export function CertifyForm({
     }
 
     const supabase = createClient();
-    const uploadedPaths: string[] = [];
+    const uploadedPaths: { storage_path: string; thumbnail_storage_path: string }[] = [];
     for (const [index, blob] of compressed.entries()) {
       const path = `${userId}/${activityDate}-${Date.now()}-${index}.jpg`;
-      const { error: uploadError } = await supabase.storage
-        .from(CERTIFICATIONS_BUCKET)
-        .upload(path, blob, { contentType: "image/jpeg" });
+      const thumbPath = `${userId}/${activityDate}-${Date.now()}-${index}-thumb.jpg`;
+      const [{ error: uploadError }, { error: thumbUploadError }] = await Promise.all([
+        supabase.storage.from(CERTIFICATIONS_BUCKET).upload(path, blob, { contentType: "image/jpeg" }),
+        supabase.storage
+          .from(CERTIFICATIONS_BUCKET)
+          .upload(thumbPath, thumbnails[index], { contentType: "image/jpeg" }),
+      ]);
 
-      if (uploadError) {
+      if (uploadError || thumbUploadError) {
         setError("사진 업로드에 실패했어요. 다시 시도해주세요.");
         setIsSubmitting(false);
         return;
       }
-      uploadedPaths.push(path);
+      uploadedPaths.push({ storage_path: path, thumbnail_storage_path: thumbPath });
     }
 
     const { data: activity, error: insertError } = await supabase
@@ -157,9 +165,10 @@ export function CertifyForm({
     const { error: photosError } = await supabase
       .from("activity_photos")
       .insert(
-        uploadedPaths.map((storage_path, sort_order) => ({
+        uploadedPaths.map(({ storage_path, thumbnail_storage_path }, sort_order) => ({
           activity_id: activity.id,
           storage_path,
+          thumbnail_storage_path,
           sort_order,
         })),
       );

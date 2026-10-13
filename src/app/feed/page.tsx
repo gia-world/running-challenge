@@ -5,7 +5,7 @@ import { PageTitle } from "@/components/PageTitle";
 import { SeasonGate } from "@/components/SeasonGate";
 import { formatKoreanDate } from "@/lib/format";
 import { describeSeasonOccurrence } from "@/lib/season";
-import { getSignedPhotoUrls } from "@/lib/photos";
+import { getSignedPhotoUrls, getSignedThumbnailUrls } from "@/lib/photos";
 import { requireTeamViewer } from "@/lib/viewer";
 import { isWithinCertificationGrace } from "@/lib/week";
 
@@ -19,7 +19,7 @@ type FeedRow = {
   distance_km: number;
   note: string | null;
   profiles: { name: string } | null;
-  activity_photos: { storage_path: string; sort_order: number }[];
+  activity_photos: { storage_path: string; thumbnail_storage_path: string | null; sort_order: number }[];
 };
 
 export default async function FeedPage() {
@@ -44,7 +44,7 @@ async function Feed({ userId }: { userId: string }) {
   const { data: activities, error } = await supabase
     .from("activities")
     .select(
-      "id, user_id, season_id, activity_date, distance_km, note, profiles!user_id(name), activity_photos(storage_path, sort_order)",
+      "id, user_id, season_id, activity_date, distance_km, note, profiles!user_id(name), activity_photos(storage_path, thumbnail_storage_path, sort_order)",
     )
     .eq("status", "approved")
     .order("created_at", { ascending: false })
@@ -143,7 +143,10 @@ async function Feed({ userId }: { userId: string }) {
 
   const items = await Promise.all(
     rows.map(async (row) => {
-      const photoUrls = await getSignedPhotoUrls(supabase, row.activity_photos);
+      const [photoUrls, thumbnailUrls] = await Promise.all([
+        getSignedPhotoUrls(supabase, row.activity_photos),
+        getSignedThumbnailUrls(supabase, row.activity_photos),
+      ]);
 
       const seasonStart = seasonStartDates.get(row.season_id);
       const seasonEnd = seasonEndDates.get(row.season_id);
@@ -156,7 +159,10 @@ async function Feed({ userId }: { userId: string }) {
       return {
         ...row,
         photoUrls,
-        photoStoragePaths: row.activity_photos.map((p) => p.storage_path),
+        thumbnailUrls,
+        photoStoragePaths: row.activity_photos.flatMap((p) =>
+          p.thumbnail_storage_path ? [p.storage_path, p.thumbnail_storage_path] : [p.storage_path],
+        ),
         occurrenceLabel: occurrence
           ? `${occurrence.weekIndex + 1}주차 ${occurrence.ordinal}회`
           : null,
@@ -191,6 +197,7 @@ async function Feed({ userId }: { userId: string }) {
           isSeasonSettled={item.isSeasonSettled}
           canDelete={item.canDelete}
           photoUrls={item.photoUrls}
+          thumbnailUrls={item.thumbnailUrls}
           photoStoragePaths={item.photoStoragePaths}
           initialReactions={item.reactions}
           initialRequested={item.requestedByMe}

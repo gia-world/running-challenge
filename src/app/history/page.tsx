@@ -93,7 +93,7 @@ async function SeasonHistory({
   const { data } = await supabase
     .from("activities")
     .select(
-      "id, activity_date, distance_km, created_at, status, rejected_reason, activity_photos(storage_path, sort_order)",
+      "id, activity_date, distance_km, created_at, status, rejected_reason, activity_photos(storage_path, thumbnail_storage_path, sort_order)",
     )
     .eq("user_id", userId)
     .eq("season_id", season.id)
@@ -107,7 +107,7 @@ async function SeasonHistory({
         created_at: string;
         status: ActivityListItem["status"];
         rejected_reason: string | null;
-        activity_photos: { storage_path: string; sort_order: number }[];
+        activity_photos: { storage_path: string; thumbnail_storage_path: string | null; sort_order: number }[];
       }[]
     >();
 
@@ -115,7 +115,9 @@ async function SeasonHistory({
     (data ?? []).map(async (activity) => ({
       ...activity,
       photoUrls: await getSignedPhotoUrls(supabase, activity.activity_photos),
-      photoStoragePaths: activity.activity_photos.map((p) => p.storage_path),
+      photoStoragePaths: activity.activity_photos.flatMap((p) =>
+        p.thumbnail_storage_path ? [p.storage_path, p.thumbnail_storage_path] : [p.storage_path],
+      ),
     })),
   );
   const canDeleteThisSeason = isWithinCertificationGrace(season.end_date);

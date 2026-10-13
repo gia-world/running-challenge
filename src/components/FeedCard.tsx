@@ -23,6 +23,7 @@ export function FeedCard({
   isSeasonSettled,
   canDelete,
   photoUrls,
+  thumbnailUrls,
   photoStoragePaths,
   initialReactions,
   initialRequested,
@@ -36,6 +37,8 @@ export function FeedCard({
   isSeasonSettled: boolean;
   canDelete: boolean;
   photoUrls: string[];
+  /** 그리드 썸네일 전용 작은 이미지 — 모달(원본 photoUrls)과 별개. */
+  thumbnailUrls: string[];
   photoStoragePaths: string[];
   initialReactions: { emoji: string; count: number; reactedByMe: boolean }[];
   initialRequested: boolean;
@@ -96,7 +99,7 @@ export function FeedCard({
 
   return (
     <article className="overflow-hidden rounded-2xl border border-border bg-surface">
-      <FeedPhotoThumbnail photoUrls={photoUrls} alt="인증샷" onOpen={() => setIsViewerOpen(true)} />
+      <FeedPhotoThumbnail photoUrls={thumbnailUrls} alt="인증샷" onOpen={() => setIsViewerOpen(true)} />
       {infoRow}
       {noteBlock}
       {!isViewerOpen && <ReactionBar {...reactionBarProps} />}
