@@ -197,6 +197,7 @@ export function PhotoViewerModal({
                 key={url}
                 src={url}
                 alt={`인증샷 ${i + 1}/${photos.length}`}
+                loading="lazy"
                 draggable={false}
                 onContextMenu={(e) => e.preventDefault()}
                 style={{

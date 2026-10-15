@@ -416,6 +416,7 @@ export function StatusBoard({
                           key={url}
                           src={url}
                           alt="인증샷"
+                          loading="lazy"
                           className="aspect-square w-full shrink-0 snap-center rounded-xl object-cover"
                         />
                       ))}

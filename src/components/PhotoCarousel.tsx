@@ -12,6 +12,7 @@ export function PhotoCarousel({ photoUrls, alt }: { photoUrls: string[]; alt: st
           key={url}
           src={url}
           alt={`${alt} ${index + 1}/${photoUrls.length}`}
+          loading="lazy"
           className="w-full flex-shrink-0 snap-center"
         />
       ))}
