@@ -9,7 +9,7 @@ import { getSignedPhotoUrls, getSignedThumbnailUrls } from "@/lib/photos";
 import { requireTeamViewer } from "@/lib/viewer";
 import { isWithinCertificationGrace } from "@/lib/week";
 
-const FEED_LIMIT = 50;
+const FEED_LIMIT = 10;
 
 type FeedRow = {
   id: string;
