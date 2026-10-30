@@ -305,15 +305,12 @@ export default async function AdminSeasonDetailPage({
                       <span className="text-ink-secondary">
                         다음 시즌 연장 (참가비 {formatWon(entryFee)} 이월)
                       </span>
-                      {unpaidAmount > 0 && (
-                        <span className="text-sm text-ink-tertiary">
-                          벌금 {formatWon(unpaidAmount)}은 별도로 받아요
-                        </span>
-                      )}
                       <span className="font-semibold text-ink-strong">
                         {amountToSend > 0
                           ? `상금 ${formatWon(amountToSend)} 송금`
-                          : "송금 없음"}
+                          : unpaidAmount > 0
+                            ? `벌금 ${formatWon(unpaidAmount)} 입금 필요`
+                            : "주고받을 금액 없음"}
                       </span>
                     </div>
                   ) : settlement.isCompleted && prizeShare > 0 ? (
