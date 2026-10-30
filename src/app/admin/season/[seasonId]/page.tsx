@@ -234,6 +234,9 @@ export default async function AdminSeasonDetailPage({
             ? settlement.refund + (settlement.isCompleted ? prizeShare : 0)
             : 0;
           const isRenewing = renewalByUserId.get(member.id) === true;
+          const unpaidAmount = settlement
+            ? Math.max(entryFee - settlement.refund, 0)
+            : 0;
           const amountToSend = settlement
             ? isRenewing
               ? settlement.isCompleted
@@ -300,9 +303,13 @@ export default async function AdminSeasonDetailPage({
                   {isRenewing ? (
                     <div className="flex flex-col gap-0.5">
                       <span className="text-ink-secondary">
-                        다음 시즌 연장 (환급 {formatWon(settlement.refund)}{" "}
-                        이월)
+                        다음 시즌 연장 (참가비 {formatWon(entryFee)} 이월)
                       </span>
+                      {unpaidAmount > 0 && (
+                        <span className="text-sm text-ink-tertiary">
+                          벌금 {formatWon(unpaidAmount)}은 별도로 받아요
+                        </span>
+                      )}
                       <span className="font-semibold text-ink-strong">
                         {amountToSend > 0
                           ? `상금 ${formatWon(amountToSend)} 송금`
