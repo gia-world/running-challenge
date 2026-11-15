@@ -4,9 +4,12 @@ const JPEG_QUALITY = 0.7;
 // 피드 그리드는 작은 정사각형 썸네일 하나 보여주려고 원본 전체를 그대로
 // 받아왔었다 — 스크롤할 때마다 Supabase 무료 플랜 egress(월 5GB)를
 // 빠르게 갉아먹은 주범. 모바일 화면에서 2배 레티나로 봐도 충분한
-// 크기(480px)로 따로 작게 만들어서 그리드 전용으로 쓴다.
-const THUMBNAIL_MAX_DIMENSION = 480;
-const THUMBNAIL_JPEG_QUALITY = 0.6;
+// 크기로 따로 작게 만들어서 그리드 전용으로 쓴다. 초기엔 480/0.6으로
+// 바짝 낮췄다가 블록 현상이 심하다는 피드백으로, 지연 로딩·피드
+// 페이지네이션 등 다른 egress 절감책이 자리잡고 여유가 확인된 뒤
+// 640/0.75로 올렸다 — 장당 용량은 약 3.5배 늘지만 여전히 예산 대비 작다.
+const THUMBNAIL_MAX_DIMENSION = 640;
+const THUMBNAIL_JPEG_QUALITY = 0.75;
 
 async function resizeAndEncode(file: File, maxDimension: number, quality: number): Promise<Blob> {
   const bitmap = await createImageBitmap(file);
