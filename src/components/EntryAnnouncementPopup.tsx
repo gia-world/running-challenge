@@ -117,13 +117,9 @@ export function EntryAnnouncementPopup() {
           <Link
             href="/notifications"
             onClick={handleClose}
-            className={
-              announcements.length > 0
-                ? "border-t border-border-subtle pt-3 text-base font-medium text-primary"
-                : "text-base font-medium text-primary"
-            }
+            className="block w-full rounded-xl bg-muted-strong px-5 py-3 text-center text-base font-medium text-ink"
           >
-            읽지 않은 알림이 {unreadCount}개 있어요 →
+            읽지 않은 알림 {unreadCount}개 보기
           </Link>
         )}
 
