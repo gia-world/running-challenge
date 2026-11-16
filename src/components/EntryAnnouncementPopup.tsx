@@ -8,6 +8,7 @@ import { Button } from "@/components/Button";
 const SESSION_FLAG = "entryPopupShown";
 
 type Announcement = { id: string; body: string };
+type ImportantNotification = { id: string; body: string };
 
 /**
  * 입장 시 제일 먼저 보여주는 센터 모달 — (1) 아직 못 본 관리자 공지와
@@ -26,6 +27,7 @@ type Announcement = { id: string; body: string };
  */
 export function EntryAnnouncementPopup() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [importantNotifications, setImportantNotifications] = useState<ImportantNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -57,19 +59,37 @@ export function EntryAnnouncementPopup() {
       const { data: unseenAnnouncements } = await announcementsQuery;
 
       let notifCount = 0;
+      let importantList: ImportantNotification[] = [];
       if (typeof window !== "undefined" && !window.sessionStorage.getItem(SESSION_FLAG)) {
-        const { count } = await supabase
-          .from("notifications")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", user.id)
-          .is("read_at", null);
+        // 재인증 요청처럼 중요한 알림은 공지처럼 본문을 그대로 보여주고,
+        // 나머지(댓글/대댓글/이모지)만 "N개 보기" 요약 카운트에 넣는다.
+        const [{ data: important }, { count }] = await Promise.all([
+          supabase
+            .from("notifications")
+            .select("id, type, profiles!actor_user_id(name)")
+            .eq("user_id", user.id)
+            .eq("type", "review_request")
+            .is("read_at", null)
+            .returns<{ id: string; type: string; profiles: { name: string } | null }[]>(),
+          supabase
+            .from("notifications")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", user.id)
+            .neq("type", "review_request")
+            .is("read_at", null),
+        ]);
+        importantList = (important ?? []).map((n) => ({
+          id: n.id,
+          body: `${n.profiles?.name ?? "누군가"}님이 재인증을 요청했어요`,
+        }));
         notifCount = count ?? 0;
       }
 
       if (cancelled) return;
       const announcementList = unseenAnnouncements ?? [];
-      if (announcementList.length > 0 || notifCount > 0) {
+      if (announcementList.length > 0 || importantList.length > 0 || notifCount > 0) {
         setAnnouncements(announcementList);
+        setImportantNotifications(importantList);
         setUnreadCount(notifCount);
         setUserId(user.id);
         setIsOpen(true);
@@ -113,13 +133,24 @@ export function EntryAnnouncementPopup() {
           </div>
         )}
 
+        {importantNotifications.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-base font-semibold text-ink-strong">🔔 중요 알림</p>
+            {importantNotifications.map((n) => (
+              <p key={n.id} className="text-base text-ink">
+                {n.body}
+              </p>
+            ))}
+          </div>
+        )}
+
         {unreadCount > 0 && (
           <Link
             href="/notifications"
             onClick={handleClose}
-            className="block w-full rounded-xl bg-muted-strong px-5 py-3 text-center text-base font-medium text-ink"
+            className="text-base font-medium text-primary underline"
           >
-            읽지 않은 알림 {unreadCount}개 보기
+            읽지 않은 알림 {unreadCount}개 보기 →
           </Link>
         )}
 
