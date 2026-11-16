@@ -10,12 +10,19 @@ const SESSION_FLAG = "entryPopupShown";
 type Announcement = { id: string; body: string };
 
 /**
- * 입장 시 제일 먼저 보여주는 바텀시트 — (1) 아직 못 본 관리자 공지와
+ * 입장 시 제일 먼저 보여주는 센터 모달 — (1) 아직 못 본 관리자 공지와
  * (2) 안읽은 개인 알림 개수 요약을 한 번에 보여준다. 공지는
  * profiles.last_seen_announcement_at으로 "진짜 처음 보는지"를 서버 상태로
  * 판단하지만(그래서 새 공지가 생기면 세션이 바뀌어도 다시 뜸), 알림 개수
  * 요약은 매번 뜨면 거슬려서 세션당 한 번만 보여준다(sessionStorage).
  * NotificationBell과 같은 이유로 자체적으로 로그인 사용자를 알아낸다.
+ *
+ * 바텀시트가 아니라 PhotoViewerModal과 같은 센터 모달 톤(bg-black/60 +
+ * 가운데 rounded-2xl 카드)을 썼다 — 자동연장 바텀시트를 배경 탭으로
+ * 무심코 닫아버려 안 읽고 넘어간 사람들이 있었던 전례가 있어서, 배경
+ * 탭으로는 안 닫히게 하고 "확인" 버튼을 직접 눌러야만 닫히게 했다.
+ * 공지는 한 번 닫으면 다시 안 뜨는 "놓치면 끝" 구조라 더 신중하게
+ * 만들었다.
  */
 export function EntryAnnouncementPopup() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -93,14 +100,8 @@ export function EntryAnnouncementPopup() {
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col justify-end bg-black/40"
-      onClick={handleClose}
-    >
-      <div
-        className="animate-sheet-up flex flex-col gap-3 rounded-t-2xl bg-surface p-5 pb-8 shadow-lg"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="flex max-h-[90vh] w-full max-w-md flex-col gap-3 overflow-y-auto rounded-2xl bg-surface p-5 shadow-lg">
         {announcements.length > 0 && (
           <div className="flex flex-col gap-2">
             <p className="text-base font-semibold text-ink-strong">📢 공지사항</p>
