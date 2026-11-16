@@ -7,6 +7,8 @@ import { CERTIFICATIONS_BUCKET } from "@/lib/photos";
 import { FeedPhotoThumbnail } from "@/components/FeedPhotoThumbnail";
 import { PhotoViewerModal } from "@/components/PhotoViewerModal";
 import { ReactionBar, type ReactionState } from "@/components/ReactionBar";
+import { CommentSection } from "@/components/CommentSection";
+import type { CommentItem } from "@/app/feed/loadFeed";
 
 /**
  * One feed card — photo, byline, and the reaction/재인증요청/삭제 row.
@@ -27,6 +29,7 @@ export function FeedCard({
   photoStoragePaths,
   initialReactions,
   initialRequested,
+  comments,
   infoRow,
   caption,
   note,
@@ -42,6 +45,7 @@ export function FeedCard({
   photoStoragePaths: string[];
   initialReactions: { emoji: string; count: number; reactedByMe: boolean }[];
   initialRequested: boolean;
+  comments: CommentItem[];
   infoRow: ReactNode;
   caption: ReactNode;
   note?: string | null;
@@ -102,7 +106,12 @@ export function FeedCard({
       <FeedPhotoThumbnail photoUrls={thumbnailUrls} alt="인증샷" onOpen={() => setIsViewerOpen(true)} />
       {infoRow}
       {noteBlock}
-      {!isViewerOpen && <ReactionBar {...reactionBarProps} />}
+      {!isViewerOpen && (
+        <>
+          <ReactionBar {...reactionBarProps} />
+          <CommentSection activityId={activityId} currentUserId={currentUserId} comments={comments} />
+        </>
+      )}
 
       {isViewerOpen && (
         // canDelete is false here on purpose — the feed's ReactionBar (in
@@ -118,6 +127,7 @@ export function FeedCard({
             <>
               {noteBlock}
               <ReactionBar {...reactionBarProps} />
+              <CommentSection activityId={activityId} currentUserId={currentUserId} comments={comments} />
             </>
           }
         />

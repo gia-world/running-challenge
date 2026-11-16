@@ -49,6 +49,7 @@ export function FeedList({
           photoStoragePaths={item.photoStoragePaths}
           initialReactions={item.reactions}
           initialRequested={item.requestedByMe}
+          comments={item.comments}
           note={item.note}
           caption={
             <>

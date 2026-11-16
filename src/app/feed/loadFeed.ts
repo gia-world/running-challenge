@@ -17,6 +17,25 @@ type FeedRow = {
   activity_photos: { storage_path: string; thumbnail_storage_path: string | null; sort_order: number }[];
 };
 
+type CommentRow = {
+  id: string;
+  activity_id: string;
+  user_id: string;
+  parent_comment_id: string | null;
+  body: string;
+  created_at: string;
+  profiles: { name: string } | null;
+};
+
+export type CommentItem = {
+  id: string;
+  userId: string;
+  profileName: string | null;
+  body: string;
+  createdAt: string;
+  parentCommentId: string | null;
+};
+
 export type FeedItem = {
   id: string;
   isOwnActivity: boolean;
@@ -27,6 +46,7 @@ export type FeedItem = {
   photoStoragePaths: string[];
   reactions: { emoji: string; count: number; reactedByMe: boolean }[];
   requestedByMe: boolean;
+  comments: CommentItem[];
   note: string | null;
   profileName: string | null;
   activityDate: string;
@@ -71,7 +91,7 @@ export async function loadFeed({
   const seasonIds = Array.from(new Set(rows.map((row) => row.season_id)));
   const activityIds = rows.map((row) => row.id);
 
-  const [{ data: seasons }, { data: allApproved }, { data: reactions }, { data: reviewRequests }] =
+  const [{ data: seasons }, { data: allApproved }, { data: reactions }, { data: reviewRequests }, { data: comments }] =
     await Promise.all([
       seasonIds.length > 0
         ? supabase
@@ -116,6 +136,14 @@ export async function loadFeed({
         : Promise.resolve({
             data: [] as { activity_id: string; requested_by: string }[],
           }),
+      activityIds.length > 0
+        ? supabase
+            .from("activity_comments")
+            .select("id, activity_id, user_id, parent_comment_id, body, created_at, profiles!user_id(name)")
+            .in("activity_id", activityIds)
+            .order("created_at", { ascending: true })
+            .returns<CommentRow[]>()
+        : Promise.resolve({ data: [] as CommentRow[] }),
     ]);
 
   const seasonStartDates = new Map((seasons ?? []).map((s) => [s.id, s.start_date]));
@@ -147,6 +175,20 @@ export async function loadFeed({
       .map((request) => request.activity_id),
   );
 
+  const commentsByActivity = new Map<string, CommentItem[]>();
+  for (const comment of comments ?? []) {
+    const list = commentsByActivity.get(comment.activity_id) ?? [];
+    list.push({
+      id: comment.id,
+      userId: comment.user_id,
+      profileName: comment.profiles?.name ?? null,
+      body: comment.body,
+      createdAt: comment.created_at,
+      parentCommentId: comment.parent_comment_id,
+    });
+    commentsByActivity.set(comment.activity_id, list);
+  }
+
   const items = await Promise.all(
     rows.map(async (row): Promise<FeedItem> => {
       const [photoUrls, thumbnailUrls] = await Promise.all([
@@ -176,6 +218,7 @@ export async function loadFeed({
           ([emoji, state]) => ({ emoji, ...state }),
         ),
         requestedByMe: requestedByMe.has(row.id),
+        comments: commentsByActivity.get(row.id) ?? [],
         note: row.note,
         profileName: row.profiles?.name ?? null,
         activityDate: row.activity_date,

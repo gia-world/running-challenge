@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { TeamEyebrow } from "./TeamEyebrow";
 import { HamburgerMenu } from "./HamburgerMenu";
+import { NotificationBell } from "./NotificationBell";
 
 export function PageHeader({
   teamName,
@@ -31,7 +32,10 @@ export function PageHeader({
         )}
         {children}
       </div>
-      <HamburgerMenu isAdmin={isAdmin} />
+      <div className="flex items-center gap-1">
+        <NotificationBell />
+        <HamburgerMenu isAdmin={isAdmin} />
+      </div>
     </header>
   );
 }
