@@ -106,7 +106,7 @@ export function EntryAnnouncementPopup() {
           <div className="flex flex-col gap-2">
             <p className="text-base font-semibold text-ink-strong">📢 공지사항</p>
             {announcements.map((a) => (
-              <p key={a.id} className="rounded-xl bg-subtle px-3 py-2 text-sm text-ink">
+              <p key={a.id} className="text-base text-ink">
                 {a.body}
               </p>
             ))}
@@ -117,7 +117,11 @@ export function EntryAnnouncementPopup() {
           <Link
             href="/notifications"
             onClick={handleClose}
-            className="rounded-xl bg-subtle px-3 py-2 text-sm text-ink-secondary"
+            className={
+              announcements.length > 0
+                ? "border-t border-border-subtle pt-3 text-base font-medium text-primary"
+                : "text-base font-medium text-primary"
+            }
           >
             읽지 않은 알림이 {unreadCount}개 있어요 →
           </Link>
