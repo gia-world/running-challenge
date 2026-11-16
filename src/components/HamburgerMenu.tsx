@@ -20,6 +20,7 @@ const ADMIN_ITEMS = [
   { href: "/admin/dropout", label: "중도하차 요청함" },
   { href: "/admin/members", label: "팀원 관리" },
   { href: "/admin/season", label: "시즌 관리" },
+  { href: "/admin/announcements", label: "공지사항" },
 ] as const;
 
 const MY_CERTIFICATIONS_ITEMS = [

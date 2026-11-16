@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { TeamEyebrow } from "./TeamEyebrow";
 import { HamburgerMenu } from "./HamburgerMenu";
 import { NotificationBell } from "./NotificationBell";
+import { EntryAnnouncementPopup } from "./EntryAnnouncementPopup";
 
 export function PageHeader({
   teamName,
@@ -24,6 +25,7 @@ export function PageHeader({
 }) {
   return (
     <header className="flex items-center justify-between border-b border-border px-6 py-4">
+      <EntryAnnouncementPopup />
       <div>
         {eyebrowSkeleton ? (
           <div className="h-3.5 w-24 animate-pulse rounded bg-muted-strong" />

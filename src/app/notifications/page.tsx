@@ -8,7 +8,7 @@ import { MarkNotificationsRead } from "@/components/MarkNotificationsRead";
 
 type NotificationRow = {
   id: string;
-  type: "comment" | "reply" | "reaction";
+  type: "comment" | "reply" | "reaction" | "review_request";
   emoji: string | null;
   created_at: string;
   read_at: string | null;
@@ -19,6 +19,7 @@ function describeNotification(n: NotificationRow): string {
   const actor = n.profiles?.name ?? "누군가";
   if (n.type === "reaction") return `${actor}님이 회원님 인증에 ${n.emoji ?? "👍"} 반응을 남겼어요`;
   if (n.type === "reply") return `${actor}님이 회원님 댓글에 답글을 남겼어요`;
+  if (n.type === "review_request") return `${actor}님이 재인증을 요청했어요`;
   return `${actor}님이 회원님 인증에 댓글을 남겼어요`;
 }
 
