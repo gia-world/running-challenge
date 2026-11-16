@@ -61,27 +61,48 @@ export function EntryAnnouncementPopup() {
       let notifCount = 0;
       let importantList: ImportantNotification[] = [];
       if (typeof window !== "undefined" && !window.sessionStorage.getItem(SESSION_FLAG)) {
-        // 재인증 요청처럼 중요한 알림은 공지처럼 본문을 그대로 보여주고,
-        // 나머지(댓글/대댓글/이모지)만 "N개 보기" 요약 카운트에 넣는다.
+        // 재인증 요청/인증 반려/정산 보류처럼 중요한 알림은 공지처럼 본문을
+        // 그대로 보여주고, 나머지(댓글/대댓글/이모지)만 "N개 보기" 요약
+        // 카운트에 넣는다.
+        const IMPORTANT_TYPES = ["review_request", "activity_rejected", "settlement_pending"];
         const [{ data: important }, { count }] = await Promise.all([
           supabase
             .from("notifications")
-            .select("id, type, profiles!actor_user_id(name)")
+            .select("id, type, profiles!actor_user_id(name), activities(rejected_reason)")
             .eq("user_id", user.id)
-            .eq("type", "review_request")
+            .in("type", IMPORTANT_TYPES)
             .is("read_at", null)
-            .returns<{ id: string; type: string; profiles: { name: string } | null }[]>(),
+            .returns<
+              {
+                id: string;
+                type: string;
+                profiles: { name: string } | null;
+                activities: { rejected_reason: string | null } | null;
+              }[]
+            >(),
           supabase
             .from("notifications")
             .select("id", { count: "exact", head: true })
             .eq("user_id", user.id)
-            .neq("type", "review_request")
+            .not("type", "in", `(${IMPORTANT_TYPES.join(",")})`)
             .is("read_at", null),
         ]);
-        importantList = (important ?? []).map((n) => ({
-          id: n.id,
-          body: `${n.profiles?.name ?? "누군가"}님이 재인증을 요청했어요`,
-        }));
+        importantList = (important ?? []).map((n) => {
+          if (n.type === "activity_rejected") {
+            const reason = n.activities?.rejected_reason;
+            return {
+              id: n.id,
+              body: `인증이 반려됐어요${reason ? ` (사유: ${reason})` : ""}. 새로 업로드해주세요.`,
+            };
+          }
+          if (n.type === "settlement_pending") {
+            return {
+              id: n.id,
+              body: "그레이스 기간이 끝났는데 처리할 요청이 남아있어서 시즌이 자동으로 정산되지 않았어요. 확인해주세요!",
+            };
+          }
+          return { id: n.id, body: `${n.profiles?.name ?? "누군가"}님이 재인증을 요청했어요` };
+        });
         notifCount = count ?? 0;
       }
 

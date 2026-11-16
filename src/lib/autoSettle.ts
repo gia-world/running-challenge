@@ -69,14 +69,18 @@ export async function autoSettleTeamSeasons(
       .eq("role", "admin");
 
     await Promise.all(
-      (admins ?? []).map((admin) =>
+      (admins ?? []).flatMap((admin) => [
         notifyUserByKakao(
           service,
           admin.user_id,
           "그레이스 기간이 끝났는데 처리할 요청이 남아있어서 시즌이 자동으로 정산되지 않았어요. 확인해주세요!",
           `/admin/season/${season.id}`,
         ),
-      ),
+        service.from("notifications").insert({
+          user_id: admin.user_id,
+          type: "settlement_pending",
+        }),
+      ]),
     );
 
     await supabase

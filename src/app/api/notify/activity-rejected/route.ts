@@ -31,12 +31,20 @@ export async function POST(request: Request) {
   }
 
   const reasonText = activity.rejected_reason ? ` (사유: ${activity.rejected_reason})` : "";
-  await notifyUserByKakao(
-    supabase,
-    activity.user_id,
-    `인증이 반려됐어요${reasonText}. 새로 업로드해주세요.`,
-    "/history",
-  );
+  await Promise.all([
+    notifyUserByKakao(
+      supabase,
+      activity.user_id,
+      `인증이 반려됐어요${reasonText}. 새로 업로드해주세요.`,
+      "/history",
+    ),
+    supabase.from("notifications").insert({
+      user_id: activity.user_id,
+      actor_user_id: user.id,
+      type: "activity_rejected",
+      activity_id: activityId,
+    }),
+  ]);
 
   return NextResponse.json({ ok: true });
 }
