@@ -10,7 +10,14 @@ import { todayInSeoul } from "@/lib/week";
 const SESSION_FLAG = "entryPopupShown";
 
 type Announcement = { id: string; body: string };
-type ImportantNotification = { id: string; body: string; href: string };
+type ImportantNotification = {
+  id: string;
+  body: string;
+  href: string;
+  /** 재인증 요청/정산 보류처럼 명확한 단일 액션이 아니라, 추가로 안내할
+   * 게 있을 때만(지금은 자동연장 미응답 → 설정 안내) 쓰는 보조 줄. */
+  hint?: { text: string; href: string };
+};
 
 /**
  * 입장 시 제일 먼저 보여주는 센터 모달 — (1) 아직 못 본 관리자 공지,
@@ -26,9 +33,11 @@ type ImportantNotification = { id: string; body: string; href: string };
  * season_memberships.renew_next_season is null — 전부 조치하면 저절로
  * 사라짐). 유일하게 activity_rejected만 notifications.read_at을 쓰는데,
  * 이건 "확인"이 아니라 CertifyForm에서 같은 날짜로 재업로드할 때 읽음
- * 처리된다. 일반 알림 요약만 매번 뜨면 거슬려서 세션당 한 번으로
- * 제한한다(sessionStorage). NotificationBell과 같은 이유로 자체적으로
- * 로그인 사용자를 알아낸다.
+ * 처리된다. profiles.auto_renew_preference를 켜둔 사람은 자동연장
+ * 알림 자체가 안 뜨고, 대신 이 자리에서 바로 renew_next_season을
+ * true로 채워버린다(마이페이지 "계속 참여" 설정 참고). 일반 알림
+ * 요약만 매번 뜨면 거슬려서 세션당 한 번으로 제한한다(sessionStorage).
+ * NotificationBell과 같은 이유로 자체적으로 로그인 사용자를 알아낸다.
  *
  * 바텀시트가 아니라 PhotoViewerModal과 같은 센터 모달 톤(bg-black/60 +
  * 가운데 rounded-2xl 카드)을 썼다 — 자동연장 바텀시트를 배경 탭으로
@@ -53,7 +62,11 @@ export function EntryAnnouncementPopup() {
       if (!user || cancelled) return;
 
       const [{ data: profile }, { data: membership }] = await Promise.all([
-        supabase.from("profiles").select("last_seen_announcement_at").eq("id", user.id).maybeSingle(),
+        supabase
+          .from("profiles")
+          .select("last_seen_announcement_at, auto_renew_preference")
+          .eq("id", user.id)
+          .maybeSingle(),
         supabase.from("team_memberships").select("team_id, role").eq("user_id", user.id).maybeSingle(),
       ]);
       if (cancelled || !membership) return;
@@ -127,6 +140,22 @@ export function EntryAnnouncementPopup() {
         return today >= lastWeekStart;
       });
 
+      // "매 시즌 물어보지 않고 계속 참여"를 켜둔 사람은 물어볼 것 없이
+      // 바로 연장으로 채워준다 — 중요 알림에도 안 띄운다.
+      const autoRenewOn = profile?.auto_renew_preference === true;
+      const renewalToShow = autoRenewOn ? [] : renewalNeedingAction;
+      if (autoRenewOn && renewalNeedingAction.length > 0) {
+        await Promise.all(
+          renewalNeedingAction.map((c) =>
+            supabase
+              .from("season_memberships")
+              .update({ renew_next_season: true })
+              .eq("season_id", c.season_id)
+              .eq("user_id", user.id),
+          ),
+        );
+      }
+
       const importantList: ImportantNotification[] = [
         ...(rejectedNotifs ?? []).map((n) => {
           const reason = n.activities?.rejected_reason;
@@ -136,10 +165,14 @@ export function EntryAnnouncementPopup() {
             href: "/certify",
           };
         }),
-        ...renewalNeedingAction.map((c) => ({
+        ...renewalToShow.map((c) => ({
           id: c.season_id,
-          body: "다음 시즌 연장 여부를 아직 안 정했어요. 연장하면 환급액이 다음 시즌 참가비로 이월돼요.",
+          body: "다음 시즌 연장 여부를 아직 안 정했어요. 연장하면 이번 시즌 환급액이 다음 시즌 참가비로 이월돼요.",
           href: "/mypage",
+          hint: {
+            text: "매번 정하기 번거로우면, 설정에서 앞으로 시즌마다 자동으로 계속 참여하도록 미리 켜둘 수 있어요",
+            href: "/mypage",
+          },
         })),
         ...(pendingReviews.data ?? []).map((r) => ({
           id: r.id,
@@ -216,14 +249,24 @@ export function EntryAnnouncementPopup() {
           <div className="flex flex-col gap-2">
             <p className="text-base font-semibold text-ink-strong">🔔 중요 알림</p>
             {importantNotifications.map((n) => (
-              <Link
-                key={n.id}
-                href={n.href}
-                onClick={handleClose}
-                className="text-base text-ink underline decoration-ink-tertiary"
-              >
-                {n.body} →
-              </Link>
+              <div key={n.id} className="flex flex-col gap-1">
+                <Link
+                  href={n.href}
+                  onClick={handleClose}
+                  className="text-base text-ink underline decoration-ink-tertiary"
+                >
+                  {n.body} →
+                </Link>
+                {n.hint && (
+                  <Link
+                    href={n.hint.href}
+                    onClick={handleClose}
+                    className="text-sm text-ink-tertiary underline"
+                  >
+                    {n.hint.text} →
+                  </Link>
+                )}
+              </div>
             ))}
           </div>
         )}

@@ -8,6 +8,7 @@ import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
 import { BankForm } from "@/components/BankForm";
 import { RenewalToggle } from "@/components/RenewalToggle";
+import { AutoRenewPreferenceToggle } from "@/components/AutoRenewPreferenceToggle";
 import { SeasonDropoutSection } from "@/components/SeasonDropoutSection";
 
 export default async function MyPage() {
@@ -20,7 +21,7 @@ export default async function MyPage() {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("name, bank_name, bank_account_number")
+    .select("name, bank_name, bank_account_number, auto_renew_preference")
     .eq("id", user.id)
     .single();
 
@@ -82,6 +83,19 @@ export default async function MyPage() {
           />
         </div>
       )}
+
+      <div className="flex flex-col gap-2">
+        <SectionTitle size="lg">계속 참여</SectionTitle>
+        <p className="text-sm text-ink-secondary">
+          켜두면 시즌이 끝날 때마다 따로 묻지 않고 다음 시즌도 자동으로
+          참여해요. 끄기 전까지 계속 적용되고, 끄면 다시 시즌마다 직접
+          선택할 수 있어요.
+        </p>
+        <AutoRenewPreferenceToggle
+          userId={user.id}
+          initialChecked={profile?.auto_renew_preference ?? false}
+        />
+      </div>
 
       <div className="flex flex-col gap-2">
         <SectionTitle size="lg">계좌 정보</SectionTitle>
