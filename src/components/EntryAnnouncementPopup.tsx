@@ -8,22 +8,28 @@ import { Button } from "@/components/Button";
 const SESSION_FLAG = "entryPopupShown";
 
 type Announcement = { id: string; body: string };
-type ImportantNotification = { id: string; body: string };
+type ImportantNotification = { id: string; body: string; href: string };
 
 /**
- * 입장 시 제일 먼저 보여주는 센터 모달 — (1) 아직 못 본 관리자 공지와
- * (2) 안읽은 개인 알림 개수 요약을 한 번에 보여준다. 공지는
- * profiles.last_seen_announcement_at으로 "진짜 처음 보는지"를 서버 상태로
- * 판단하지만(그래서 새 공지가 생기면 세션이 바뀌어도 다시 뜸), 알림 개수
- * 요약은 매번 뜨면 거슬려서 세션당 한 번만 보여준다(sessionStorage).
+ * 입장 시 제일 먼저 보여주는 센터 모달 — (1) 아직 못 본 관리자 공지,
+ * (2) 실제로 조치해야 하는 중요 알림(재인증 요청/인증 반려/정산 보류),
+ * (3) 안읽은 일반 알림(댓글/대댓글/이모지) 개수 요약을 한 번에 보여준다.
+ *
+ * 공지는 profiles.last_seen_announcement_at으로 "진짜 처음 보는지"를
+ * 서버 상태로 판단한다. 중요 알림은 notifications.read_at이 아니라 —
+ * "확인"을 눌렀다고 실제 조치를 한 건 아니므로 — 매번 그 자리에서 실제로
+ * 아직 해결 안 됐는지를 직접 조회해서, 조치할 때까지 계속 뜨게 한다
+ * (재인증 요청은 activity_review_requests.status='pending', 정산 보류는
+ * seasons.settled_at is null — 둘 다 조치하면 저절로 사라짐). 유일하게
+ * activity_rejected만 notifications.read_at을 쓰는데, 이건 "확인"이 아니라
+ * CertifyForm에서 같은 날짜로 재업로드할 때 읽음 처리된다. 일반 알림
+ * 요약만 매번 뜨면 거슬려서 세션당 한 번으로 제한한다(sessionStorage).
  * NotificationBell과 같은 이유로 자체적으로 로그인 사용자를 알아낸다.
  *
  * 바텀시트가 아니라 PhotoViewerModal과 같은 센터 모달 톤(bg-black/60 +
  * 가운데 rounded-2xl 카드)을 썼다 — 자동연장 바텀시트를 배경 탭으로
  * 무심코 닫아버려 안 읽고 넘어간 사람들이 있었던 전례가 있어서, 배경
  * 탭으로는 안 닫히게 하고 "확인" 버튼을 직접 눌러야만 닫히게 했다.
- * 공지는 한 번 닫으면 다시 안 뜨는 "놓치면 끝" 구조라 더 신중하게
- * 만들었다.
  */
 export function EntryAnnouncementPopup() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -44,7 +50,7 @@ export function EntryAnnouncementPopup() {
 
       const [{ data: profile }, { data: membership }] = await Promise.all([
         supabase.from("profiles").select("last_seen_announcement_at").eq("id", user.id).maybeSingle(),
-        supabase.from("team_memberships").select("team_id").eq("user_id", user.id).maybeSingle(),
+        supabase.from("team_memberships").select("team_id, role").eq("user_id", user.id).maybeSingle(),
       ]);
       if (cancelled || !membership) return;
 
@@ -56,53 +62,68 @@ export function EntryAnnouncementPopup() {
       if (profile?.last_seen_announcement_at) {
         announcementsQuery = announcementsQuery.gt("created_at", profile.last_seen_announcement_at);
       }
-      const { data: unseenAnnouncements } = await announcementsQuery;
+
+      const isAdmin = membership.role === "admin";
+
+      const [{ data: unseenAnnouncements }, { data: rejectedNotifs }, pendingReviews, pendingSettlements] =
+        await Promise.all([
+          announcementsQuery,
+          supabase
+            .from("notifications")
+            .select("id, activities(rejected_reason)")
+            .eq("user_id", user.id)
+            .eq("type", "activity_rejected")
+            .is("read_at", null)
+            .returns<{ id: string; activities: { rejected_reason: string | null } | null }[]>(),
+          // team_id 필터가 없는 건 실수가 아니다 — "team members can view
+          // review requests in their team" RLS가 이미 본인 팀으로만
+          // 걸러준다(admin/review 페이지와 동일한 패턴).
+          isAdmin
+            ? supabase
+                .from("activity_review_requests")
+                .select("id, profiles!requested_by(name)")
+                .eq("status", "pending")
+                .returns<{ id: string; profiles: { name: string } | null }[]>()
+            : Promise.resolve({ data: [] as { id: string; profiles: { name: string } | null }[] }),
+          isAdmin
+            ? supabase
+                .from("seasons")
+                .select("id")
+                .eq("team_id", membership.team_id)
+                .not("settlement_notified_at", "is", null)
+                .is("settled_at", null)
+            : Promise.resolve({ data: [] as { id: string }[] }),
+        ]);
+
+      const importantList: ImportantNotification[] = [
+        ...(rejectedNotifs ?? []).map((n) => {
+          const reason = n.activities?.rejected_reason;
+          return {
+            id: n.id,
+            body: `인증이 반려됐어요${reason ? ` (사유: ${reason})` : ""}. 새로 업로드해주세요.`,
+            href: "/certify",
+          };
+        }),
+        ...(pendingReviews.data ?? []).map((r) => ({
+          id: r.id,
+          body: `${r.profiles?.name ?? "누군가"}님이 재인증을 요청했어요. 확인해주세요!`,
+          href: "/admin/review",
+        })),
+        ...(pendingSettlements.data ?? []).map((s) => ({
+          id: s.id,
+          body: "그레이스 기간이 끝났는데 처리할 요청이 남아있어서 시즌이 자동으로 정산되지 않았어요. 확인해주세요!",
+          href: `/admin/season/${s.id}`,
+        })),
+      ];
 
       let notifCount = 0;
-      let importantList: ImportantNotification[] = [];
       if (typeof window !== "undefined" && !window.sessionStorage.getItem(SESSION_FLAG)) {
-        // 재인증 요청/인증 반려/정산 보류처럼 중요한 알림은 공지처럼 본문을
-        // 그대로 보여주고, 나머지(댓글/대댓글/이모지)만 "N개 보기" 요약
-        // 카운트에 넣는다.
-        const IMPORTANT_TYPES = ["review_request", "activity_rejected", "settlement_pending"];
-        const [{ data: important }, { count }] = await Promise.all([
-          supabase
-            .from("notifications")
-            .select("id, type, profiles!actor_user_id(name), activities(rejected_reason)")
-            .eq("user_id", user.id)
-            .in("type", IMPORTANT_TYPES)
-            .is("read_at", null)
-            .returns<
-              {
-                id: string;
-                type: string;
-                profiles: { name: string } | null;
-                activities: { rejected_reason: string | null } | null;
-              }[]
-            >(),
-          supabase
-            .from("notifications")
-            .select("id", { count: "exact", head: true })
-            .eq("user_id", user.id)
-            .not("type", "in", `(${IMPORTANT_TYPES.join(",")})`)
-            .is("read_at", null),
-        ]);
-        importantList = (important ?? []).map((n) => {
-          if (n.type === "activity_rejected") {
-            const reason = n.activities?.rejected_reason;
-            return {
-              id: n.id,
-              body: `인증이 반려됐어요${reason ? ` (사유: ${reason})` : ""}. 새로 업로드해주세요.`,
-            };
-          }
-          if (n.type === "settlement_pending") {
-            return {
-              id: n.id,
-              body: "그레이스 기간이 끝났는데 처리할 요청이 남아있어서 시즌이 자동으로 정산되지 않았어요. 확인해주세요!",
-            };
-          }
-          return { id: n.id, body: `${n.profiles?.name ?? "누군가"}님이 재인증을 요청했어요` };
-        });
+        const { count } = await supabase
+          .from("notifications")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .in("type", ["comment", "reply", "reaction"])
+          .is("read_at", null);
         notifCount = count ?? 0;
       }
 
@@ -158,9 +179,14 @@ export function EntryAnnouncementPopup() {
           <div className="flex flex-col gap-2">
             <p className="text-base font-semibold text-ink-strong">🔔 중요 알림</p>
             {importantNotifications.map((n) => (
-              <p key={n.id} className="text-base text-ink">
-                {n.body}
-              </p>
+              <Link
+                key={n.id}
+                href={n.href}
+                onClick={handleClose}
+                className="text-base text-ink underline decoration-ink-tertiary"
+              >
+                {n.body} →
+              </Link>
             ))}
           </div>
         )}

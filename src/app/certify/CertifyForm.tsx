@@ -184,6 +184,30 @@ export function CertifyForm({
       return;
     }
 
+    // 같은 날짜에 반려됐던 인증이 있었다면, 지금 새로 올린 게 그걸
+    // 고치려는 재업로드라고 보고 그 반려 알림을 읽음 처리한다 — 입장
+    // 팝업의 "중요 알림"이 실제로 조치할 때까지 계속 뜨게 하려면, "확인"
+    // 버튼이 아니라 이 재업로드 자체가 알림을 꺼야 한다.
+    const { data: rejectedSameDay } = await supabase
+      .from("activities")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("activity_date", activityDate)
+      .eq("status", "rejected");
+    const rejectedIds = (rejectedSameDay ?? []).map((a) => a.id);
+    if (rejectedIds.length > 0) {
+      supabase
+        .from("notifications")
+        .update({ read_at: new Date().toISOString() })
+        .eq("user_id", userId)
+        .eq("type", "activity_rejected")
+        .in("activity_id", rejectedIds)
+        .is("read_at", null)
+        .then(({ error }) => {
+          if (error) console.error("[certify] mark rejection-notification read failed:", error.message);
+        });
+    }
+
     // Only today's upload counts toward this week's live goal tracking —
     // a backfilled past date could belong to an already-settled week we
     // have no cheap way to re-check here.

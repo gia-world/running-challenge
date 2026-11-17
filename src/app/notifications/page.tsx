@@ -20,7 +20,7 @@ function describeNotification(n: NotificationRow): string {
   const actor = n.profiles?.name ?? "누군가";
   if (n.type === "reaction") return `${actor}님이 회원님 인증에 ${n.emoji ?? "👍"} 반응을 남겼어요`;
   if (n.type === "reply") return `${actor}님이 회원님 댓글에 답글을 남겼어요`;
-  if (n.type === "review_request") return `${actor}님이 재인증을 요청했어요`;
+  if (n.type === "review_request") return `${actor}님이 재인증을 요청했어요. 확인해주세요!`;
   if (n.type === "activity_rejected") {
     const reason = n.activities?.rejected_reason;
     return `인증이 반려됐어요${reason ? ` (사유: ${reason})` : ""}. 새로 업로드해주세요.`;
