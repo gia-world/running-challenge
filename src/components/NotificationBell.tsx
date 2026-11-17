@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
+import { todayInSeoul } from "@/lib/week";
 
 /**
  * 헤더의 알림 벨 — 서버에서 currentUserId를 내려받지 않고 브라우저
@@ -10,10 +12,11 @@ import { createClient } from "@/lib/supabase/client";
  * PageShell/PageHeader 시그니처를 안 건드리려고 일부러 이렇게 뺐다.
  *
  * EntryAnnouncementPopup과 같은 기준으로 센다 — 댓글/대댓글/이모지는
- * notifications.read_at 기준, 재인증 요청/정산 보류는 실제로 아직
- * 해결 안 됐는지(activity_review_requests.status='pending',
- * seasons.settled_at is null)를 직접 세서 뱃지 숫자가 입장 팝업이랑
- * 어긋나지 않게 한다.
+ * notifications.read_at 기준, 재인증 요청/정산 보류/자동연장 응답은
+ * 실제로 아직 해결 안 됐는지(activity_review_requests.status='pending',
+ * seasons.settled_at is null, season_memberships.renew_next_season is
+ * null인 채로 마지막 주에 들어섰는지)를 직접 세서 뱃지 숫자가 입장
+ * 팝업이랑 어긋나지 않게 한다.
  */
 export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -37,8 +40,13 @@ export function NotificationBell() {
 
       const isAdmin = membership.role === "admin";
 
-      const [{ count: genericCount }, { count: rejectedCount }, pendingReviews, pendingSettlements] =
-        await Promise.all([
+      const [
+        { count: genericCount },
+        { count: rejectedCount },
+        { data: renewalCandidates },
+        pendingReviews,
+        pendingSettlements,
+      ] = await Promise.all([
           supabase
             .from("notifications")
             .select("id", { count: "exact", head: true })
@@ -51,6 +59,14 @@ export function NotificationBell() {
             .eq("user_id", user.id)
             .eq("type", "activity_rejected")
             .is("read_at", null),
+          supabase
+            .from("season_memberships")
+            .select("seasons(start_date, end_date, settled_at)")
+            .eq("user_id", user.id)
+            .is("renew_next_season", null)
+            .returns<
+              { seasons: { start_date: string; end_date: string; settled_at: string | null } | null }[]
+            >(),
           // team_id 필터 없음 — RLS가 이미 본인 팀으로만 걸러준다.
           isAdmin
             ? supabase
@@ -68,10 +84,20 @@ export function NotificationBell() {
             : Promise.resolve({ count: 0 }),
         ]);
 
+      const today = todayInSeoul();
+      const renewalCount = (renewalCandidates ?? []).filter((c) => {
+        const season = c.seasons;
+        if (!season || season.settled_at) return false;
+        const lastWeekIndex = seasonWeekIndexForDate(season.start_date, season.end_date);
+        if (lastWeekIndex === null) return false;
+        return today >= seasonWeekRange(season.start_date, lastWeekIndex).start;
+      }).length;
+
       if (!cancelled) {
         setUnreadCount(
           (genericCount ?? 0) +
             (rejectedCount ?? 0) +
+            renewalCount +
             (pendingReviews.count ?? 0) +
             (pendingSettlements.count ?? 0),
         );

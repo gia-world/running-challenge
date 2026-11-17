@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/Button";
+import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
+import { todayInSeoul } from "@/lib/week";
 
 const SESSION_FLAG = "entryPopupShown";
 
@@ -20,11 +22,13 @@ type ImportantNotification = { id: string; body: string; href: string };
  * "확인"을 눌렀다고 실제 조치를 한 건 아니므로 — 매번 그 자리에서 실제로
  * 아직 해결 안 됐는지를 직접 조회해서, 조치할 때까지 계속 뜨게 한다
  * (재인증 요청은 activity_review_requests.status='pending', 정산 보류는
- * seasons.settled_at is null — 둘 다 조치하면 저절로 사라짐). 유일하게
- * activity_rejected만 notifications.read_at을 쓰는데, 이건 "확인"이 아니라
- * CertifyForm에서 같은 날짜로 재업로드할 때 읽음 처리된다. 일반 알림
- * 요약만 매번 뜨면 거슬려서 세션당 한 번으로 제한한다(sessionStorage).
- * NotificationBell과 같은 이유로 자체적으로 로그인 사용자를 알아낸다.
+ * seasons.settled_at is null, 자동연장 응답은
+ * season_memberships.renew_next_season is null — 전부 조치하면 저절로
+ * 사라짐). 유일하게 activity_rejected만 notifications.read_at을 쓰는데,
+ * 이건 "확인"이 아니라 CertifyForm에서 같은 날짜로 재업로드할 때 읽음
+ * 처리된다. 일반 알림 요약만 매번 뜨면 거슬려서 세션당 한 번으로
+ * 제한한다(sessionStorage). NotificationBell과 같은 이유로 자체적으로
+ * 로그인 사용자를 알아낸다.
  *
  * 바텀시트가 아니라 PhotoViewerModal과 같은 센터 모달 톤(bg-black/60 +
  * 가운데 rounded-2xl 카드)을 썼다 — 자동연장 바텀시트를 배경 탭으로
@@ -65,8 +69,13 @@ export function EntryAnnouncementPopup() {
 
       const isAdmin = membership.role === "admin";
 
-      const [{ data: unseenAnnouncements }, { data: rejectedNotifs }, pendingReviews, pendingSettlements] =
-        await Promise.all([
+      const [
+        { data: unseenAnnouncements },
+        { data: rejectedNotifs },
+        { data: renewalCandidates },
+        pendingReviews,
+        pendingSettlements,
+      ] = await Promise.all([
           announcementsQuery,
           supabase
             .from("notifications")
@@ -75,6 +84,17 @@ export function EntryAnnouncementPopup() {
             .eq("type", "activity_rejected")
             .is("read_at", null)
             .returns<{ id: string; activities: { rejected_reason: string | null } | null }[]>(),
+          supabase
+            .from("season_memberships")
+            .select("season_id, seasons(start_date, end_date, settled_at)")
+            .eq("user_id", user.id)
+            .is("renew_next_season", null)
+            .returns<
+              {
+                season_id: string;
+                seasons: { start_date: string; end_date: string; settled_at: string | null } | null;
+              }[]
+            >(),
           // team_id 필터가 없는 건 실수가 아니다 — "team members can view
           // review requests in their team" RLS가 이미 본인 팀으로만
           // 걸러준다(admin/review 페이지와 동일한 패턴).
@@ -95,6 +115,18 @@ export function EntryAnnouncementPopup() {
             : Promise.resolve({ data: [] as { id: string }[] }),
         ]);
 
+      // 시즌이 아직 안 끝났고(settled_at is null) 마지막 주에 들어섰을
+      // 때만 "조치가 필요"하다 — 시즌 중간에 답을 안 한 건 급할 게 없다.
+      const today = todayInSeoul();
+      const renewalNeedingAction = (renewalCandidates ?? []).filter((c) => {
+        const season = c.seasons;
+        if (!season || season.settled_at) return false;
+        const lastWeekIndex = seasonWeekIndexForDate(season.start_date, season.end_date);
+        if (lastWeekIndex === null) return false;
+        const lastWeekStart = seasonWeekRange(season.start_date, lastWeekIndex).start;
+        return today >= lastWeekStart;
+      });
+
       const importantList: ImportantNotification[] = [
         ...(rejectedNotifs ?? []).map((n) => {
           const reason = n.activities?.rejected_reason;
@@ -104,6 +136,11 @@ export function EntryAnnouncementPopup() {
             href: "/certify",
           };
         }),
+        ...renewalNeedingAction.map((c) => ({
+          id: c.season_id,
+          body: "다음 시즌 연장 여부를 아직 안 정했어요. 연장하면 환급액이 다음 시즌 참가비로 이월돼요.",
+          href: "/mypage",
+        })),
         ...(pendingReviews.data ?? []).map((r) => ({
           id: r.id,
           body: `${r.profiles?.name ?? "누군가"}님이 재인증을 요청했어요. 확인해주세요!`,
