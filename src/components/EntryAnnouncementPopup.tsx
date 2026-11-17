@@ -171,7 +171,7 @@ export function EntryAnnouncementPopup() {
         }),
         ...renewalToShow.map((c) => ({
           id: c.season_id,
-          body: "다음 시즌 연장 여부를 아직 안 정했어요. 연장하면 이번 시즌 환급액이 다음 시즌 참가비로 이월돼요.",
+          body: "다음 시즌 연장 여부를 아직 안 정했어요. 연장하면 이번 시즌 참가비가 다음 시즌 참가비로 이월돼요.",
           href: "/mypage",
           hint: {
             text: "매번 정하기 번거로우면, 설정에서 앞으로 시즌마다 자동으로 계속 참여하도록 미리 켜둘 수 있어요",
