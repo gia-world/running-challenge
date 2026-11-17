@@ -57,7 +57,12 @@ export async function POST(request: Request) {
 
   await Promise.all(
     (admins ?? []).map((admin) =>
-      notifyUserByKakao(supabase, admin.user_id, "재인증 요청이 들어왔어요. 확인해주세요!", "/admin/review"),
+      notifyUserByKakao(
+        supabase,
+        admin.user_id,
+        "재인증 요청이 들어왔어요. 확인해주세요!",
+        "/admin/review",
+      ),
     ),
   );
 

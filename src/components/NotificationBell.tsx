@@ -47,42 +47,44 @@ export function NotificationBell() {
         pendingReviews,
         pendingSettlements,
       ] = await Promise.all([
-          supabase
-            .from("notifications")
-            .select("id", { count: "exact", head: true })
-            .eq("user_id", user.id)
-            .in("type", ["comment", "reply", "reaction"])
-            .is("read_at", null),
-          supabase
-            .from("notifications")
-            .select("id", { count: "exact", head: true })
-            .eq("user_id", user.id)
-            .eq("type", "activity_rejected")
-            .is("read_at", null),
-          supabase
-            .from("season_memberships")
-            .select("seasons(start_date, end_date, settled_at)")
-            .eq("user_id", user.id)
-            .is("renew_next_season", null)
-            .returns<
-              { seasons: { start_date: string; end_date: string; settled_at: string | null } | null }[]
-            >(),
-          // team_id 필터 없음 — RLS가 이미 본인 팀으로만 걸러준다.
-          isAdmin
-            ? supabase
-                .from("activity_review_requests")
-                .select("id", { count: "exact", head: true })
-                .eq("status", "pending")
-            : Promise.resolve({ count: 0 }),
-          isAdmin
-            ? supabase
-                .from("seasons")
-                .select("id", { count: "exact", head: true })
-                .eq("team_id", membership.team_id)
-                .not("settlement_notified_at", "is", null)
-                .is("settled_at", null)
-            : Promise.resolve({ count: 0 }),
-        ]);
+        supabase
+          .from("notifications")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .in("type", ["comment", "reply", "reaction"])
+          .is("read_at", null),
+        supabase
+          .from("notifications")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("type", "activity_rejected")
+          .is("read_at", null),
+        supabase
+          .from("season_memberships")
+          .select("seasons(start_date, end_date, settled_at)")
+          .eq("user_id", user.id)
+          .is("renew_next_season", null)
+          .returns<
+            {
+              seasons: { start_date: string; end_date: string; settled_at: string | null } | null;
+            }[]
+          >(),
+        // team_id 필터 없음 — RLS가 이미 본인 팀으로만 걸러준다.
+        isAdmin
+          ? supabase
+              .from("activity_review_requests")
+              .select("id", { count: "exact", head: true })
+              .eq("status", "pending")
+          : Promise.resolve({ count: 0 }),
+        isAdmin
+          ? supabase
+              .from("seasons")
+              .select("id", { count: "exact", head: true })
+              .eq("team_id", membership.team_id)
+              .not("settlement_notified_at", "is", null)
+              .is("settled_at", null)
+          : Promise.resolve({ count: 0 }),
+      ]);
 
       const today = todayInSeoul();
       const renewalCount = (renewalCandidates ?? []).filter((c) => {

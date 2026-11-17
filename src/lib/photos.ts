@@ -31,7 +31,10 @@ export async function getSignedPhotoUrls(
   photos: PhotoRow[],
 ): Promise<string[]> {
   const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
-  return signPaths(supabase, sorted.map((p) => p.storage_path));
+  return signPaths(
+    supabase,
+    sorted.map((p) => p.storage_path),
+  );
 }
 
 /**
@@ -45,5 +48,8 @@ export async function getSignedThumbnailUrls(
   photos: (PhotoRow & { thumbnail_storage_path: string | null })[],
 ): Promise<string[]> {
   const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
-  return signPaths(supabase, sorted.map((p) => p.thumbnail_storage_path ?? p.storage_path));
+  return signPaths(
+    supabase,
+    sorted.map((p) => p.thumbnail_storage_path ?? p.storage_path),
+  );
 }

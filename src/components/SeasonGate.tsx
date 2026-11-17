@@ -55,7 +55,10 @@ export function SeasonGate({
           관리자가 입금 확인 후 참여가 승인돼요.
         </p>
         {hasTeamAccount && (
-          <AccountNote accountNumber={viewer.teamSettlementAccountNumber!} className="mt-3 text-left">
+          <AccountNote
+            accountNumber={viewer.teamSettlementAccountNumber!}
+            className="mt-3 text-left"
+          >
             참가비 입금 계좌
             <br />
             {viewer.teamSettlementBankName} {viewer.teamSettlementAccountNumber}

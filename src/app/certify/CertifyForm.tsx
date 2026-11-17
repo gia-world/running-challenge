@@ -65,16 +65,16 @@ export function CertifyForm({
 
     setPhotos((prev) => {
       const existingKeys = new Set(prev.map((p) => `${p.file.name}:${p.file.size}`));
-      const deduped = selected.filter(
-        (file) => !existingKeys.has(`${file.name}:${file.size}`),
-      );
+      const deduped = selected.filter((file) => !existingKeys.has(`${file.name}:${file.size}`));
       const room = MAX_PHOTOS - prev.length;
       if (deduped.length > room) {
         setError(`사진은 최대 ${MAX_PHOTOS}장까지 선택할 수 있어요.`);
       }
       return [
         ...prev,
-        ...deduped.slice(0, Math.max(room, 0)).map((file) => ({ file, previewUrl: URL.createObjectURL(file) })),
+        ...deduped
+          .slice(0, Math.max(room, 0))
+          .map((file) => ({ file, previewUrl: URL.createObjectURL(file) })),
       ];
     });
   }
@@ -130,7 +130,9 @@ export function CertifyForm({
       const path = `${userId}/${activityDate}-${Date.now()}-${index}.jpg`;
       const thumbPath = `${userId}/${activityDate}-${Date.now()}-${index}-thumb.jpg`;
       const [{ error: uploadError }, { error: thumbUploadError }] = await Promise.all([
-        supabase.storage.from(CERTIFICATIONS_BUCKET).upload(path, blob, { contentType: "image/jpeg" }),
+        supabase.storage
+          .from(CERTIFICATIONS_BUCKET)
+          .upload(path, blob, { contentType: "image/jpeg" }),
         supabase.storage
           .from(CERTIFICATIONS_BUCKET)
           .upload(thumbPath, thumbnails[index], { contentType: "image/jpeg" }),
@@ -167,16 +169,14 @@ export function CertifyForm({
       return;
     }
 
-    const { error: photosError } = await supabase
-      .from("activity_photos")
-      .insert(
-        uploadedPaths.map(({ storage_path, thumbnail_storage_path }, sort_order) => ({
-          activity_id: activity.id,
-          storage_path,
-          thumbnail_storage_path,
-          sort_order,
-        })),
-      );
+    const { error: photosError } = await supabase.from("activity_photos").insert(
+      uploadedPaths.map(({ storage_path, thumbnail_storage_path }, sort_order) => ({
+        activity_id: activity.id,
+        storage_path,
+        thumbnail_storage_path,
+        sort_order,
+      })),
+    );
 
     if (photosError) {
       setError("사진 등록에 실패했어요. 다시 시도해주세요.");
@@ -204,7 +204,8 @@ export function CertifyForm({
         .in("activity_id", rejectedIds)
         .is("read_at", null)
         .then(({ error }) => {
-          if (error) console.error("[certify] mark rejection-notification read failed:", error.message);
+          if (error)
+            console.error("[certify] mark rejection-notification read failed:", error.message);
         });
     }
 
@@ -239,18 +240,16 @@ export function CertifyForm({
           홈으로 가기
         </Button>
 
-        {activityDate === today &&
-          showRenewalPrompt &&
-          !renewalSheetDismissed && (
-            <BottomSheet onClose={() => setRenewalSheetDismissed(true)}>
-              <RenewalToggle
-                seasonId={seasonId}
-                userId={userId}
-                initialChoice={null}
-                onAnswered={() => setRenewalSheetDismissed(true)}
-              />
-            </BottomSheet>
-          )}
+        {activityDate === today && showRenewalPrompt && !renewalSheetDismissed && (
+          <BottomSheet onClose={() => setRenewalSheetDismissed(true)}>
+            <RenewalToggle
+              seasonId={seasonId}
+              userId={userId}
+              initialChoice={null}
+              onAnswered={() => setRenewalSheetDismissed(true)}
+            />
+          </BottomSheet>
+        )}
       </div>
     );
   }
@@ -265,9 +264,7 @@ export function CertifyForm({
       )}
 
       <div className="flex flex-col gap-2">
-        <span className="text-base font-medium text-ink">
-          인증샷 (최대 {MAX_PHOTOS}장)
-        </span>
+        <span className="text-base font-medium text-ink">인증샷 (최대 {MAX_PHOTOS}장)</span>
         {photos.length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
             {photos.map((photo, index) => (
@@ -344,9 +341,7 @@ export function CertifyForm({
       />
 
       <label className="flex flex-col gap-2">
-        <span className="text-base font-medium text-ink">
-          하고 싶은 말 (선택)
-        </span>
+        <span className="text-base font-medium text-ink">하고 싶은 말 (선택)</span>
         <Textarea
           value={note}
           onChange={setNote}
@@ -358,11 +353,7 @@ export function CertifyForm({
       {error && <ErrorBanner>{error}</ErrorBanner>}
 
       <Button type="submit" disabled={isSubmitting || isBlocked}>
-        {isBlocked
-          ? "오늘은 이미 인증했어요"
-          : isSubmitting
-            ? "업로드 중..."
-            : "인증하기"}
+        {isBlocked ? "오늘은 이미 인증했어요" : isSubmitting ? "업로드 중..." : "인증하기"}
       </Button>
     </form>
   );

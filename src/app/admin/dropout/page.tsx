@@ -41,19 +41,12 @@ export default async function AdminDropoutPage() {
   return (
     <div className="flex flex-col gap-4">
       {items.length === 0 ? (
-        <p className="mt-10 text-center text-base text-ink-tertiary">
-          중도하차 요청이 없어요.
-        </p>
+        <p className="mt-10 text-center text-base text-ink-tertiary">중도하차 요청이 없어요.</p>
       ) : (
         items.map((item) => (
-          <div
-            key={item.id}
-            className="rounded-2xl border border-border bg-surface px-4 py-3"
-          >
+          <div key={item.id} className="rounded-2xl border border-border bg-surface px-4 py-3">
             <div className="flex items-center justify-between text-base">
-              <span className="font-semibold text-ink-strong">
-                {item.profiles?.name ?? "팀원"}
-              </span>
+              <span className="font-semibold text-ink-strong">{item.profiles?.name ?? "팀원"}</span>
               {item.seasons && (
                 <span className="text-ink-secondary">
                   {formatKoreanDate(item.seasons.start_date)} ~{" "}
@@ -61,9 +54,7 @@ export default async function AdminDropoutPage() {
                 </span>
               )}
             </div>
-            {item.reason && (
-              <p className="mt-1 text-sm text-ink-secondary">{item.reason}</p>
-            )}
+            {item.reason && <p className="mt-1 text-sm text-ink-secondary">{item.reason}</p>}
             <DropoutRequestItem
               requestId={item.id}
               seasonId={item.season_id}

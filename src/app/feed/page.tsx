@@ -27,9 +27,7 @@ async function Feed({ userId }: { userId: string }) {
 
   if (items.length === 0) {
     return (
-      <p className="mt-10 text-center text-base text-ink-tertiary">
-        아직 인증된 기록이 없어요.
-      </p>
+      <p className="mt-10 text-center text-base text-ink-tertiary">아직 인증된 기록이 없어요.</p>
     );
   }
 

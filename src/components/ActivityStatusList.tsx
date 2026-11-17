@@ -87,9 +87,7 @@ export function ActivityStatusList({
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-ink">
-                    {formatKoreanDate(activity.activity_date)}
-                  </span>
+                  <span className="text-ink">{formatKoreanDate(activity.activity_date)}</span>
                   {activity.status === "rejected" && (
                     <span
                       className={`rounded-full px-2 py-0.5 text-sm font-medium ${REJECTED_BADGE.className}`}
@@ -103,9 +101,7 @@ export function ActivityStatusList({
                 </span>
               </div>
               {activity.status === "rejected" && activity.rejected_reason && (
-                <p className="text-sm text-danger">
-                  반려 사유: {activity.rejected_reason}
-                </p>
+                <p className="text-sm text-danger">반려 사유: {activity.rejected_reason}</p>
               )}
             </button>
           </li>

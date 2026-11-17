@@ -80,9 +80,7 @@ export function BankForm({
         placeholder="123456-78-901234"
       />
 
-      {error && (
-        <p className="text-sm text-danger">{error}</p>
-      )}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "저장 중..." : "저장하기"}

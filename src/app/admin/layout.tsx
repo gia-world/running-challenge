@@ -6,11 +6,7 @@ import { PageTitle } from "@/components/PageTitle";
 import { requireTeamViewer } from "@/lib/viewer";
 import { autoSettleTeamSeasons } from "@/lib/autoSettle";
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const { viewer } = await requireTeamViewer();
 
   if (viewer.teamRole !== "admin") {
@@ -49,11 +45,7 @@ export default async function AdminLayout({
   ).length;
 
   return (
-    <PageShell
-      teamName={viewer.teamName}
-      header={<PageTitle>ADMIN</PageTitle>}
-      isAdmin
-    >
+    <PageShell teamName={viewer.teamName} header={<PageTitle>ADMIN</PageTitle>} isAdmin>
       <AdminTabs pendingCount={pendingCount} dropoutPendingCount={dropoutPendingCount}>
         {children}
       </AdminTabs>

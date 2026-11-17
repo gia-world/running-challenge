@@ -57,7 +57,12 @@ export default async function SeasonReportPage({
   // Latest dropout request per user — same "newest first, first-seen wins" rule as the admin season page.
   const dropoutByUserId = new Map<
     string,
-    { status: string; settlement_amount: number | null; reason: string | null; admin_note: string | null }
+    {
+      status: string;
+      settlement_amount: number | null;
+      reason: string | null;
+      admin_note: string | null;
+    }
   >();
   for (const r of dropoutRequests ?? []) {
     if (!dropoutByUserId.has(r.user_id)) dropoutByUserId.set(r.user_id, r);
@@ -130,9 +135,7 @@ export default async function SeasonReportPage({
 
   const settlement = settlements.get(user.id) ?? null;
   const isRenewing = renewalByUserId.get(user.id) === true;
-  const total = settlement
-    ? settlement.refund + (settlement.isCompleted ? prizeShare : 0)
-    : 0;
+  const total = settlement ? settlement.refund + (settlement.isCompleted ? prizeShare : 0) : 0;
   const unpaidAmount = hasFees && settlement ? Math.max(entryFee - settlement.refund, 0) : 0;
 
   // 참가비/상금이 나에게 오는 경우 — 내 계좌(설정에 등록한 계좌)로 입금될
@@ -274,9 +277,7 @@ export default async function SeasonReportPage({
                         {teamAccountNote}
                       </>
                     ) : (
-                      <p className="text-ink-secondary">
-                        환급액은 다음 시즌 참가비로 이월돼요.
-                      </p>
+                      <p className="text-ink-secondary">환급액은 다음 시즌 참가비로 이월돼요.</p>
                     )}
                     <p className="font-semibold text-ink-strong">
                       {settlement.isCompleted && prizeShare > 0
@@ -290,16 +291,12 @@ export default async function SeasonReportPage({
                     <p className="text-ink-secondary">
                       환급 {formatWon(settlement.refund)} + 상금 {formatWon(prizeShare)}
                     </p>
-                    <p className="font-semibold text-ink-strong">
-                      총 {formatWon(total)}을 받아요
-                    </p>
+                    <p className="font-semibold text-ink-strong">총 {formatWon(total)}을 받아요</p>
                     {ownAccountNote(total)}
                   </>
                 ) : (
                   <>
-                    <p className="font-semibold text-ink-strong">
-                      {formatWon(total)}을 받아요
-                    </p>
+                    <p className="font-semibold text-ink-strong">{formatWon(total)}을 받아요</p>
                     {unpaidAmount > 0 && (
                       <p className="text-sm text-danger">
                         참가비 중 {formatWon(unpaidAmount)}은 돌려받지 못해요.

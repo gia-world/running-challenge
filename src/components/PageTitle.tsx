@@ -18,9 +18,7 @@ export function PageTitle({
   children: ReactNode;
 }) {
   const base =
-    size === "lg"
-      ? "text-2xl font-bold text-ink-strong"
-      : "text-lg font-bold text-ink-strong";
+    size === "lg" ? "text-2xl font-bold text-ink-strong" : "text-lg font-bold text-ink-strong";
   const finalClassName = className ? `${base} ${className}` : base;
   return size === "lg" ? (
     <h1 className={finalClassName}>{children}</h1>

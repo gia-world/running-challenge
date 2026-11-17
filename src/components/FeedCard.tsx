@@ -103,13 +103,21 @@ export function FeedCard({
 
   return (
     <article className="overflow-hidden rounded-2xl border border-border bg-surface">
-      <FeedPhotoThumbnail photoUrls={thumbnailUrls} alt="인증샷" onOpen={() => setIsViewerOpen(true)} />
+      <FeedPhotoThumbnail
+        photoUrls={thumbnailUrls}
+        alt="인증샷"
+        onOpen={() => setIsViewerOpen(true)}
+      />
       {infoRow}
       {noteBlock}
       {!isViewerOpen && (
         <>
           <ReactionBar {...reactionBarProps} />
-          <CommentSection activityId={activityId} currentUserId={currentUserId} comments={comments} />
+          <CommentSection
+            activityId={activityId}
+            currentUserId={currentUserId}
+            comments={comments}
+          />
         </>
       )}
 
@@ -127,7 +135,11 @@ export function FeedCard({
             <>
               {noteBlock}
               <ReactionBar {...reactionBarProps} />
-              <CommentSection activityId={activityId} currentUserId={currentUserId} comments={comments} />
+              <CommentSection
+                activityId={activityId}
+                currentUserId={currentUserId}
+                comments={comments}
+              />
             </>
           }
         />

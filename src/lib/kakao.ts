@@ -53,7 +53,9 @@ export async function sendKakaoMemo(
   const templateObject = {
     object_type: "text",
     text,
-    link: hasLink ? { web_url: `${baseUrl}${linkPath}`, mobile_web_url: `${baseUrl}${linkPath}` } : {},
+    link: hasLink
+      ? { web_url: `${baseUrl}${linkPath}`, mobile_web_url: `${baseUrl}${linkPath}` }
+      : {},
     // Kakao's default "text" template only renders a tappable button when
     // button_title is set — populating `link` alone isn't enough.
     ...(hasLink ? { button_title: "바로 확인" } : {}),

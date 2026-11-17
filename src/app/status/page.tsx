@@ -38,7 +38,11 @@ export default async function StatusPage() {
     viewer.activeSeason?.id ?? null,
   );
 
-  let currentSeasonMembers: { id: string; name: string; weeks: ReturnType<typeof emptyWeekStats> }[] = [];
+  let currentSeasonMembers: {
+    id: string;
+    name: string;
+    weeks: ReturnType<typeof emptyWeekStats>;
+  }[] = [];
   let currentWeekIndex = 0;
   let weekCount = 0;
   if (viewer.activeSeason) {
@@ -64,7 +68,11 @@ export default async function StatusPage() {
       );
       currentSeasonMembers = allMembers
         .filter((p) => participantIds.has(p.id))
-        .map((p) => ({ id: p.id, name: p.name, weeks: weeklyStats.get(p.id) ?? emptyWeekStats(weekCount) }));
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          weeks: weeklyStats.get(p.id) ?? emptyWeekStats(weekCount),
+        }));
       const effectiveDate = cappedTodayForSeason(season.end_date, todayInSeoul());
       currentWeekIndex = seasonWeekIndexForDate(season.start_date, effectiveDate) ?? 0;
     }

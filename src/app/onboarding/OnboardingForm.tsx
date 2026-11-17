@@ -63,9 +63,7 @@ export function OnboardingForm({
           autoFocus
           className="text-center"
         />
-        {error && (
-          <p className="text-sm text-danger">{error}</p>
-        )}
+        {error && <p className="text-sm text-danger">{error}</p>}
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "저장 중..." : "이 이름으로 시작하기"}
         </Button>
@@ -78,13 +76,9 @@ export function OnboardingForm({
       <p className="rounded-2xl border border-border bg-surface px-4 py-3 text-lg font-bold text-ink-strong">
         {currentName}
       </p>
-      <p className="text-base text-ink-secondary mt-4">
-        본인의 실명이 맞나요?
-      </p>
+      <p className="text-base text-ink-secondary mt-4">본인의 실명이 맞나요?</p>
 
-      {error && (
-        <p className="text-sm text-danger">{error}</p>
-      )}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <Button onClick={() => confirmName(currentName)} disabled={isSubmitting}>
         네, 맞아요

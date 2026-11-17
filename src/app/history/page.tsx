@@ -15,10 +15,7 @@ import { PageTitle } from "@/components/PageTitle";
 import { SectionTitle } from "@/components/SectionTitle";
 import { BackLink } from "@/components/BackLink";
 import { SeasonGate } from "@/components/SeasonGate";
-import {
-  ActivityStatusList,
-  type ActivityListItem,
-} from "@/components/ActivityStatusList";
+import { ActivityStatusList, type ActivityListItem } from "@/components/ActivityStatusList";
 
 export default async function HistoryPage({
   searchParams,
@@ -107,7 +104,11 @@ async function SeasonHistory({
         created_at: string;
         status: ActivityListItem["status"];
         rejected_reason: string | null;
-        activity_photos: { storage_path: string; thumbnail_storage_path: string | null; sort_order: number }[];
+        activity_photos: {
+          storage_path: string;
+          thumbnail_storage_path: string | null;
+          sort_order: number;
+        }[];
       }[]
     >();
 
@@ -122,15 +123,9 @@ async function SeasonHistory({
   );
   const canDeleteThisSeason = isWithinCertificationGrace(season.end_date);
   const weekCount = seasonWeekCount(season.start_date, season.end_date);
-  const weeks: ActivityListItem[][] = Array.from(
-    { length: weekCount },
-    () => [],
-  );
+  const weeks: ActivityListItem[][] = Array.from({ length: weekCount }, () => []);
   for (const activity of activities) {
-    const weekIndex = seasonWeekIndexForDate(
-      season.start_date,
-      activity.activity_date,
-    );
+    const weekIndex = seasonWeekIndexForDate(season.start_date, activity.activity_date);
     if (weekIndex !== null && weekIndex < weekCount) {
       weeks[weekIndex].push(activity);
     }
@@ -154,15 +149,12 @@ async function SeasonHistory({
         return (
           <section key={index}>
             <SectionTitle>
-              {index + 1}주차 ({formatKoreanDate(start)}~{formatKoreanDate(end)}
-              )
+              {index + 1}주차 ({formatKoreanDate(start)}~{formatKoreanDate(end)})
             </SectionTitle>
             <ActivityStatusList
               activities={weekActivities}
               emptyMessage={
-                isFutureWeek
-                  ? `${index + 1}주차도 화이팅!`
-                  : "이번 주에는 아직 인증 기록이 없어요."
+                isFutureWeek ? `${index + 1}주차도 화이팅!` : "이번 주에는 아직 인증 기록이 없어요."
               }
               canDelete={canDeleteThisSeason}
             />

@@ -93,7 +93,12 @@ export function ParticipantToggle({
 
   return (
     <>
-      <Button size="pill" variant="secondary" onClick={() => setIsCancelling(true)} disabled={isSubmitting}>
+      <Button
+        size="pill"
+        variant="secondary"
+        onClick={() => setIsCancelling(true)}
+        disabled={isSubmitting}
+      >
         참여 취소
       </Button>
 

@@ -17,12 +17,7 @@ import { Button } from "@/components/Button";
 
 type ExistingSeason = { id: string; start_date: string; end_date: string };
 
-function rangesOverlap(
-  aStart: string,
-  aEnd: string,
-  bStart: string,
-  bEnd: string,
-) {
+function rangesOverlap(aStart: string, aEnd: string, bStart: string, bEnd: string) {
   return aStart <= bEnd && bStart <= aEnd;
 }
 
@@ -168,11 +163,7 @@ export function SeasonForm({
       {error && <p className="text-sm text-danger">{error}</p>}
 
       <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting
-          ? "생성 중..."
-          : needsOverlapConfirm
-            ? "그래도 만들기"
-            : "시즌 만들기"}
+        {isSubmitting ? "생성 중..." : needsOverlapConfirm ? "그래도 만들기" : "시즌 만들기"}
       </Button>
     </form>
   );

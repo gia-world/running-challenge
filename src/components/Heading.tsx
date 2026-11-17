@@ -17,8 +17,6 @@ export function Heading({
 }) {
   const level = useHeadingLevel();
   const Tag = TAGS[Math.min(Math.max(level, 1), 6) - 1];
-  const finalClassName = srOnly
-    ? ["sr-only", className].filter(Boolean).join(" ")
-    : className;
+  const finalClassName = srOnly ? ["sr-only", className].filter(Boolean).join(" ") : className;
   return <Tag className={finalClassName}>{children}</Tag>;
 }

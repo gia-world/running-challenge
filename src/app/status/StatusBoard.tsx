@@ -44,8 +44,7 @@ function cellClassName(week: WeekStat, isCurrentWeek: boolean) {
   const ring = isCurrentWeek ? " ring-2 ring-primary-400 border-0" : "";
   if (week.isSuccess)
     return `${base} text-bold text-base! bg-surface text-success border-success${ring}`;
-  if (week.achieved > 0)
-    return `${base} bg-muted text-ink${ring}`;
+  if (week.achieved > 0) return `${base} bg-muted text-ink${ring}`;
   return `${base} bg-muted text-ink-disabled${ring}`;
 }
 
@@ -98,7 +97,8 @@ export function StatusBoard({
       badges: earnedBadges(member.completedCount, member.hasParticipated),
     }))
     .sort((a, b) => {
-      if (badgeSortKey === "count") return b.badges.length - a.badges.length || a.name.localeCompare(b.name);
+      if (badgeSortKey === "count")
+        return b.badges.length - a.badges.length || a.name.localeCompare(b.name);
       return a.name.localeCompare(b.name);
     });
 
@@ -113,9 +113,7 @@ export function StatusBoard({
 
     const { data: activities } = await supabase
       .from("activities")
-      .select(
-        "id, activity_date, distance_km, activity_photos(storage_path, sort_order)",
-      )
+      .select("id, activity_date, distance_km, activity_photos(storage_path, sort_order)")
       .eq("user_id", member.id)
       .eq("season_id", seasonId)
       .eq("status", "approved")
@@ -149,8 +147,18 @@ export function StatusBoard({
     <div className="flex flex-col gap-4">
       <SegmentedTabs
         items={[
-          { key: "season", label: "이번 시즌", isActive: view === "season", onClick: () => setView("season") },
-          { key: "history", label: "전체 기록", isActive: view === "history", onClick: () => setView("history") },
+          {
+            key: "season",
+            label: "이번 시즌",
+            isActive: view === "season",
+            onClick: () => setView("season"),
+          },
+          {
+            key: "history",
+            label: "전체 기록",
+            isActive: view === "history",
+            onClick: () => setView("history"),
+          },
         ]}
       >
         {view === "season" ? (
@@ -167,22 +175,14 @@ export function StatusBoard({
                 <button
                   type="button"
                   onClick={() => setSortKey("name")}
-                  className={
-                    sortKey === "name"
-                      ? "font-bold text-primary"
-                      : "text-ink-tertiary"
-                  }
+                  className={sortKey === "name" ? "font-bold text-primary" : "text-ink-tertiary"}
                 >
                   이름순
                 </button>
                 <button
                   type="button"
                   onClick={() => setSortKey("total")}
-                  className={
-                    sortKey === "total"
-                      ? "font-bold text-primary"
-                      : "text-ink-tertiary"
-                  }
+                  className={sortKey === "total" ? "font-bold text-primary" : "text-ink-tertiary"}
                 >
                   성공횟수순
                 </button>
@@ -227,10 +227,7 @@ export function StatusBoard({
                               type="button"
                               onClick={() => openCell(member, weekIndex)}
                               disabled={week.achieved === 0}
-                              className={cellClassName(
-                                week,
-                                weekIndex === currentWeekIndex,
-                              )}
+                              className={cellClassName(week, weekIndex === currentWeekIndex)}
                               title={`${weekIndex + 1}주차 ${week.achieved}회`}
                             >
                               {week.achieved > 0 ? week.achieved : ""}
@@ -295,16 +292,11 @@ export function StatusBoard({
                           : "flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3"
                       }
                     >
-                      <span className="font-semibold text-ink-strong">
-                        {member.name}
-                      </span>
+                      <span className="font-semibold text-ink-strong">{member.name}</span>
                       {badges.length > 0 ? (
                         <span className="flex flex-wrap items-center justify-end gap-1 text-xl">
                           {badges.map((badge, index) => (
-                            <span
-                              key={`${badge.emoji}-${index}`}
-                              title={badge.label}
-                            >
+                            <span key={`${badge.emoji}-${index}`} title={badge.label}>
                               {badge.emoji}
                             </span>
                           ))}
@@ -333,15 +325,12 @@ export function StatusBoard({
                             {formatKoreanDate(season.end_date)}
                           </span>
                           <span className="text-sm text-ink-tertiary">
-                            참가 {season.participantCount}명 · 완주{" "}
-                            {season.completedCount}명
+                            참가 {season.participantCount}명 · 완주 {season.completedCount}명
                           </span>
                         </div>
                         <span className="shrink-0 text-sm font-medium">
                           {!season.viewerParticipated ? (
-                            <span className="text-ink-disabled">
-                              미참여
-                            </span>
+                            <span className="text-ink-disabled">미참여</span>
                           ) : season.viewerCompleted ? (
                             <span className="text-success">완주</span>
                           ) : (
@@ -389,25 +378,18 @@ export function StatusBoard({
               {modal.name} · {modal.weekIndex + 1}주차
             </p>
             {isLoadingPhotos ? (
-              <p className="mt-4 py-8 text-center text-base text-ink-tertiary">
-                불러오는 중...
-              </p>
+              <p className="mt-4 py-8 text-center text-base text-ink-tertiary">불러오는 중...</p>
             ) : modal.activities.length === 0 ? (
-              <p className="mt-4 py-8 text-center text-base text-ink-tertiary">
-                사진이 없어요.
-              </p>
+              <p className="mt-4 py-8 text-center text-base text-ink-tertiary">사진이 없어요.</p>
             ) : (
               <div className="mt-3 flex max-h-[70vh] flex-col gap-4 overflow-y-auto">
                 {modal.activities.map((activity) => (
                   <div key={activity.id} className="flex flex-col gap-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-semibold text-primary">
-                        {activity.ordinal}회째 ·{" "}
-                        {formatKoreanDate(activity.activityDate)}
+                        {activity.ordinal}회째 · {formatKoreanDate(activity.activityDate)}
                       </span>
-                      <span className="text-ink-tertiary">
-                        {activity.distanceKm.toFixed(2)}km
-                      </span>
+                      <span className="text-ink-tertiary">{activity.distanceKm.toFixed(2)}km</span>
                     </div>
                     <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto">
                       {activity.photoUrls.map((url) => (
@@ -441,12 +423,8 @@ export function StatusBoard({
                 <li key={badge.emoji} className="flex items-center gap-3">
                   <span className="text-2xl">{badge.emoji}</span>
                   <div className="flex flex-col">
-                    <span className="font-semibold text-ink-strong">
-                      {badge.label}
-                    </span>
-                    <span className="text-sm text-ink-secondary">
-                      {badge.criteria}
-                    </span>
+                    <span className="font-semibold text-ink-strong">{badge.label}</span>
+                    <span className="text-sm text-ink-secondary">{badge.criteria}</span>
                   </div>
                 </li>
               ))}

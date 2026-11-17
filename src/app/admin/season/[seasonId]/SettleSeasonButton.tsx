@@ -26,7 +26,8 @@ export function SettleSeasonButton({
   const warnings = [
     hasPendingReviewRequests && "재인증 요청 신청/처리가 모두 막혀요.",
     hasPendingDropoutRequests && "대기 중인 중도하차 요청은 더 이상 처리할 수 없게 돼요.",
-    isInGracePeriod && "그레이스 기간(오늘 정오까지)이 끝나기 전이라 정산 금액이 아직 바뀔 수 있어요.",
+    isInGracePeriod &&
+      "그레이스 기간(오늘 정오까지)이 끝나기 전이라 정산 금액이 아직 바뀔 수 있어요.",
   ].filter((w): w is string => !!w);
 
   async function settle() {
@@ -69,15 +70,9 @@ export function SettleSeasonButton({
           <span>그래도 계속할까요?</span>
         </div>
       )}
-      {error && (
-        <p className="text-sm text-danger">{error}</p>
-      )}
+      {error && <p className="text-sm text-danger">{error}</p>}
       <Button variant="inverse" size="auto" onClick={handleClick} disabled={isSubmitting}>
-        {isSubmitting
-          ? "처리 중..."
-          : needsConfirm
-            ? "그래도 정산완료"
-            : "정산완료"}
+        {isSubmitting ? "처리 중..." : needsConfirm ? "그래도 정산완료" : "정산완료"}
       </Button>
     </div>
   );

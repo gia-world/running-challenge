@@ -10,13 +10,7 @@ function randomInviteCode(): string {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 8);
 }
 
-export function InviteCodeCard({
-  teamId,
-  initialCode,
-}: {
-  teamId: string;
-  initialCode: string;
-}) {
+export function InviteCodeCard({ teamId, initialCode }: { teamId: string; initialCode: string }) {
   const router = useRouter();
   const [code, setCode] = useState(initialCode);
   const [isRegenerating, setIsRegenerating] = useState(false);

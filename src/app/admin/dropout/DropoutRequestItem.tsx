@@ -108,7 +108,13 @@ export function DropoutRequestItem({
         />
         {error && <p className="text-sm text-danger">{error}</p>}
         <div className="flex gap-2">
-          <Button variant="danger" size="auto" className="flex-1" onClick={reject} disabled={isSubmitting}>
+          <Button
+            variant="danger"
+            size="auto"
+            className="flex-1"
+            onClick={reject}
+            disabled={isSubmitting}
+          >
             반려 확정
           </Button>
           <Button

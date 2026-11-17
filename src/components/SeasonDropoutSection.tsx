@@ -111,9 +111,7 @@ export function SeasonDropoutSection({
             ? `정산액 ${formatWon(Number(request.settlement_amount))}`
             : "정산 금액은 관리자에게 확인해주세요."}
         </p>
-        {request.admin_note && (
-          <p className="text-sm text-ink-tertiary">{request.admin_note}</p>
-        )}
+        {request.admin_note && <p className="text-sm text-ink-tertiary">{request.admin_note}</p>}
       </div>
     );
   }

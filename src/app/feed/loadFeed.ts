@@ -14,7 +14,11 @@ type FeedRow = {
   note: string | null;
   created_at: string;
   profiles: { name: string } | null;
-  activity_photos: { storage_path: string; thumbnail_storage_path: string | null; sort_order: number }[];
+  activity_photos: {
+    storage_path: string;
+    thumbnail_storage_path: string | null;
+    sort_order: number;
+  }[];
 };
 
 type CommentRow = {
@@ -91,60 +95,64 @@ export async function loadFeed({
   const seasonIds = Array.from(new Set(rows.map((row) => row.season_id)));
   const activityIds = rows.map((row) => row.id);
 
-  const [{ data: seasons }, { data: allApproved }, { data: reactions }, { data: reviewRequests }, { data: comments }] =
-    await Promise.all([
-      seasonIds.length > 0
-        ? supabase
-            .from("seasons")
-            .select("id, start_date, end_date, settled_at")
-            .in("id", seasonIds)
-        : Promise.resolve({
-            data: [] as {
-              id: string;
-              start_date: string;
-              end_date: string;
-              settled_at: string | null;
-            }[],
-          }),
-      seasonIds.length > 0
-        ? supabase
-            .from("activities")
-            .select("user_id, season_id, activity_date")
-            .eq("status", "approved")
-            .in("season_id", seasonIds)
-        : Promise.resolve({
-            data: [] as {
-              user_id: string;
-              season_id: string;
-              activity_date: string;
-            }[],
-          }),
-      activityIds.length > 0
-        ? supabase
-            .from("activity_reactions")
-            .select("activity_id, user_id, emoji")
-            .in("activity_id", activityIds)
-        : Promise.resolve({
-            data: [] as { activity_id: string; user_id: string; emoji: string }[],
-          }),
-      activityIds.length > 0
-        ? supabase
-            .from("activity_review_requests")
-            .select("activity_id, requested_by")
-            .eq("status", "pending")
-            .in("activity_id", activityIds)
-        : Promise.resolve({
-            data: [] as { activity_id: string; requested_by: string }[],
-          }),
-      activityIds.length > 0
-        ? supabase
-            .from("activity_comments")
-            .select("id, activity_id, user_id, parent_comment_id, body, created_at, profiles!user_id(name)")
-            .in("activity_id", activityIds)
-            .order("created_at", { ascending: true })
-            .returns<CommentRow[]>()
-        : Promise.resolve({ data: [] as CommentRow[] }),
-    ]);
+  const [
+    { data: seasons },
+    { data: allApproved },
+    { data: reactions },
+    { data: reviewRequests },
+    { data: comments },
+  ] = await Promise.all([
+    seasonIds.length > 0
+      ? supabase.from("seasons").select("id, start_date, end_date, settled_at").in("id", seasonIds)
+      : Promise.resolve({
+          data: [] as {
+            id: string;
+            start_date: string;
+            end_date: string;
+            settled_at: string | null;
+          }[],
+        }),
+    seasonIds.length > 0
+      ? supabase
+          .from("activities")
+          .select("user_id, season_id, activity_date")
+          .eq("status", "approved")
+          .in("season_id", seasonIds)
+      : Promise.resolve({
+          data: [] as {
+            user_id: string;
+            season_id: string;
+            activity_date: string;
+          }[],
+        }),
+    activityIds.length > 0
+      ? supabase
+          .from("activity_reactions")
+          .select("activity_id, user_id, emoji")
+          .in("activity_id", activityIds)
+      : Promise.resolve({
+          data: [] as { activity_id: string; user_id: string; emoji: string }[],
+        }),
+    activityIds.length > 0
+      ? supabase
+          .from("activity_review_requests")
+          .select("activity_id, requested_by")
+          .eq("status", "pending")
+          .in("activity_id", activityIds)
+      : Promise.resolve({
+          data: [] as { activity_id: string; requested_by: string }[],
+        }),
+    activityIds.length > 0
+      ? supabase
+          .from("activity_comments")
+          .select(
+            "id, activity_id, user_id, parent_comment_id, body, created_at, profiles!user_id(name)",
+          )
+          .in("activity_id", activityIds)
+          .order("created_at", { ascending: true })
+          .returns<CommentRow[]>()
+      : Promise.resolve({ data: [] as CommentRow[] }),
+  ]);
 
   const seasonStartDates = new Map((seasons ?? []).map((s) => [s.id, s.start_date]));
   const seasonEndDates = new Map((seasons ?? []).map((s) => [s.id, s.end_date]));
@@ -157,7 +165,10 @@ export async function loadFeed({
     datesByUserSeason.set(key, dates);
   }
 
-  const reactionsByActivity = new Map<string, Map<string, { count: number; reactedByMe: boolean }>>();
+  const reactionsByActivity = new Map<
+    string,
+    Map<string, { count: number; reactedByMe: boolean }>
+  >();
   for (const reaction of reactions ?? []) {
     const emojiMap = reactionsByActivity.get(reaction.activity_id) ?? new Map();
     const entry = emojiMap.get(reaction.emoji) ?? { count: 0, reactedByMe: false };
@@ -213,24 +224,25 @@ export async function loadFeed({
         photoStoragePaths: row.activity_photos.flatMap((p) =>
           p.thumbnail_storage_path ? [p.storage_path, p.thumbnail_storage_path] : [p.storage_path],
         ),
-        reactions: Array.from(
-          reactionsByActivity.get(row.id) ?? new Map(),
-          ([emoji, state]) => ({ emoji, ...state }),
-        ),
+        reactions: Array.from(reactionsByActivity.get(row.id) ?? new Map(), ([emoji, state]) => ({
+          emoji,
+          ...state,
+        })),
         requestedByMe: requestedByMe.has(row.id),
         comments: commentsByActivity.get(row.id) ?? [],
         note: row.note,
         profileName: row.profiles?.name ?? null,
         activityDate: row.activity_date,
-        occurrenceLabel: occurrence ? `${occurrence.weekIndex + 1}주차 ${occurrence.ordinal}회` : null,
+        occurrenceLabel: occurrence
+          ? `${occurrence.weekIndex + 1}주차 ${occurrence.ordinal}회`
+          : null,
         distanceKm: Number(row.distance_km),
         createdAt: row.created_at,
       };
     }),
   );
 
-  const nextCursor =
-    rows.length === FEED_PAGE_SIZE ? rows[rows.length - 1].created_at : null;
+  const nextCursor = rows.length === FEED_PAGE_SIZE ? rows[rows.length - 1].created_at : null;
 
   return { items, nextCursor };
 }

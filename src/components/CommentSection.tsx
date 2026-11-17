@@ -73,16 +73,12 @@ export function CommentSection({
       {topLevel.map((comment) => (
         <div key={comment.id} className="flex flex-col gap-1">
           <p>
-            <span className="font-semibold text-ink-strong">
-              {comment.profileName ?? "러너"}
-            </span>{" "}
+            <span className="font-semibold text-ink-strong">{comment.profileName ?? "러너"}</span>{" "}
             <span className="text-ink">{comment.body}</span>
           </p>
           <button
             type="button"
-            onClick={() =>
-              setReplyingToId((id) => (id === comment.id ? null : comment.id))
-            }
+            onClick={() => setReplyingToId((id) => (id === comment.id ? null : comment.id))}
             className="self-start text-ink-tertiary hover:text-ink"
           >
             답글
@@ -90,9 +86,7 @@ export function CommentSection({
 
           {(repliesByParent.get(comment.id) ?? []).map((reply) => (
             <p key={reply.id} className="pl-4">
-              <span className="font-semibold text-ink-strong">
-                {reply.profileName ?? "러너"}
-              </span>{" "}
+              <span className="font-semibold text-ink-strong">{reply.profileName ?? "러너"}</span>{" "}
               <span className="text-ink">{reply.body}</span>
             </p>
           ))}

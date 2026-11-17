@@ -45,7 +45,9 @@ export function deriveRefundPerCertification(entryFee: number, weekCount: number
 }
 
 export function deriveEntryFee(refundPerCertification: number, weekCount: number): number {
-  return Math.round((refundPerCertification * maxRefundableCertifications(weekCount)) / 1000) * 1000;
+  return (
+    Math.round((refundPerCertification * maxRefundableCertifications(weekCount)) / 1000) * 1000
+  );
 }
 
 /**
@@ -54,10 +56,7 @@ export function deriveEntryFee(refundPerCertification: number, weekCount: number
  * summing over every participant (not just non-completers) gives the same
  * total and avoids filtering twice.
  */
-export function computePrizeShare(
-  settlements: ParticipantSettlement[],
-  entryFee: number,
-): number {
+export function computePrizeShare(settlements: ParticipantSettlement[], entryFee: number): number {
   const completedCount = settlements.filter((s) => s.isCompleted).length;
   if (completedCount === 0) return 0;
 
@@ -108,7 +107,10 @@ export function computeSeasonSettlements(
         isCompleted: false,
       });
     } else if (hasFees && p.isParticipant) {
-      byUserId.set(p.userId, computeParticipantSettlement(p.weeks, entryFee, refundPerCertification));
+      byUserId.set(
+        p.userId,
+        computeParticipantSettlement(p.weeks, entryFee, refundPerCertification),
+      );
     }
   }
 

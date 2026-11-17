@@ -67,10 +67,7 @@ export function cappedTodayForSeason(seasonEndDate: string, today: string): stri
  * admin extends past 4 weeks. Callers that need to bound by a season's own
  * actual length should compare against seasonWeekCount themselves.
  */
-export function seasonWeekIndexForDate(
-  seasonStartDate: string,
-  dateISO: string,
-): number | null {
+export function seasonWeekIndexForDate(seasonStartDate: string, dateISO: string): number | null {
   const start = parseISODate(seasonStartDate);
   const date = parseISODate(dateISO);
   const diffDays = Math.round((date.getTime() - start.getTime()) / 86_400_000);

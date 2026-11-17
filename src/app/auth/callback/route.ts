@@ -34,7 +34,10 @@ export async function GET(request: Request) {
             .from("kakao_tokens")
             .upsert({ user_id: data.session.user.id, refresh_token: refreshToken });
           if (tokenError) {
-            console.error("[auth/callback] failed to store kakao refresh token:", tokenError.message);
+            console.error(
+              "[auth/callback] failed to store kakao refresh token:",
+              tokenError.message,
+            );
           }
         }
       } else if (data.session) {

@@ -20,8 +20,6 @@ export function SectionTitle({
   children: ReactNode;
 }) {
   const base =
-    size === "lg"
-      ? "text-lg font-bold text-ink-strong"
-      : "text-base font-semibold text-ink";
+    size === "lg" ? "text-lg font-bold text-ink-strong" : "text-base font-semibold text-ink";
   return <Heading className={className ? `${base} ${className}` : base}>{children}</Heading>;
 }

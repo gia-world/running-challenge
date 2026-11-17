@@ -6,18 +6,7 @@ import { Button } from "@/components/Button";
 
 const UNIQUE_VIOLATION = "23505";
 
-const REACTION_EMOJIS = [
-  "❤️",
-  "👍",
-  "🔥",
-  "💪",
-  "🎉",
-  "👏",
-  "🎶",
-  "😢",
-  "🤣",
-  "🫢",
-] as const;
+const REACTION_EMOJIS = ["❤️", "👍", "🔥", "💪", "🎉", "👏", "🎶", "😢", "🤣", "🫢"] as const;
 
 export type ReactionState = { count: number; reactedByMe: boolean };
 

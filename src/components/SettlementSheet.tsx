@@ -98,7 +98,13 @@ export function SettlementSheet({
           >
             {confirmLabel}
           </Button>
-          <Button variant="secondary" size="auto" className="flex-1" onClick={onClose} disabled={isSubmitting}>
+          <Button
+            variant="secondary"
+            size="auto"
+            className="flex-1"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
             닫기
           </Button>
         </div>

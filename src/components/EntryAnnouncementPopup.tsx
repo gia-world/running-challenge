@@ -67,7 +67,11 @@ export function EntryAnnouncementPopup() {
           .select("last_seen_announcement_at, auto_renew_preference")
           .eq("id", user.id)
           .maybeSingle(),
-        supabase.from("team_memberships").select("team_id, role").eq("user_id", user.id).maybeSingle(),
+        supabase
+          .from("team_memberships")
+          .select("team_id, role")
+          .eq("user_id", user.id)
+          .maybeSingle(),
       ]);
       if (cancelled || !membership) return;
 
@@ -89,44 +93,44 @@ export function EntryAnnouncementPopup() {
         pendingReviews,
         pendingSettlements,
       ] = await Promise.all([
-          announcementsQuery,
-          supabase
-            .from("notifications")
-            .select("id, activities(rejected_reason)")
-            .eq("user_id", user.id)
-            .eq("type", "activity_rejected")
-            .is("read_at", null)
-            .returns<{ id: string; activities: { rejected_reason: string | null } | null }[]>(),
-          supabase
-            .from("season_memberships")
-            .select("season_id, seasons(start_date, end_date, settled_at)")
-            .eq("user_id", user.id)
-            .is("renew_next_season", null)
-            .returns<
-              {
-                season_id: string;
-                seasons: { start_date: string; end_date: string; settled_at: string | null } | null;
-              }[]
-            >(),
-          // team_id 필터가 없는 건 실수가 아니다 — "team members can view
-          // review requests in their team" RLS가 이미 본인 팀으로만
-          // 걸러준다(admin/review 페이지와 동일한 패턴).
-          isAdmin
-            ? supabase
-                .from("activity_review_requests")
-                .select("id, profiles!requested_by(name)")
-                .eq("status", "pending")
-                .returns<{ id: string; profiles: { name: string } | null }[]>()
-            : Promise.resolve({ data: [] as { id: string; profiles: { name: string } | null }[] }),
-          isAdmin
-            ? supabase
-                .from("seasons")
-                .select("id")
-                .eq("team_id", membership.team_id)
-                .not("settlement_notified_at", "is", null)
-                .is("settled_at", null)
-            : Promise.resolve({ data: [] as { id: string }[] }),
-        ]);
+        announcementsQuery,
+        supabase
+          .from("notifications")
+          .select("id, activities(rejected_reason)")
+          .eq("user_id", user.id)
+          .eq("type", "activity_rejected")
+          .is("read_at", null)
+          .returns<{ id: string; activities: { rejected_reason: string | null } | null }[]>(),
+        supabase
+          .from("season_memberships")
+          .select("season_id, seasons(start_date, end_date, settled_at)")
+          .eq("user_id", user.id)
+          .is("renew_next_season", null)
+          .returns<
+            {
+              season_id: string;
+              seasons: { start_date: string; end_date: string; settled_at: string | null } | null;
+            }[]
+          >(),
+        // team_id 필터가 없는 건 실수가 아니다 — "team members can view
+        // review requests in their team" RLS가 이미 본인 팀으로만
+        // 걸러준다(admin/review 페이지와 동일한 패턴).
+        isAdmin
+          ? supabase
+              .from("activity_review_requests")
+              .select("id, profiles!requested_by(name)")
+              .eq("status", "pending")
+              .returns<{ id: string; profiles: { name: string } | null }[]>()
+          : Promise.resolve({ data: [] as { id: string; profiles: { name: string } | null }[] }),
+        isAdmin
+          ? supabase
+              .from("seasons")
+              .select("id")
+              .eq("team_id", membership.team_id)
+              .not("settlement_notified_at", "is", null)
+              .is("settled_at", null)
+          : Promise.resolve({ data: [] as { id: string }[] }),
+      ]);
 
       // 시즌이 아직 안 끝났고(settled_at is null) 마지막 주에 들어섰을
       // 때만 "조치가 필요"하다 — 시즌 중간에 답을 안 한 건 급할 게 없다.

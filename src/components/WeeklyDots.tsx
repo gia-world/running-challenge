@@ -1,10 +1,4 @@
-export function WeeklyDots({
-  achieved,
-  goal,
-}: {
-  achieved: number;
-  goal: number;
-}) {
+export function WeeklyDots({ achieved, goal }: { achieved: number; goal: number }) {
   const filled = Math.min(achieved, goal);
 
   return (

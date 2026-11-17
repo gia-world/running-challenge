@@ -8,7 +8,13 @@ import { MarkNotificationsRead } from "@/components/MarkNotificationsRead";
 
 type NotificationRow = {
   id: string;
-  type: "comment" | "reply" | "reaction" | "review_request" | "activity_rejected" | "settlement_pending";
+  type:
+    | "comment"
+    | "reply"
+    | "reaction"
+    | "review_request"
+    | "activity_rejected"
+    | "settlement_pending";
   emoji: string | null;
   created_at: string;
   read_at: string | null;
@@ -37,7 +43,9 @@ export default async function NotificationsPage() {
 
   const { data: notifications, error } = await supabase
     .from("notifications")
-    .select("id, type, emoji, created_at, read_at, profiles!actor_user_id(name), activities(rejected_reason)")
+    .select(
+      "id, type, emoji, created_at, read_at, profiles!actor_user_id(name), activities(rejected_reason)",
+    )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(50)
@@ -63,9 +71,7 @@ export default async function NotificationsPage() {
       <MarkNotificationsRead userId={user.id} />
 
       {items.length === 0 ? (
-        <p className="mt-10 text-center text-base text-ink-tertiary">
-          아직 알림이 없어요.
-        </p>
+        <p className="mt-10 text-center text-base text-ink-tertiary">아직 알림이 없어요.</p>
       ) : (
         <ul className="flex flex-col gap-2">
           {items.map((n) => (
@@ -78,7 +84,9 @@ export default async function NotificationsPage() {
               }
             >
               <p className="text-base text-ink">{describeNotification(n)}</p>
-              <p className="mt-0.5 text-sm text-ink-tertiary">{formatKoreanDate(n.created_at.slice(0, 10))}</p>
+              <p className="mt-0.5 text-sm text-ink-tertiary">
+                {formatKoreanDate(n.created_at.slice(0, 10))}
+              </p>
             </li>
           ))}
         </ul>

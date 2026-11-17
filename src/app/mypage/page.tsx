@@ -29,10 +29,7 @@ export default async function MyPage() {
   // 노출 — 고정된 주차 번호가 아니라 종료일 기준으로 계산해야, 시즌 기간을
   // 4주가 아닌 다른 길이로 조정해도 정확한 마지막 주에 뜸.
   const lastWeekIndex = viewer.activeSeason
-    ? seasonWeekIndexForDate(
-        viewer.activeSeason.start_date,
-        viewer.activeSeason.end_date,
-      )
+    ? seasonWeekIndexForDate(viewer.activeSeason.start_date, viewer.activeSeason.end_date)
     : null;
   const lastWeekStart =
     viewer.activeSeason && lastWeekIndex !== null
@@ -87,9 +84,8 @@ export default async function MyPage() {
       <div className="flex flex-col gap-2">
         <SectionTitle size="lg">계속 참여</SectionTitle>
         <p className="text-sm text-ink-secondary">
-          켜두면 시즌이 끝날 때마다 따로 묻지 않고 다음 시즌도 자동으로
-          참여해요. 끄기 전까지 계속 적용되고, 끄면 다시 시즌마다 직접
-          선택할 수 있어요.
+          켜두면 시즌이 끝날 때마다 따로 묻지 않고 다음 시즌도 자동으로 참여해요. 끄기 전까지 계속
+          적용되고, 끄면 다시 시즌마다 직접 선택할 수 있어요.
         </p>
         <AutoRenewPreferenceToggle
           userId={user.id}

@@ -70,14 +70,16 @@ export function RenewalToggle({
   return (
     <div className="flex flex-col gap-3">
       <p className="text-base text-ink-secondary">
-        다음 시즌도 계속하시나요? 연장하면 이번 시즌 환급액은 다음 시즌
-        참가비로 자동 이월돼요.
+        다음 시즌도 계속하시나요? 연장하면 이번 시즌 환급액은 다음 시즌 참가비로 자동 이월돼요.
       </p>
-      {error && (
-        <p className="text-sm text-danger">{error}</p>
-      )}
+      {error && <p className="text-sm text-danger">{error}</p>}
       <div className="flex gap-2">
-        <Button size="auto" className="flex-1" onClick={() => setRenewal(true)} disabled={isSubmitting}>
+        <Button
+          size="auto"
+          className="flex-1"
+          onClick={() => setRenewal(true)}
+          disabled={isSubmitting}
+        >
           연장할게요
         </Button>
         <Button

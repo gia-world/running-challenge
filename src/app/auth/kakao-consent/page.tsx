@@ -55,7 +55,13 @@ function KakaoConsentRedirect() {
 
 export default function KakaoConsentPage() {
   return (
-    <Suspense fallback={<div className="flex flex-1 items-center justify-center"><LoadingSpinner /></div>}>
+    <Suspense
+      fallback={
+        <div className="flex flex-1 items-center justify-center">
+          <LoadingSpinner />
+        </div>
+      }
+    >
       <KakaoConsentRedirect />
     </Suspense>
   );

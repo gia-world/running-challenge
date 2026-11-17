@@ -32,10 +32,7 @@ export const BADGE_CATALOG: Badge[] = [
  * moment a medal (or anything above it) exists, it's served its purpose
  * and drops off rather than sticking around forever.
  */
-export function earnedBadges(
-  completedSeasonCount: number,
-  hasParticipated: boolean,
-): Badge[] {
+export function earnedBadges(completedSeasonCount: number, hasParticipated: boolean): Badge[] {
   const earned: Badge[] = [];
   if (hasParticipated && completedSeasonCount === 0) earned.push(BADGE_CATALOG[0]);
 

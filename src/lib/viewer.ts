@@ -49,7 +49,11 @@ export const loadViewerContext = cache(async (userId: string): Promise<ViewerCon
     .maybeSingle<{
       team_id: string;
       role: UserRole;
-      teams: { name: string; settlement_bank_name: string | null; settlement_account_number: string | null } | null;
+      teams: {
+        name: string;
+        settlement_bank_name: string | null;
+        settlement_account_number: string | null;
+      } | null;
     }>();
 
   if (!membership) {

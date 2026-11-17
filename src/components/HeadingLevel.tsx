@@ -17,16 +17,8 @@ export function useHeadingLevel(): number {
  * a <SectionTitle> automatically land on h4 or h5 depending on whether a
  * tab wraps it, with no page having to say which.
  */
-export function HeadingLevelBoundary({
-  level,
-  children,
-}: {
-  level?: number;
-  children: ReactNode;
-}) {
+export function HeadingLevelBoundary({ level, children }: { level?: number; children: ReactNode }) {
   const ambient = useHeadingLevel();
   const next = level ?? Math.min(ambient + 1, 6);
-  return (
-    <HeadingLevelContext.Provider value={next}>{children}</HeadingLevelContext.Provider>
-  );
+  return <HeadingLevelContext.Provider value={next}>{children}</HeadingLevelContext.Provider>;
 }

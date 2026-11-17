@@ -1,16 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import {
-  WEEKLY_GOAL,
-  todayInSeoul,
-  isBeforeNoonInSeoul,
-  yesterdayInSeoul,
-} from "@/lib/week";
-import {
-  seasonWeekIndexForDate,
-  seasonWeekCount,
-  cappedTodayForSeason,
-} from "@/lib/season";
+import { WEEKLY_GOAL, todayInSeoul, isBeforeNoonInSeoul, yesterdayInSeoul } from "@/lib/week";
+import { seasonWeekIndexForDate, seasonWeekCount, cappedTodayForSeason } from "@/lib/season";
 import { requireTeamViewer } from "@/lib/viewer";
 import { WeeklyDots } from "@/components/WeeklyDots";
 import { PageShell } from "@/components/PageShell";
@@ -31,8 +22,7 @@ export default async function HomePage() {
 
   const displayName = profile?.name ?? "러너";
   const needsBankInfo =
-    viewer.isSeasonMember &&
-    (!profile?.bank_name || !profile?.bank_account_number);
+    viewer.isSeasonMember && (!profile?.bank_name || !profile?.bank_account_number);
 
   return (
     <PageShell
@@ -52,9 +42,7 @@ export default async function HomePage() {
       )}
 
       <SeasonGate viewer={viewer}>
-        {viewer.activeSeason && (
-          <SeasonProgress userId={user.id} season={viewer.activeSeason} />
-        )}
+        {viewer.activeSeason && <SeasonProgress userId={user.id} season={viewer.activeSeason} />}
       </SeasonGate>
 
       {viewer.activeSeason && (
@@ -81,10 +69,8 @@ async function SeasonProgress({
   const supabase = await createClient();
   const today = todayInSeoul();
   const effectiveDate = cappedTodayForSeason(season.end_date, today);
-  const currentWeekIndex =
-    seasonWeekIndexForDate(season.start_date, effectiveDate) ?? 0;
-  const isInGracePeriod =
-    season.end_date === yesterdayInSeoul() && isBeforeNoonInSeoul();
+  const currentWeekIndex = seasonWeekIndexForDate(season.start_date, effectiveDate) ?? 0;
+  const isInGracePeriod = season.end_date === yesterdayInSeoul() && isBeforeNoonInSeoul();
 
   const { data: seasonMembership } = await supabase
     .from("season_memberships")
@@ -103,23 +89,15 @@ async function SeasonProgress({
     .returns<{ activity_date: string }[]>();
 
   const weekCount = seasonWeekCount(season.start_date, season.end_date);
-  const datesByWeek: Set<string>[] = Array.from(
-    { length: weekCount },
-    () => new Set(),
-  );
+  const datesByWeek: Set<string>[] = Array.from({ length: weekCount }, () => new Set());
   for (const activity of approvedActivities ?? []) {
-    const weekIndex = seasonWeekIndexForDate(
-      season.start_date,
-      activity.activity_date,
-    );
+    const weekIndex = seasonWeekIndexForDate(season.start_date, activity.activity_date);
     if (weekIndex !== null && weekIndex < weekCount) {
       datesByWeek[weekIndex].add(activity.activity_date);
     }
   }
 
-  const successfulWeeks = datesByWeek.filter(
-    (dates) => dates.size >= WEEKLY_GOAL,
-  ).length;
+  const successfulWeeks = datesByWeek.filter((dates) => dates.size >= WEEKLY_GOAL).length;
   const achieved = datesByWeek[currentWeekIndex]?.size ?? 0;
   const remaining = Math.max(WEEKLY_GOAL - achieved, 0);
 
@@ -127,8 +105,7 @@ async function SeasonProgress({
     <>
       {isInGracePeriod && (
         <p className="rounded-lg bg-warning-subtle px-3 py-2 text-base text-warning">
-          ⏰ 시즌이 끝났어요 — 오늘 정오까지 인증하면 이번 시즌 기록으로
-          인정돼요.
+          ⏰ 시즌이 끝났어요 — 오늘 정오까지 인증하면 이번 시즌 기록으로 인정돼요.
         </p>
       )}
 
@@ -152,10 +129,7 @@ async function SeasonProgress({
         </p>
         {renewNextSeason !== null && (
           <p className="mt-1 text-sm text-ink-tertiary">
-            다음 시즌:{" "}
-            {renewNextSeason
-              ? "연장 예정 (참가비 자동 이월)"
-              : "이번 시즌으로 마무리"}
+            다음 시즌: {renewNextSeason ? "연장 예정 (참가비 자동 이월)" : "이번 시즌으로 마무리"}
           </p>
         )}
       </section>

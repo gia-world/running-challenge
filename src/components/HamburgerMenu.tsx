@@ -8,12 +8,9 @@ import { createClient } from "@/lib/supabase/client";
 // TODO: 실제 카톡 수다방 링크로 교체.
 const CHAT_URL = "#";
 
-const ROW_CLASS =
-  "rounded-xl px-3 py-2.5 text-left text-base font-medium hover:bg-muted";
-const SUB_ROW_CLASS =
-  "rounded-xl py-2.5 pl-6 pr-3 text-left text-base font-medium hover:bg-muted";
-const GROUP_LABEL_CLASS =
-  "px-3 pt-3 pb-1 text-sm font-semibold text-ink-tertiary";
+const ROW_CLASS = "rounded-xl px-3 py-2.5 text-left text-base font-medium hover:bg-muted";
+const SUB_ROW_CLASS = "rounded-xl py-2.5 pl-6 pr-3 text-left text-base font-medium hover:bg-muted";
+const GROUP_LABEL_CLASS = "px-3 pt-3 pb-1 text-sm font-semibold text-ink-tertiary";
 
 const ADMIN_ITEMS = [
   { href: "/admin/review", label: "재인증 요청함" },
@@ -79,9 +76,7 @@ export function HamburgerMenu({ isAdmin = false }: { isAdmin?: boolean }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-base font-semibold text-ink-strong">
-                메뉴
-              </span>
+              <span className="text-base font-semibold text-ink-strong">메뉴</span>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}

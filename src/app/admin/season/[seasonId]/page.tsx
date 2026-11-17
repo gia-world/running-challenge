@@ -36,9 +36,7 @@ export default async function AdminSeasonDetailPage({
   const supabase = await createClient();
   const { data: season } = await supabase
     .from("seasons")
-    .select(
-      "id, start_date, end_date, entry_fee, refund_per_certification, settled_at",
-    )
+    .select("id, start_date, end_date, entry_fee, refund_per_certification, settled_at")
     .eq("id", seasonId)
     .single();
 
@@ -74,14 +72,9 @@ export default async function AdminSeasonDetailPage({
     if (!dropoutByUserId.has(r.user_id)) dropoutByUserId.set(r.user_id, r);
   }
 
-  const participantIds = new Set(
-    (seasonMemberships ?? []).map((m) => m.user_id),
-  );
+  const participantIds = new Set((seasonMemberships ?? []).map((m) => m.user_id));
   const renewalByUserId = new Map(
-    (seasonMemberships ?? []).map((m) => [
-      m.user_id,
-      m.renew_next_season as boolean | null,
-    ]),
+    (seasonMemberships ?? []).map((m) => [m.user_id, m.renew_next_season as boolean | null]),
   );
   const weeklyStats = await computeSeasonWeeklyStats(
     supabase,
@@ -118,22 +111,18 @@ export default async function AdminSeasonDetailPage({
   // settling with one still open leaves it stuck forever with no way to
   // resolve it from the UI — worth the same settle-time warning as a
   // pending review request.
-  const hasPendingDropoutRequests = (dropoutRequests ?? []).some(
-    (r) => r.status === "pending",
-  );
+  const hasPendingDropoutRequests = (dropoutRequests ?? []).some((r) => r.status === "pending");
   // Mirrors the grace-period rule in loadViewerContext: a season that ended
   // yesterday still accepts certifications until noon KST today, so the
   // settlement totals below can still shift until that window closes.
-  const isInGracePeriod =
-    season.end_date === yesterdayInSeoul() && isBeforeNoonInSeoul();
+  const isInGracePeriod = season.end_date === yesterdayInSeoul() && isBeforeNoonInSeoul();
 
   const members = (memberships ?? [])
     .map((m) => m.profiles)
     .filter((p): p is Member => !!p)
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  const hasFees =
-    season.entry_fee != null && season.refund_per_certification != null;
+  const hasFees = season.entry_fee != null && season.refund_per_certification != null;
   const entryFee = Number(season.entry_fee);
   const refundPerCertification = Number(season.refund_per_certification);
 
@@ -145,10 +134,7 @@ export default async function AdminSeasonDetailPage({
   // computeSeasonSettlements applies for the money itself — this local
   // copy is just for the badge/weekly-dots rendering below.)
   function isDroppedOut(memberId: string): boolean {
-    return (
-      dropoutByUserId.get(memberId)?.status === "approved" &&
-      !participantIds.has(memberId)
-    );
+    return dropoutByUserId.get(memberId)?.status === "approved" && !participantIds.has(memberId);
   }
 
   const { byUserId: settlements, prizeShare } = computeSeasonSettlements(
@@ -173,8 +159,7 @@ export default async function AdminSeasonDetailPage({
         <BackLink href="/admin/season">← 시즌 관리</BackLink>
         <div className="mt-1 flex items-center gap-2">
           <PageTitle>
-            {formatKoreanDate(season.start_date)} ~{" "}
-            {formatKoreanDate(season.end_date)}
+            {formatKoreanDate(season.start_date)} ~ {formatKoreanDate(season.end_date)}
           </PageTitle>
           {status === "active" && (
             <span className="rounded-full bg-success-subtle px-2 py-0.5 text-sm font-medium text-success">
@@ -234,9 +219,7 @@ export default async function AdminSeasonDetailPage({
             ? settlement.refund + (settlement.isCompleted ? prizeShare : 0)
             : 0;
           const isRenewing = renewalByUserId.get(member.id) === true;
-          const unpaidAmount = settlement
-            ? Math.max(entryFee - settlement.refund, 0)
-            : 0;
+          const unpaidAmount = settlement ? Math.max(entryFee - settlement.refund, 0) : 0;
           const amountToSend = settlement
             ? isRenewing
               ? settlement.isCompleted
@@ -252,9 +235,7 @@ export default async function AdminSeasonDetailPage({
               <div className="flex items-center justify-between gap-3">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-semibold text-ink-strong">
-                      {member.name}
-                    </span>
+                    <span className="font-semibold text-ink-strong">{member.name}</span>
                     {dropout?.status === "pending" && (
                       <span className="rounded-full bg-warning-subtle px-2 py-0.5 text-sm font-medium text-warning">
                         중도하차 검토중
@@ -290,9 +271,7 @@ export default async function AdminSeasonDetailPage({
                     userId={member.id}
                     memberName={member.name}
                     initialIsParticipant={isParticipant}
-                    pendingDropoutRequestId={
-                      dropout?.status === "pending" ? dropout.id : null
-                    }
+                    pendingDropoutRequestId={dropout?.status === "pending" ? dropout.id : null}
                     maxSettlementAmount={hasFees ? entryFee : null}
                   />
                 )}
@@ -316,21 +295,14 @@ export default async function AdminSeasonDetailPage({
                   ) : settlement.isCompleted && prizeShare > 0 ? (
                     <div className="flex items-center justify-between">
                       <span className="text-ink-secondary">
-                        환급 {formatWon(settlement.refund)} + 상금{" "}
-                        {formatWon(prizeShare)}
+                        환급 {formatWon(settlement.refund)} + 상금 {formatWon(prizeShare)}
                       </span>
-                      <span className="font-semibold text-ink-strong">
-                        = {formatWon(total)}
-                      </span>
+                      <span className="font-semibold text-ink-strong">= {formatWon(total)}</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
-                      <span className="text-ink-secondary">
-                        총 환급액
-                      </span>
-                      <span className="font-semibold text-ink-strong">
-                        {formatWon(total)}
-                      </span>
+                      <span className="text-ink-secondary">총 환급액</span>
+                      <span className="font-semibold text-ink-strong">{formatWon(total)}</span>
                     </div>
                   )}
                   <span className="text-ink-secondary">

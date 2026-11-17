@@ -45,8 +45,7 @@ export default async function AdminSeasonPage() {
                     className="flex items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3 text-base"
                   >
                     <span className="text-ink-strong">
-                      {formatKoreanDate(season.start_date)} ~{" "}
-                      {formatKoreanDate(season.end_date)}
+                      {formatKoreanDate(season.start_date)} ~ {formatKoreanDate(season.end_date)}
                     </span>
                     {status === "active" && (
                       <span className="rounded-full bg-success-subtle px-2 py-0.5 text-sm font-medium text-success">

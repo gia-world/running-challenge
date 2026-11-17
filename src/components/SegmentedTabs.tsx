@@ -56,12 +56,7 @@ export function SegmentedTabs({
           }
 
           return (
-            <button
-              key={item.key}
-              type="button"
-              onClick={item.onClick}
-              className={className}
-            >
+            <button key={item.key} type="button" onClick={item.onClick} className={className}>
               {item.label}
             </button>
           );

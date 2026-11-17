@@ -22,9 +22,7 @@ export function TeamEyebrow({
   return (
     <Tag
       className={
-        size === "lg"
-          ? "text-base font-medium text-primary"
-          : "text-sm font-medium text-primary"
+        size === "lg" ? "text-base font-medium text-primary" : "text-sm font-medium text-primary"
       }
     >
       {suffix ? `${name} · ${suffix}` : name}

@@ -29,10 +29,7 @@ export default async function AdminReviewPage() {
     .returns<ReviewRequestRow[]>();
 
   if (error) {
-    console.error(
-      "[admin/review] failed to load review requests:",
-      error.message,
-    );
+    console.error("[admin/review] failed to load review requests:", error.message);
   }
 
   const grouped = new Map<
@@ -57,44 +54,32 @@ export default async function AdminReviewPage() {
   }
 
   const items = await Promise.all(
-    Array.from(grouped.entries()).map(
-      async ([activityId, { activity, requesterNames }]) => ({
-        activityId,
-        requesterNames,
-        activity_date: activity!.activity_date,
-        distance_km: activity!.distance_km,
-        ownerName: activity!.profiles?.name ?? "러너",
-        photoUrls: await getSignedPhotoUrls(
-          supabase,
-          activity!.activity_photos,
-        ),
-      }),
-    ),
+    Array.from(grouped.entries()).map(async ([activityId, { activity, requesterNames }]) => ({
+      activityId,
+      requesterNames,
+      activity_date: activity!.activity_date,
+      distance_km: activity!.distance_km,
+      ownerName: activity!.profiles?.name ?? "러너",
+      photoUrls: await getSignedPhotoUrls(supabase, activity!.activity_photos),
+    })),
   );
 
   return (
     <div className="flex flex-col gap-4">
       {items.length === 0 ? (
-        <p className="mt-10 text-center text-base text-ink-tertiary">
-          재인증 요청이 없어요.
-        </p>
+        <p className="mt-10 text-center text-base text-ink-tertiary">재인증 요청이 없어요.</p>
       ) : (
         items.map((item) => (
           <div
             key={item.activityId}
             className="overflow-hidden rounded-2xl border border-border bg-surface"
           >
-            {item.photoUrls.length > 0 && (
-              <PhotoCarousel photoUrls={item.photoUrls} alt="인증샷" />
-            )}
+            {item.photoUrls.length > 0 && <PhotoCarousel photoUrls={item.photoUrls} alt="인증샷" />}
             <div className="px-4 py-3">
               <div className="flex items-center justify-between text-base">
-                <span className="font-semibold text-ink-strong">
-                  {item.ownerName}
-                </span>
+                <span className="font-semibold text-ink-strong">{item.ownerName}</span>
                 <span className="text-ink-secondary">
-                  {formatKoreanDate(item.activity_date)} ·{" "}
-                  {Number(item.distance_km).toFixed(2)}km
+                  {formatKoreanDate(item.activity_date)} · {Number(item.distance_km).toFixed(2)}km
                 </span>
               </div>
               <p className="mt-1 text-sm text-ink-tertiary">

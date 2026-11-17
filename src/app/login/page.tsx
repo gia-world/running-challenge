@@ -46,16 +46,12 @@ export default async function LoginPage({
         <PageTitle size="lg" className="mt-2">
           주 3회 러닝 인증 챌린지
         </PageTitle>
-        <p className="mt-2 text-base text-ink-secondary">
-          카카오 계정으로 바로 시작하세요.
-        </p>
+        <p className="mt-2 text-base text-ink-secondary">카카오 계정으로 바로 시작하세요.</p>
 
         {error && (
           <ErrorBanner className="mt-4">
             로그인에 실패했어요. 다시 시도해 주세요.
-            {reason && (
-              <span className="mt-1 block text-sm opacity-80">({reason})</span>
-            )}
+            {reason && <span className="mt-1 block text-sm opacity-80">({reason})</span>}
           </ErrorBanner>
         )}
 

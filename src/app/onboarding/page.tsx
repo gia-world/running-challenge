@@ -36,12 +36,14 @@ export default async function OnboardingPage({
         <PageTitle size="lg" className="mt-2">
           이름을 확인해주세요
         </PageTitle>
-        <p className="mt-2 text-base text-ink-secondary">
-          팀원들에게는 이 이름으로 보여요.
-        </p>
+        <p className="mt-2 text-base text-ink-secondary">팀원들에게는 이 이름으로 보여요.</p>
 
         <div className="mt-8">
-          <OnboardingForm userId={user.id} currentName={profile?.name ?? "러너"} inviteCode={code} />
+          <OnboardingForm
+            userId={user.id}
+            currentName={profile?.name ?? "러너"}
+            inviteCode={code}
+          />
         </div>
       </div>
     </CenteredPage>
