@@ -239,3 +239,22 @@ textarea {
 .animate-drawer-in {
   animation: drawer-in 0.25s ease-out both;
 }
+
+/* Notification bubble: pops in near where it's anchored (top-right, by
+   the bell) instead of rising from an edge like a bottom sheet — the
+   origin-top-right transform on the element using this class makes it
+   read as growing out from the bell/tail rather than a generic modal. */
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-bubble-in {
+  animation: bubble-in 0.15s ease-out both;
+}

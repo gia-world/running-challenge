@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatKoreanDate } from "@/lib/format";
-import { BottomSheet } from "@/components/BottomSheet";
 
 type NotificationRow = {
   id: string;
@@ -37,9 +36,16 @@ function describeNotification(n: NotificationRow): string {
 }
 
 /**
- * 알림 벨/입장 팝업의 "N개 보기"에서 공통으로 쓰는 알림 목록 바텀시트.
- * 원래 /notifications 전용 페이지였는데, 배포 후 "알림 페이지 말고
- * 팝업처럼 띄우는 게 낫겠다"는 피드백으로 BottomSheet로 바꿨다.
+ * 알림 벨/입장 팝업의 "N개 보기"에서 공통으로 쓰는 알림 목록. 원래
+ * /notifications 전용 페이지였다가 한 번은 바텀시트로 바꿨는데 —
+ * "벨은 상단에 있는데 바텀시트는 아래서 올라온다"는 피드백으로 다시
+ * 바꿨다. 바텀시트도 아니고 EntryAnnouncementPopup 같은 가운데 모달도
+ * 아니라, 헤더 바로 아래 + 벨 쪽에 꼬리가 달린 말풍선 모양 — 벨이든
+ * 입장 팝업의 "N개 보기" 링크든 어디서 열려도 "벨에서 나온 알림"이라는
+ * 느낌이 들게 한다. 꼬리 위치(`right-14`)는 벨의 실제 DOM 위치를 재서
+ * 동적으로 맞춘 게 아니라 벨이 항상 헤더 오른쪽 같은 자리(햄버거 메뉴
+ * 바로 왼쪽)에 있다는 걸 알고 CSS로 고정해둔 값이라, 두 입구 어디서
+ * 열려도 같은 모양이 나온다.
  *
  * 열리면 댓글/대댓글/이모지 알림만 읽음 처리한다 — 재인증요청/인증반려/
  * 정산보류는 이 목록을 봤다고 해결된 게 아니라서 실제 조치 전까지는
@@ -94,31 +100,42 @@ export function NotificationListSheet({ onClose }: { onClose: () => void }) {
   }, []);
 
   return (
-    <BottomSheet onClose={onClose}>
-      <p className="mb-3 text-base font-semibold text-ink-strong">알림</p>
-      {items === null ? (
-        <p className="py-6 text-center text-base text-ink-tertiary">불러오는 중...</p>
-      ) : items.length === 0 ? (
-        <p className="py-6 text-center text-base text-ink-tertiary">아직 알림이 없어요.</p>
-      ) : (
-        <ul className="flex max-h-[60vh] flex-col gap-2 overflow-y-auto">
-          {items.map((n) => (
-            <li
-              key={n.id}
-              className={
-                n.read_at
-                  ? "rounded-2xl border border-border bg-surface px-4 py-3"
-                  : "rounded-2xl border border-primary-400 bg-primary-50 px-4 py-3"
-              }
-            >
-              <p className="text-base text-ink">{describeNotification(n)}</p>
-              <p className="mt-0.5 text-sm text-ink-tertiary">
-                {formatKoreanDate(n.created_at.slice(0, 10))}
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
-    </BottomSheet>
+    <div
+      className="fixed inset-0 z-50 flex justify-center bg-black/40 px-4 pt-16"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-md origin-top-right animate-bubble-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div aria-hidden className="absolute -top-1.5 right-14 h-3 w-3 rotate-45 bg-surface" />
+        <div className="relative z-10 flex max-h-[70vh] flex-col gap-3 overflow-y-auto rounded-2xl bg-surface p-5 shadow-lg">
+          <p className="text-base font-semibold text-ink-strong">알림</p>
+          {items === null ? (
+            <p className="py-6 text-center text-base text-ink-tertiary">불러오는 중...</p>
+          ) : items.length === 0 ? (
+            <p className="py-6 text-center text-base text-ink-tertiary">아직 알림이 없어요.</p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {items.map((n) => (
+                <li
+                  key={n.id}
+                  className={
+                    n.read_at
+                      ? "rounded-2xl border border-border bg-surface px-4 py-3"
+                      : "rounded-2xl border border-primary-400 bg-primary-50 px-4 py-3"
+                  }
+                >
+                  <p className="text-base text-ink">{describeNotification(n)}</p>
+                  <p className="mt-0.5 text-sm text-ink-tertiary">
+                    {formatKoreanDate(n.created_at.slice(0, 10))}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
