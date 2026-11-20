@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/Button";
+import { NotificationListSheet } from "@/components/NotificationListSheet";
 import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
 
@@ -43,6 +44,13 @@ type ImportantNotification = {
  * 가운데 rounded-2xl 카드)을 썼다 — 자동연장 바텀시트를 배경 탭으로
  * 무심코 닫아버려 안 읽고 넘어간 사람들이 있었던 전례가 있어서, 배경
  * 탭으로는 안 닫히게 하고 "확인" 버튼을 직접 눌러야만 닫히게 했다.
+ *
+ * "읽지 않은 알림 N개 보기"는 /notifications로 이동하는 대신
+ * NotificationListSheet를 띄운다("알림 페이지 말고 팝업처럼" 피드백).
+ * 이 시트는 isOpen(센터 모달)과 별개의 상태(showNotifSheet)라 — 누르면
+ * handleClose로 모달을 닫으면서 동시에 시트를 여니, 모달 JSX가
+ * `!isOpen`에서 통째로 return null 되어도 시트는 그 바깥에서 따로
+ * 렌더링된다.
  */
 export function EntryAnnouncementPopup() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -50,6 +58,7 @@ export function EntryAnnouncementPopup() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [showNotifSheet, setShowNotifSheet] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -233,60 +242,67 @@ export function EntryAnnouncementPopup() {
     setIsOpen(false);
   }
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="flex max-h-[90vh] w-full max-w-md flex-col gap-3 overflow-y-auto rounded-2xl bg-surface p-5 shadow-lg">
-        {announcements.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <p className="text-base font-semibold text-ink-strong">📢 공지사항</p>
-            {announcements.map((a) => (
-              <p key={a.id} className="text-base text-ink">
-                {a.body}
-              </p>
-            ))}
-          </div>
-        )}
-
-        {importantNotifications.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <p className="text-base font-semibold text-ink-strong">🔔 중요 알림</p>
-            {importantNotifications.map((n) => (
-              <div key={n.id} className="flex flex-col gap-1">
-                <Link
-                  href={n.href}
-                  onClick={handleClose}
-                  className="text-base text-ink underline decoration-ink-tertiary"
-                >
-                  {n.body} →
-                </Link>
-                {n.hint && (
-                  <Link
-                    href={n.hint.href}
-                    onClick={handleClose}
-                    className="text-sm text-ink-tertiary underline"
-                  >
-                    {n.hint.text} →
-                  </Link>
-                )}
+    <>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="flex max-h-[90vh] w-full max-w-md flex-col gap-3 overflow-y-auto rounded-2xl bg-surface p-5 shadow-lg">
+            {announcements.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <p className="text-base font-semibold text-ink-strong">📢 공지사항</p>
+                {announcements.map((a) => (
+                  <p key={a.id} className="text-base text-ink">
+                    {a.body}
+                  </p>
+                ))}
               </div>
-            ))}
+            )}
+
+            {importantNotifications.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <p className="text-base font-semibold text-ink-strong">🔔 중요 알림</p>
+                {importantNotifications.map((n) => (
+                  <div key={n.id} className="flex flex-col gap-1">
+                    <Link
+                      href={n.href}
+                      onClick={handleClose}
+                      className="text-base text-ink underline decoration-ink-tertiary"
+                    >
+                      {n.body} →
+                    </Link>
+                    {n.hint && (
+                      <Link
+                        href={n.hint.href}
+                        onClick={handleClose}
+                        className="text-sm text-ink-tertiary underline"
+                      >
+                        {n.hint.text} →
+                      </Link>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {unreadCount > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  handleClose();
+                  setShowNotifSheet(true);
+                }}
+                className="text-left text-base font-medium text-primary underline"
+              >
+                읽지 않은 알림 {unreadCount}개 보기 →
+              </button>
+            )}
+
+            <Button onClick={handleClose}>확인</Button>
           </div>
-        )}
+        </div>
+      )}
 
-        {unreadCount > 0 && (
-          <Link
-            href="/notifications"
-            onClick={handleClose}
-            className="text-base font-medium text-primary underline"
-          >
-            읽지 않은 알림 {unreadCount}개 보기 →
-          </Link>
-        )}
-
-        <Button onClick={handleClose}>확인</Button>
-      </div>
-    </div>
+      {showNotifSheet && <NotificationListSheet onClose={() => setShowNotifSheet(false)} />}
+    </>
   );
 }

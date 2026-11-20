@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
+import { NotificationListSheet } from "@/components/NotificationListSheet";
 
 /**
  * 헤더의 알림 벨 — 서버에서 currentUserId를 내려받지 않고 브라우저
@@ -17,9 +17,16 @@ import { todayInSeoul } from "@/lib/week";
  * seasons.settled_at is null, season_memberships.renew_next_season is
  * null인 채로 마지막 주에 들어섰는지)를 직접 세서 뱃지 숫자가 입장
  * 팝업이랑 어긋나지 않게 한다.
+ *
+ * 누르면 /notifications로 이동하는 대신 NotificationListSheet를 바로
+ * 띄운다("알림 페이지 말고 팝업처럼" 피드백) — 시트가 열리는 동안
+ * 댓글/대댓글/이모지가 읽음 처리되므로, 닫히면 refreshKey를 올려서
+ * 뱃지 숫자를 다시 센다.
  */
 export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,20 +117,32 @@ export function NotificationBell() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [refreshKey]);
 
   return (
-    <Link
-      href="/notifications"
-      aria-label="알림"
-      className="relative flex h-8 w-8 items-center justify-center rounded-full text-xl text-ink hover:bg-muted"
-    >
-      🔔
-      {unreadCount > 0 && (
-        <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-sm font-semibold text-white">
-          {unreadCount > 9 ? "9+" : unreadCount}
-        </span>
+    <>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        aria-label="알림"
+        className="relative flex h-8 w-8 items-center justify-center rounded-full text-xl text-ink hover:bg-muted"
+      >
+        🔔
+        {unreadCount > 0 && (
+          <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-sm font-semibold text-white">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {isOpen && (
+        <NotificationListSheet
+          onClose={() => {
+            setIsOpen(false);
+            setRefreshKey((k) => k + 1);
+          }}
+        />
       )}
-    </Link>
+    </>
   );
 }
