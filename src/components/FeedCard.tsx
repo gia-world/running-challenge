@@ -30,6 +30,7 @@ export function FeedCard({
   initialReactions,
   initialRequested,
   comments,
+  autoOpen,
   infoRow,
   caption,
   note,
@@ -46,12 +47,16 @@ export function FeedCard({
   initialReactions: { emoji: string; count: number; reactedByMe: boolean }[];
   initialRequested: boolean;
   comments: CommentItem[];
+  /** 알림의 "그 피드로 가기" 링크로 들어왔을 때 이 카드를 바로 확대해서
+   * 보여준다 — 첫 렌더에만 쓰는 값이라 이후 autoOpen이 바뀌어도 다시
+   * 열지 않는다(useState 초기값으로만 사용). */
+  autoOpen?: boolean;
   infoRow: ReactNode;
   caption: ReactNode;
   note?: string | null;
 }) {
   const router = useRouter();
-  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [isViewerOpen, setIsViewerOpen] = useState(autoOpen ?? false);
   const [reactions, setReactions] = useState<Record<string, ReactionState>>(() =>
     Object.fromEntries(
       initialReactions.map((r) => [r.emoji, { count: r.count, reactedByMe: r.reactedByMe }]),

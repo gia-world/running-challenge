@@ -67,16 +67,25 @@ export type FeedItem = {
 export async function loadFeed({
   userId,
   cursor,
+  highlightActivityId,
 }: {
   userId: string;
   cursor?: string;
+  /**
+   * 알림을 눌러 "그 피드로" 들어올 때 넘어오는 특정 활동 id. 보통 최신
+   * FEED_PAGE_SIZE개 범위 안에 없을 수 있어서(댓글이 한참 지난 글에
+   * 달릴 수도 있으니) 첫 페이지에 없으면 그 활동 하나만 따로 가져와
+   * 맨 앞에 끼워 넣는다.
+   */
+  highlightActivityId?: string;
 }): Promise<{ items: FeedItem[]; nextCursor: string | null }> {
   const supabase = await createClient();
+  const selectColumns =
+    "id, user_id, season_id, activity_date, distance_km, note, created_at, profiles!user_id(name), activity_photos(storage_path, thumbnail_storage_path, sort_order)";
+
   let query = supabase
     .from("activities")
-    .select(
-      "id, user_id, season_id, activity_date, distance_km, note, created_at, profiles!user_id(name), activity_photos(storage_path, thumbnail_storage_path, sort_order)",
-    )
+    .select(selectColumns)
     .eq("status", "approved")
     .order("created_at", { ascending: false })
     .limit(FEED_PAGE_SIZE);
@@ -91,7 +100,21 @@ export async function loadFeed({
     console.error("[feed] failed to load approved activities:", error.message);
   }
 
-  const rows = activities ?? [];
+  let rows = activities ?? [];
+  const pageLength = rows.length;
+
+  if (highlightActivityId && !rows.some((row) => row.id === highlightActivityId)) {
+    const { data: highlighted } = await supabase
+      .from("activities")
+      .select(selectColumns)
+      .eq("id", highlightActivityId)
+      .eq("status", "approved")
+      .returns<FeedRow[]>()
+      .maybeSingle();
+    if (highlighted) {
+      rows = [highlighted, ...rows];
+    }
+  }
   const seasonIds = Array.from(new Set(rows.map((row) => row.season_id)));
   const activityIds = rows.map((row) => row.id);
 
@@ -242,7 +265,9 @@ export async function loadFeed({
     }),
   );
 
-  const nextCursor = rows.length === FEED_PAGE_SIZE ? rows[rows.length - 1].created_at : null;
+  // 맨 앞에 끼워 넣은 하이라이트 행 때문에 rows.length가 늘어나도,
+  // "더보기" 여부는 원래 페이지(prepend 전) 길이로 판단해야 한다.
+  const nextCursor = pageLength === FEED_PAGE_SIZE ? rows[rows.length - 1].created_at : null;
 
   return { items, nextCursor };
 }

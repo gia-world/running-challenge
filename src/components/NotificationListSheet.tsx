@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { formatKoreanDate } from "@/lib/format";
 
@@ -14,6 +15,7 @@ type NotificationRow = {
     | "activity_rejected"
     | "settlement_pending";
   emoji: string | null;
+  activity_id: string | null;
   created_at: string;
   read_at: string | null;
   profiles: { name: string } | null;
@@ -33,6 +35,21 @@ function describeNotification(n: NotificationRow): string {
     return "그레이스 기간이 끝났는데 처리할 요청이 남아있어서 시즌이 자동으로 정산되지 않았어요. 확인해주세요!";
   }
   return `${actor}님이 회원님 인증에 댓글을 남겼어요`;
+}
+
+/**
+ * 누르면 실제로 가야 할 곳 — 댓글/대댓글/이모지는 그 활동이 있는 피드로
+ * (활동이 최신 페이지 밖에 있어도 loadFeed의 highlightActivityId가
+ * 따로 끼워 넣어준다). 나머지는 특정 레코드로 바로 못 가서(정산 보류는
+ * notifications 테이블에 시즌 id가 안 남아있음) 해당 목록 페이지로.
+ */
+function hrefForNotification(n: NotificationRow): string {
+  if (n.type === "comment" || n.type === "reply" || n.type === "reaction") {
+    return n.activity_id ? `/feed?activity=${n.activity_id}` : "/feed";
+  }
+  if (n.type === "review_request") return "/admin/review";
+  if (n.type === "activity_rejected") return "/certify";
+  return "/admin/season";
 }
 
 /**
@@ -72,7 +89,7 @@ export function NotificationListSheet({ onClose }: { onClose: () => void }) {
       const { data, error } = await supabase
         .from("notifications")
         .select(
-          "id, type, emoji, created_at, read_at, profiles!actor_user_id(name), activities(rejected_reason)",
+          "id, type, emoji, activity_id, created_at, read_at, profiles!actor_user_id(name), activities(rejected_reason)",
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
@@ -118,18 +135,21 @@ export function NotificationListSheet({ onClose }: { onClose: () => void }) {
           ) : (
             <ul className="flex flex-col gap-2">
               {items.map((n) => (
-                <li
-                  key={n.id}
-                  className={
-                    n.read_at
-                      ? "rounded-2xl border border-border bg-surface px-4 py-3"
-                      : "rounded-2xl border border-primary-400 bg-primary-50 px-4 py-3"
-                  }
-                >
-                  <p className="text-base text-ink">{describeNotification(n)}</p>
-                  <p className="mt-0.5 text-sm text-ink-tertiary">
-                    {formatKoreanDate(n.created_at.slice(0, 10))}
-                  </p>
+                <li key={n.id}>
+                  <Link
+                    href={hrefForNotification(n)}
+                    onClick={onClose}
+                    className={
+                      n.read_at
+                        ? "block rounded-2xl border border-border bg-surface px-4 py-3"
+                        : "block rounded-2xl border border-primary-400 bg-primary-50 px-4 py-3"
+                    }
+                  >
+                    <p className="text-base text-ink">{describeNotification(n)}</p>
+                    <p className="mt-0.5 text-sm text-ink-tertiary">
+                      {formatKoreanDate(n.created_at.slice(0, 10))}
+                    </p>
+                  </Link>
                 </li>
               ))}
             </ul>

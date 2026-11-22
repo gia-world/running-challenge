@@ -5,8 +5,13 @@ import { SeasonGate } from "@/components/SeasonGate";
 import { requireTeamViewer } from "@/lib/viewer";
 import { loadFeed } from "./loadFeed";
 
-export default async function FeedPage() {
+export default async function FeedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ activity?: string }>;
+}) {
   const { user, viewer } = await requireTeamViewer();
+  const { activity } = await searchParams;
 
   return (
     <PageShell
@@ -16,14 +21,20 @@ export default async function FeedPage() {
       activeTab="feed"
     >
       <SeasonGate viewer={viewer}>
-        <Feed userId={user.id} />
+        <Feed userId={user.id} highlightActivityId={activity} />
       </SeasonGate>
     </PageShell>
   );
 }
 
-async function Feed({ userId }: { userId: string }) {
-  const { items, nextCursor } = await loadFeed({ userId });
+async function Feed({
+  userId,
+  highlightActivityId,
+}: {
+  userId: string;
+  highlightActivityId?: string;
+}) {
+  const { items, nextCursor } = await loadFeed({ userId, highlightActivityId });
 
   if (items.length === 0) {
     return (
@@ -31,5 +42,12 @@ async function Feed({ userId }: { userId: string }) {
     );
   }
 
-  return <FeedList initialItems={items} initialNextCursor={nextCursor} currentUserId={userId} />;
+  return (
+    <FeedList
+      initialItems={items}
+      initialNextCursor={nextCursor}
+      currentUserId={userId}
+      autoOpenActivityId={highlightActivityId}
+    />
+  );
 }

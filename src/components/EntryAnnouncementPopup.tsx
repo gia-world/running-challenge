@@ -212,7 +212,10 @@ export function EntryAnnouncementPopup() {
 
       if (cancelled) return;
       const announcementList = unseenAnnouncements ?? [];
-      if (announcementList.length > 0 || importantList.length > 0 || notifCount > 0) {
+      // 안읽은 일반 알림(댓글/대댓글/이모지)만 있고 공지도 중요 알림도
+      // 없으면 이 모달을 띄울 이유가 없다 — 그건 벨 뱃지 숫자로 충분히
+      // 전달된다. 모달은 "직접 조치가 필요하거나 꼭 봐야 하는" 것에만 쓴다.
+      if (announcementList.length > 0 || importantList.length > 0) {
         setAnnouncements(announcementList);
         setImportantNotifications(importantList);
         setUnreadCount(notifCount);
