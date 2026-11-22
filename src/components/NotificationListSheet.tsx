@@ -83,15 +83,18 @@ function hrefForNotification(n: NotificationRow): string {
  * 씌워진 <main> 바깥이다 — SectionTitle을 쓰면 실제 h1으로 잘못
  * 렌더링되니, EntryAnnouncementPopup의 "📢 공지사항"처럼 일반 <p>로
  * 제목을 단다.
+ *
+ * 벨(NotificationBell)과 입장 팝업(EntryAnnouncementPopup) 둘 다 이
+ * 시트를 각자 따로 띄울 수 있는데, 이 시트가 PageHeader 안에서 서로
+ * 형제로 독립 렌더링되는 두 컴포넌트 중 "어느 쪽이 열었는지"는 알 바
+ * 아니다 — 알림을 읽음 처리할 때마다 `NOTIFICATIONS_CHANGED_EVENT`를
+ * window에 쏴서, 벨이 자기 뱃지를 다시 세야 한다는 걸 알게 한다(prop
+ * 콜백 대신 이벤트를 쓴 건, 입장 팝업 쪽에서 열렸을 때도 벨이 알아챌
+ * 수 있어야 하기 때문 — 두 컴포넌트는 서로의 존재를 모른다).
  */
-export function NotificationListSheet({
-  onClose,
-  onChange,
-}: {
-  onClose: () => void;
-  /** 알림을 읽음 처리할 때마다 호출 — 벨 뱃지 숫자를 다시 세게 한다. */
-  onChange?: () => void;
-}) {
+export const NOTIFICATIONS_CHANGED_EVENT = "notifications:changed";
+
+export function NotificationListSheet({ onClose }: { onClose: () => void }) {
   const [items, setItems] = useState<NotificationRow[] | null>(null);
 
   useEffect(() => {
@@ -130,7 +133,7 @@ export function NotificationListSheet({
     setItems(
       (prev) => prev?.map((n) => (ids.includes(n.id) ? { ...n, read_at: nowIso } : n)) ?? prev,
     );
-    onChange?.();
+    window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED_EVENT));
 
     const supabase = createClient();
     supabase

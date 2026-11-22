@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
-import { NotificationListSheet } from "@/components/NotificationListSheet";
+import {
+  NotificationListSheet,
+  NOTIFICATIONS_CHANGED_EVENT,
+} from "@/components/NotificationListSheet";
 
 /**
  * 헤더의 알림 벨 — 서버에서 currentUserId를 내려받지 않고 브라우저
@@ -19,9 +22,11 @@ import { NotificationListSheet } from "@/components/NotificationListSheet";
  * 팝업이랑 어긋나지 않게 한다.
  *
  * 누르면 /notifications로 이동하는 대신 NotificationListSheet를 바로
- * 띄운다("알림 페이지 말고 팝업처럼" 피드백) — 시트 안에서 알림 한
- * 건을 눌러 확인하거나 "모두 확인"을 누를 때마다(onChange), 그리고
- * 시트가 닫힐 때(onClose) refreshKey를 올려서 뱃지 숫자를 다시 센다.
+ * 띄운다("알림 페이지 말고 팝업처럼" 피드백). 이 시트는 벨 말고
+ * EntryAnnouncementPopup의 "N개 보기"에서도 독립적으로 열릴 수 있는데
+ * — 거기서 읽음 처리해도 이 벨의 뱃지는 알아야 하므로, props 콜백이
+ * 아니라 window 이벤트(NOTIFICATIONS_CHANGED_EVENT)를 구독해서 "어느
+ * 쪽이 열었든" 뱃지를 다시 센다.
  */
 export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -119,6 +124,14 @@ export function NotificationBell() {
     };
   }, [refreshKey]);
 
+  useEffect(() => {
+    function handleChanged() {
+      setRefreshKey((k) => k + 1);
+    }
+    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, handleChanged);
+    return () => window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, handleChanged);
+  }, []);
+
   return (
     <>
       <button
@@ -135,15 +148,7 @@ export function NotificationBell() {
         )}
       </button>
 
-      {isOpen && (
-        <NotificationListSheet
-          onClose={() => {
-            setIsOpen(false);
-            setRefreshKey((k) => k + 1);
-          }}
-          onChange={() => setRefreshKey((k) => k + 1)}
-        />
-      )}
+      {isOpen && <NotificationListSheet onClose={() => setIsOpen(false)} />}
     </>
   );
 }
