@@ -22,6 +22,14 @@ type NotificationRow = {
   activities: { rejected_reason: string | null } | null;
 };
 
+/** 댓글/대댓글/이모지만 "확인하면 사라지는" 일반 알림이다 — 재인증요청/
+ * 인증반려/정산보류는 notifications.read_at이 아니라 실제 조치 여부로
+ * 해결 상태를 가리는 별개 체계라(EntryAnnouncementPopup 참고),
+ * read_at을 건드리면 그 불변식이 깨진다. */
+function isGenericType(type: NotificationRow["type"]): boolean {
+  return type === "comment" || type === "reply" || type === "reaction";
+}
+
 function describeNotification(n: NotificationRow): string {
   const actor = n.profiles?.name ?? "누군가";
   if (n.type === "reaction") return `${actor}님이 회원님 인증에 ${n.emoji ?? "👍"} 반응을 남겼어요`;
@@ -64,16 +72,26 @@ function hrefForNotification(n: NotificationRow): string {
  * 바로 왼쪽)에 있다는 걸 알고 CSS로 고정해둔 값이라, 두 입구 어디서
  * 열려도 같은 모양이 나온다.
  *
- * 열리면 댓글/대댓글/이모지 알림만 읽음 처리한다 — 재인증요청/인증반려/
- * 정산보류는 이 목록을 봤다고 해결된 게 아니라서 실제 조치 전까지는
- * 읽음 처리하지 않는다(EntryAnnouncementPopup과 같은 이유).
+ * 댓글/대댓글/이모지는 "확인하면 그 알림은 사라진다" — 한 건 누르면
+ * (그 피드로 이동하면서) 그 건만, "모두 확인"을 누르면 보이는 일반
+ * 알림을 전부 읽음 처리해서 목록에서 뺀다. 재인증요청/인증반려/정산
+ * 보류는 이 목록에서 봤다고 해결된 게 아니라서 건드리지 않는다 — 계속
+ * 보이고, 실제 조치 전까지는 읽음 처리도 안 한다(EntryAnnouncementPopup과
+ * 같은 이유).
  *
  * 헤더(PageHeader) 안에서 열리는 오버레이라 HeadingLevelBoundary가
  * 씌워진 <main> 바깥이다 — SectionTitle을 쓰면 실제 h1으로 잘못
  * 렌더링되니, EntryAnnouncementPopup의 "📢 공지사항"처럼 일반 <p>로
  * 제목을 단다.
  */
-export function NotificationListSheet({ onClose }: { onClose: () => void }) {
+export function NotificationListSheet({
+  onClose,
+  onChange,
+}: {
+  onClose: () => void;
+  /** 알림을 읽음 처리할 때마다 호출 — 벨 뱃지 숫자를 다시 세게 한다. */
+  onChange?: () => void;
+}) {
   const [items, setItems] = useState<NotificationRow[] | null>(null);
 
   useEffect(() => {
@@ -98,16 +116,6 @@ export function NotificationListSheet({ onClose }: { onClose: () => void }) {
 
       if (error) console.error("[notifications] failed to load notifications:", error.message);
       if (!cancelled) setItems(data ?? []);
-
-      supabase
-        .from("notifications")
-        .update({ read_at: new Date().toISOString() })
-        .eq("user_id", user.id)
-        .in("type", ["comment", "reply", "reaction"])
-        .is("read_at", null)
-        .then(({ error: markError }) => {
-          if (markError) console.error("[notifications] mark-read failed:", markError.message);
-        });
     }
 
     load();
@@ -115,6 +123,27 @@ export function NotificationListSheet({ onClose }: { onClose: () => void }) {
       cancelled = true;
     };
   }, []);
+
+  function markRead(ids: string[]) {
+    if (ids.length === 0) return;
+    const nowIso = new Date().toISOString();
+    setItems(
+      (prev) => prev?.map((n) => (ids.includes(n.id) ? { ...n, read_at: nowIso } : n)) ?? prev,
+    );
+    onChange?.();
+
+    const supabase = createClient();
+    supabase
+      .from("notifications")
+      .update({ read_at: nowIso })
+      .in("id", ids)
+      .then(({ error }) => {
+        if (error) console.error("[notifications] mark-read failed:", error.message);
+      });
+  }
+
+  const visibleItems = (items ?? []).filter((n) => !isGenericType(n.type) || !n.read_at);
+  const hasUnreadGeneric = visibleItems.some((n) => isGenericType(n.type));
 
   return (
     <div
@@ -127,18 +156,34 @@ export function NotificationListSheet({ onClose }: { onClose: () => void }) {
       >
         <div aria-hidden className="absolute -top-1.5 right-14 h-3 w-3 rotate-45 bg-surface" />
         <div className="relative z-10 flex max-h-[70vh] flex-col gap-3 overflow-y-auto rounded-2xl bg-surface p-5 shadow-lg">
-          <p className="text-base font-semibold text-ink-strong">알림</p>
+          <div className="flex items-center justify-between">
+            <p className="text-base font-semibold text-ink-strong">알림</p>
+            {hasUnreadGeneric && (
+              <button
+                type="button"
+                onClick={() =>
+                  markRead(visibleItems.filter((n) => isGenericType(n.type)).map((n) => n.id))
+                }
+                className="text-sm font-medium text-primary"
+              >
+                모두 확인
+              </button>
+            )}
+          </div>
           {items === null ? (
             <p className="py-6 text-center text-base text-ink-tertiary">불러오는 중...</p>
-          ) : items.length === 0 ? (
+          ) : visibleItems.length === 0 ? (
             <p className="py-6 text-center text-base text-ink-tertiary">아직 알림이 없어요.</p>
           ) : (
             <ul className="flex flex-col gap-2">
-              {items.map((n) => (
+              {visibleItems.map((n) => (
                 <li key={n.id}>
                   <Link
                     href={hrefForNotification(n)}
-                    onClick={onClose}
+                    onClick={() => {
+                      if (isGenericType(n.type)) markRead([n.id]);
+                      onClose();
+                    }}
                     className={
                       n.read_at
                         ? "block rounded-2xl border border-border bg-surface px-4 py-3"

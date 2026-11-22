@@ -19,9 +19,9 @@ import { NotificationListSheet } from "@/components/NotificationListSheet";
  * 팝업이랑 어긋나지 않게 한다.
  *
  * 누르면 /notifications로 이동하는 대신 NotificationListSheet를 바로
- * 띄운다("알림 페이지 말고 팝업처럼" 피드백) — 시트가 열리는 동안
- * 댓글/대댓글/이모지가 읽음 처리되므로, 닫히면 refreshKey를 올려서
- * 뱃지 숫자를 다시 센다.
+ * 띄운다("알림 페이지 말고 팝업처럼" 피드백) — 시트 안에서 알림 한
+ * 건을 눌러 확인하거나 "모두 확인"을 누를 때마다(onChange), 그리고
+ * 시트가 닫힐 때(onClose) refreshKey를 올려서 뱃지 숫자를 다시 센다.
  */
 export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -141,6 +141,7 @@ export function NotificationBell() {
             setIsOpen(false);
             setRefreshKey((k) => k + 1);
           }}
+          onChange={() => setRefreshKey((k) => k + 1)}
         />
       )}
     </>
