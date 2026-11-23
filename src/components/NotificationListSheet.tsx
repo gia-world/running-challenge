@@ -61,20 +61,19 @@ function hrefForNotification(n: NotificationRow): string {
 }
 
 /**
- * 알림 벨/입장 팝업의 "N개 보기"에서 공통으로 쓰는 알림 목록. 원래
- * /notifications 전용 페이지였다가 한 번은 바텀시트로 바꿨는데 —
- * "벨은 상단에 있는데 바텀시트는 아래서 올라온다"는 피드백으로 다시
- * 바꿨다. 바텀시트도 아니고 EntryAnnouncementPopup 같은 가운데 모달도
- * 아니라, 헤더 바로 아래 + 벨 쪽에 꼬리가 달린 말풍선 모양 — 벨이든
- * 입장 팝업의 "N개 보기" 링크든 어디서 열려도 "벨에서 나온 알림"이라는
- * 느낌이 들게 한다. 꼬리 위치(`right-14`)는 벨의 실제 DOM 위치를 재서
- * 동적으로 맞춘 게 아니라 벨이 항상 헤더 오른쪽 같은 자리(햄버거 메뉴
- * 바로 왼쪽)에 있다는 걸 알고 CSS로 고정해둔 값이라, 두 입구 어디서
- * 열려도 같은 모양이 나온다.
+ * 알림 벨에서 여는 알림 목록. 원래 /notifications 전용 페이지였다가
+ * 한 번은 바텀시트로 바꿨는데 — "벨은 상단에 있는데 바텀시트는 아래서
+ * 올라온다"는 피드백으로 다시 바꿨다. 바텀시트도 아니고
+ * EntryAnnouncementPopup 같은 가운데 모달도 아니라, 헤더 바로 아래 +
+ * 벨 쪽에 꼬리가 달린 말풍선 모양이다. 꼬리 위치(`right-14`)는 벨의
+ * 실제 DOM 위치를 재서 동적으로 맞춘 게 아니라 벨이 항상 헤더 오른쪽
+ * 같은 자리(햄버거 메뉴 바로 왼쪽)에 있다는 걸 알고 CSS로 고정해둔
+ * 값이다.
  *
  * 댓글/대댓글/이모지는 "확인하면 그 알림은 사라진다" — 한 건 누르면
  * (그 피드로 이동하면서) 그 건만, "모두 확인"을 누르면 보이는 일반
- * 알림을 전부 읽음 처리해서 목록에서 뺀다. 재인증요청/인증반려/정산
+ * 알림을 전부 읽음 처리해서 목록에서 뺀다. 읽음 처리할 때마다 `onChange`를
+ * 불러서 벨의 뱃지 숫자를 다시 세게 한다. 재인증요청/인증반려/정산
  * 보류는 이 목록에서 봤다고 해결된 게 아니라서 건드리지 않는다 — 계속
  * 보이고, 실제 조치 전까지는 읽음 처리도 안 한다(EntryAnnouncementPopup과
  * 같은 이유).
@@ -83,18 +82,15 @@ function hrefForNotification(n: NotificationRow): string {
  * 씌워진 <main> 바깥이다 — SectionTitle을 쓰면 실제 h1으로 잘못
  * 렌더링되니, EntryAnnouncementPopup의 "📢 공지사항"처럼 일반 <p>로
  * 제목을 단다.
- *
- * 벨(NotificationBell)과 입장 팝업(EntryAnnouncementPopup) 둘 다 이
- * 시트를 각자 따로 띄울 수 있는데, 이 시트가 PageHeader 안에서 서로
- * 형제로 독립 렌더링되는 두 컴포넌트 중 "어느 쪽이 열었는지"는 알 바
- * 아니다 — 알림을 읽음 처리할 때마다 `NOTIFICATIONS_CHANGED_EVENT`를
- * window에 쏴서, 벨이 자기 뱃지를 다시 세야 한다는 걸 알게 한다(prop
- * 콜백 대신 이벤트를 쓴 건, 입장 팝업 쪽에서 열렸을 때도 벨이 알아챌
- * 수 있어야 하기 때문 — 두 컴포넌트는 서로의 존재를 모른다).
  */
-export const NOTIFICATIONS_CHANGED_EVENT = "notifications:changed";
-
-export function NotificationListSheet({ onClose }: { onClose: () => void }) {
+export function NotificationListSheet({
+  onClose,
+  onChange,
+}: {
+  onClose: () => void;
+  /** 알림을 읽음 처리할 때마다 호출 — 벨 뱃지 숫자를 다시 세게 한다. */
+  onChange: () => void;
+}) {
   const [items, setItems] = useState<NotificationRow[] | null>(null);
 
   useEffect(() => {
@@ -133,7 +129,7 @@ export function NotificationListSheet({ onClose }: { onClose: () => void }) {
     setItems(
       (prev) => prev?.map((n) => (ids.includes(n.id) ? { ...n, read_at: nowIso } : n)) ?? prev,
     );
-    window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED_EVENT));
+    onChange();
 
     const supabase = createClient();
     supabase

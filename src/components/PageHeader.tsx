@@ -1,8 +1,11 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { TeamEyebrow } from "./TeamEyebrow";
 import { HamburgerMenu } from "./HamburgerMenu";
 import { NotificationBell } from "./NotificationBell";
 import { EntryAnnouncementPopup } from "./EntryAnnouncementPopup";
+import { useNotificationData } from "./useNotificationData";
 
 export function PageHeader({
   teamName,
@@ -23,9 +26,23 @@ export function PageHeader({
   isAdmin?: boolean;
   children?: ReactNode;
 }) {
+  const {
+    announcements,
+    importantNotifications,
+    genericUnreadCount,
+    isReady,
+    markAnnouncementsSeen,
+    refreshGenericCount,
+  } = useNotificationData();
+
   return (
     <header className="flex items-center justify-between border-b border-border px-6 py-4">
-      <EntryAnnouncementPopup />
+      <EntryAnnouncementPopup
+        announcements={announcements}
+        importantNotifications={importantNotifications}
+        isReady={isReady}
+        onConfirm={markAnnouncementsSeen}
+      />
       <div>
         {eyebrowSkeleton ? (
           <div className="h-3.5 w-24 animate-pulse rounded bg-muted-strong" />
@@ -35,7 +52,10 @@ export function PageHeader({
         {children}
       </div>
       <div className="flex items-center gap-1">
-        <NotificationBell />
+        <NotificationBell
+          unreadCount={importantNotifications.length + genericUnreadCount}
+          onRead={refreshGenericCount}
+        />
         <HamburgerMenu isAdmin={isAdmin} />
       </div>
     </header>
