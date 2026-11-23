@@ -6,6 +6,7 @@ import { todayInSeoul } from "@/lib/week";
 import { computeSeasonStatus } from "@/lib/seasonStatus";
 import { EmptyState } from "@/components/EmptyState";
 import { SectionTitle } from "@/components/SectionTitle";
+import { AutoCreateSeasonToggle } from "@/components/AutoCreateSeasonToggle";
 import { SeasonForm } from "./SeasonForm";
 
 export default async function AdminSeasonPage() {
@@ -13,17 +14,25 @@ export default async function AdminSeasonPage() {
   const teamId = viewer.teamId;
 
   const supabase = await createClient();
-  const { data: seasons } = await supabase
-    .from("seasons")
-    .select("id, start_date, end_date, settled_at")
-    .eq("team_id", teamId)
-    .order("start_date", { ascending: false });
+  const [{ data: seasons }, { data: team }] = await Promise.all([
+    supabase
+      .from("seasons")
+      .select("id, start_date, end_date, settled_at")
+      .eq("team_id", teamId)
+      .order("start_date", { ascending: false }),
+    supabase.from("teams").select("auto_create_next_season").eq("id", teamId).maybeSingle(),
+  ]);
 
   const allSeasons = seasons ?? [];
   const mostRecentSeasonId = allSeasons[0]?.id ?? null;
 
   return (
     <div className="flex flex-col gap-6">
+      <AutoCreateSeasonToggle
+        teamId={teamId}
+        initialChecked={team?.auto_create_next_season ?? true}
+      />
+
       <SeasonForm
         teamId={teamId}
         existingSeasons={allSeasons}

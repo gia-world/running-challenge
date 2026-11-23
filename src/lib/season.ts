@@ -33,6 +33,34 @@ export function seasonWeekCount(startDate: string, endDate: string): number {
   return Math.max(1, Math.ceil(totalDays / 7));
 }
 
+/** The day right after a season ends — where a back-to-back next season
+ * starts when auto-created (autoSettle.ts). */
+export function nextSeasonStartDate(previousEndDate: string): string {
+  const d = parseISODate(previousEndDate);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return toISODate(d);
+}
+
+/**
+ * End date for a season starting on `newStartDate` that spans the same
+ * number of days as the season from `previousStartDate` to
+ * `previousEndDate` — used when auto-creating a season that picks up
+ * where the last one left off, matching whatever custom duration an admin
+ * may have set rather than always falling back to the 4-week default.
+ */
+export function seasonEndDateForSameDuration(
+  newStartDate: string,
+  previousStartDate: string,
+  previousEndDate: string,
+): string {
+  const start = parseISODate(previousStartDate);
+  const end = parseISODate(previousEndDate);
+  const durationDays = Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
+  const newStart = parseISODate(newStartDate);
+  newStart.setUTCDate(newStart.getUTCDate() + durationDays - 1);
+  return toISODate(newStart);
+}
+
 /** [start, end] (both inclusive) for the given 0-indexed week of a season. */
 export function seasonWeekRange(
   seasonStartDate: string,
