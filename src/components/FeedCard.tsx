@@ -48,8 +48,7 @@ export function FeedCard({
   initialRequested: boolean;
   comments: CommentItem[];
   /** 알림의 "그 피드로 가기" 링크로 들어왔을 때 이 카드를 바로 확대해서
-   * 보여준다 — 첫 렌더에만 쓰는 값이라 이후 autoOpen이 바뀌어도 다시
-   * 열지 않는다(useState 초기값으로만 사용). */
+   * 보여준다. */
   autoOpen?: boolean;
   infoRow: ReactNode;
   caption: ReactNode;
@@ -57,6 +56,17 @@ export function FeedCard({
 }) {
   const router = useRouter();
   const [isViewerOpen, setIsViewerOpen] = useState(autoOpen ?? false);
+  const [prevAutoOpen, setPrevAutoOpen] = useState(autoOpen ?? false);
+  // /feed에 이미 떠 있는 상태에서 알림 링크를 눌러 같은 경로로 검색
+  // 파라미터만 바뀌는 경우(소프트 내비게이션)엔 이 카드가 리마운트되지
+  // 않아서 useState 초기값만으론 못 잡는다 — 새로고침해야만 열리던
+  // 버그가 이것 때문이었다. FeedList의 initialItems 동기화와 같은
+  // 패턴(useEffect 대신 렌더 중에 비교)으로, autoOpen이 false→true로
+  // 바뀌는 순간만 잡아서 그때 한 번 더 연다.
+  if ((autoOpen ?? false) !== prevAutoOpen) {
+    setPrevAutoOpen(autoOpen ?? false);
+    if (autoOpen) setIsViewerOpen(true);
+  }
   const [reactions, setReactions] = useState<Record<string, ReactionState>>(() =>
     Object.fromEntries(
       initialReactions.map((r) => [r.emoji, { count: r.count, reactedByMe: r.reactedByMe }]),
