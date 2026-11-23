@@ -4,11 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/Button";
-import { NotificationListSheet } from "@/components/NotificationListSheet";
 import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
-
-const SESSION_FLAG = "entryPopupShown";
 
 type Announcement = { id: string; body: string };
 type ImportantNotification = {
@@ -22,8 +19,12 @@ type ImportantNotification = {
 
 /**
  * 입장 시 제일 먼저 보여주는 센터 모달 — (1) 아직 못 본 관리자 공지,
- * (2) 실제로 조치해야 하는 중요 알림(재인증 요청/인증 반려/정산 보류),
- * (3) 안읽은 일반 알림(댓글/대댓글/이모지) 개수 요약을 한 번에 보여준다.
+ * (2) 실제로 조치해야 하는 중요 알림(재인증 요청/인증 반려/정산 보류)을
+ * 한 번에 보여준다. 둘 다 없으면 아예 안 뜬다 — 안읽은 일반 알림(댓글/
+ * 대댓글/이모지)만 있는 경우는 벨 뱃지로 충분하다고 보고 이 모달을
+ * 띄우지 않는다(한때 "N개 보기" 요약 링크를 여기도 같이 넣어뒀었는데,
+ * 지금은 벨이 모든 화면에 상시로 떠서 같은 정보를 중복으로 보여줄
+ * 필요가 없어져 뺐다).
  *
  * 공지는 profiles.last_seen_announcement_at으로 "진짜 처음 보는지"를
  * 서버 상태로 판단한다. 중요 알림은 notifications.read_at이 아니라 —
@@ -36,29 +37,24 @@ type ImportantNotification = {
  * 이건 "확인"이 아니라 CertifyForm에서 같은 날짜로 재업로드할 때 읽음
  * 처리된다. profiles.auto_renew_preference를 켜둔 사람은 자동연장
  * 알림 자체가 안 뜨고, 대신 이 자리에서 바로 renew_next_season을
- * true로 채워버린다(마이페이지 "계속 참여" 설정 참고). 일반 알림
- * 요약만 매번 뜨면 거슬려서 세션당 한 번으로 제한한다(sessionStorage).
- * NotificationBell과 같은 이유로 자체적으로 로그인 사용자를 알아낸다.
+ * true로 채워버린다(마이페이지 "계속 참여" 설정 참고). 공지/중요 알림
+ * 둘 다 실제로 해결되기 전까지는 페이지를 옮길 때마다(마운트할 때마다)
+ * 다시 뜬다 — 세션당 한 번으로 막아두지 않는다. 중요 알림은 그게 원래
+ * 의도(액션을 취할 때까지 계속 보이게)고, 공지는 "확인"을 누르면
+ * profiles.last_seen_announcement_at이 갱신돼서 다음 조회부터 자연히
+ * 빠진다. NotificationBell과 같은 이유로 자체적으로 로그인 사용자를
+ * 알아낸다.
  *
  * 바텀시트가 아니라 PhotoViewerModal과 같은 센터 모달 톤(bg-black/60 +
  * 가운데 rounded-2xl 카드)을 썼다 — 자동연장 바텀시트를 배경 탭으로
  * 무심코 닫아버려 안 읽고 넘어간 사람들이 있었던 전례가 있어서, 배경
  * 탭으로는 안 닫히게 하고 "확인" 버튼을 직접 눌러야만 닫히게 했다.
- *
- * "읽지 않은 알림 N개 보기"는 /notifications로 이동하는 대신
- * NotificationListSheet를 띄운다("알림 페이지 말고 팝업처럼" 피드백).
- * 이 시트는 isOpen(센터 모달)과 별개의 상태(showNotifSheet)라 — 누르면
- * handleClose로 모달을 닫으면서 동시에 시트를 여니, 모달 JSX가
- * `!isOpen`에서 통째로 return null 되어도 시트는 그 바깥에서 따로
- * 렌더링된다.
  */
 export function EntryAnnouncementPopup() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [importantNotifications, setImportantNotifications] = useState<ImportantNotification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [showNotifSheet, setShowNotifSheet] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -199,26 +195,11 @@ export function EntryAnnouncementPopup() {
         })),
       ];
 
-      let notifCount = 0;
-      if (typeof window !== "undefined" && !window.sessionStorage.getItem(SESSION_FLAG)) {
-        const { count } = await supabase
-          .from("notifications")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", user.id)
-          .in("type", ["comment", "reply", "reaction"])
-          .is("read_at", null);
-        notifCount = count ?? 0;
-      }
-
       if (cancelled) return;
       const announcementList = unseenAnnouncements ?? [];
-      // 안읽은 일반 알림(댓글/대댓글/이모지)만 있고 공지도 중요 알림도
-      // 없으면 이 모달을 띄울 이유가 없다 — 그건 벨 뱃지 숫자로 충분히
-      // 전달된다. 모달은 "직접 조치가 필요하거나 꼭 봐야 하는" 것에만 쓴다.
       if (announcementList.length > 0 || importantList.length > 0) {
         setAnnouncements(announcementList);
         setImportantNotifications(importantList);
-        setUnreadCount(notifCount);
         setUserId(user.id);
         setIsOpen(true);
       }
@@ -231,7 +212,6 @@ export function EntryAnnouncementPopup() {
   }, []);
 
   function handleClose() {
-    window.sessionStorage.setItem(SESSION_FLAG, "1");
     if (announcements.length > 0 && userId) {
       const supabase = createClient();
       supabase
@@ -245,67 +225,50 @@ export function EntryAnnouncementPopup() {
     setIsOpen(false);
   }
 
+  if (!isOpen) return null;
+
   return (
-    <>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="flex max-h-[90vh] w-full max-w-md flex-col gap-3 overflow-y-auto rounded-2xl bg-surface p-5 shadow-lg">
-            {announcements.length > 0 && (
-              <div className="flex flex-col gap-2">
-                <p className="text-base font-semibold text-ink-strong">📢 공지사항</p>
-                {announcements.map((a) => (
-                  <p key={a.id} className="text-base text-ink">
-                    {a.body}
-                  </p>
-                ))}
-              </div>
-            )}
-
-            {importantNotifications.length > 0 && (
-              <div className="flex flex-col gap-2">
-                <p className="text-base font-semibold text-ink-strong">🔔 중요 알림</p>
-                {importantNotifications.map((n) => (
-                  <div key={n.id} className="flex flex-col gap-1">
-                    <Link
-                      href={n.href}
-                      onClick={handleClose}
-                      className="text-base text-ink underline decoration-ink-tertiary"
-                    >
-                      {n.body} →
-                    </Link>
-                    {n.hint && (
-                      <Link
-                        href={n.hint.href}
-                        onClick={handleClose}
-                        className="text-sm text-ink-tertiary underline"
-                      >
-                        {n.hint.text} →
-                      </Link>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {unreadCount > 0 && (
-              <button
-                type="button"
-                onClick={() => {
-                  handleClose();
-                  setShowNotifSheet(true);
-                }}
-                className="text-left text-base font-medium text-primary underline"
-              >
-                읽지 않은 알림 {unreadCount}개 보기 →
-              </button>
-            )}
-
-            <Button onClick={handleClose}>확인</Button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="flex max-h-[90vh] w-full max-w-md flex-col gap-3 overflow-y-auto rounded-2xl bg-surface p-5 shadow-lg">
+        {announcements.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-base font-semibold text-ink-strong">📢 공지사항</p>
+            {announcements.map((a) => (
+              <p key={a.id} className="text-base text-ink">
+                {a.body}
+              </p>
+            ))}
           </div>
-        </div>
-      )}
+        )}
 
-      {showNotifSheet && <NotificationListSheet onClose={() => setShowNotifSheet(false)} />}
-    </>
+        {importantNotifications.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-base font-semibold text-ink-strong">🔔 중요 알림</p>
+            {importantNotifications.map((n) => (
+              <div key={n.id} className="flex flex-col gap-1">
+                <Link
+                  href={n.href}
+                  onClick={handleClose}
+                  className="text-base text-ink underline decoration-ink-tertiary"
+                >
+                  {n.body} →
+                </Link>
+                {n.hint && (
+                  <Link
+                    href={n.hint.href}
+                    onClick={handleClose}
+                    className="text-sm text-ink-tertiary underline"
+                  >
+                    {n.hint.text} →
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <Button onClick={handleClose}>확인</Button>
+      </div>
+    </div>
   );
 }
