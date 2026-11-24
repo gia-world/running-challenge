@@ -111,8 +111,6 @@ export default async function StatusPage() {
         currentWeekIndex={currentWeekIndex}
         weekCount={weekCount}
         currentUserId={user.id}
-        seasonId={viewer.activeSeason?.id ?? ""}
-        seasonStartDate={viewer.activeSeason?.start_date ?? ""}
         history={seasons}
         badgeMembers={badgeMembers}
         teamSettlementBankName={viewer.teamSettlementBankName}

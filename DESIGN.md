@@ -186,7 +186,7 @@ rounded-2xl border border-border bg-surface px-4 py-3
 ## 그림자
 
 - 카드에는 그림자를 쓰지 않는다 (위 "카드" 항목 참고) — `shadow-sm`은 세그먼트 탭의 선택된 알약, 작은 원형 배지처럼 카드가 아닌 요소에만 남아 있다.
-- 진짜로 화면 위에 떠 있는 요소만 `shadow-lg`: 바텀시트(`BottomSheet`), StatusBoard의 주차별 인증 모달(떠 있는 흰 카드, `rounded-2xl bg-surface shadow-lg`).
+- 진짜로 화면 위에 떠 있는 요소만 `shadow-lg`: 바텀시트(`BottomSheet`), 사진 뷰어 모달(`PhotoViewerModal`, 떠 있는 흰 카드, `rounded-2xl bg-surface shadow-lg`).
 
 ## 바텀시트 vs 센터 모달 — "놓치면 끝"인 콘텐츠는 센터 모달로
 
@@ -214,7 +214,7 @@ rounded-2xl border border-border bg-surface px-4 py-3
 
 ## 사진 뷰어 모달 & 피드 카드
 
-인증샷을 자세히 보는 화면은 `src/components/PhotoViewerModal.tsx` — 피드, 홈의 이번 주 인증 기록, 시즌 전체 기록 어디서 열어도 같은 컴포넌트를 쓴다. 처음엔 전체화면 다크 모달로 만들었는데, 앱에 다크 모드가 없다는 원칙(맨 위 참고)과 부딪혀서 톤이 붕 떴다 — 라우트로 바꿔봤지만 모달 자체가 문제가 아니라 다크 톤이 문제였던 것으로 확인돼, 다시 모달로 돌아오되 스타일만 다른 카드들과 같은 흰 캔버스 톤으로 맞췄다. StatusBoard의 주차별 모달과 같은 컨벤션(`bg-black/60` 딤 배경 + 중앙 정렬된 `rounded-2xl bg-surface shadow-lg` 카드)을 그대로 따르되, 사진을 크게 봐야 하는 용도라 카드 자체는 `max-w-md`로 더 크고 `max-h-[90vh]`까지 뷰포트를 채운다.
+인증샷을 자세히 보는 화면은 `src/components/PhotoViewerModal.tsx` — 피드, 홈의 이번 주 인증 기록, 시즌 전체 기록 어디서 열어도 같은 컴포넌트를 쓴다. 처음엔 전체화면 다크 모달로 만들었는데, 앱에 다크 모드가 없다는 원칙(맨 위 참고)과 부딪혀서 톤이 붕 떴다 — 라우트로 바꿔봤지만 모달 자체가 문제가 아니라 다크 톤이 문제였던 것으로 확인돼, 다시 모달로 돌아오되 스타일만 다른 카드들과 같은 흰 캔버스 톤으로 맞췄다. 센터 모달 컨벤션(`bg-black/60` 딤 배경 + 중앙 정렬된 `rounded-2xl bg-surface shadow-lg` 카드)을 따르되, 사진을 크게 봐야 하는 용도라 카드 자체는 `max-w-md`로 더 크고 `max-h-[90vh]`까지 뷰포트를 채운다.
 
 - 사진 영역은 고정 높이 `h-[60vh]`다 — 처음엔 `flex-1 min-h-0`로 남는 공간을 채우게 했는데, 그러면 `<img>`의 `h-full`이 퍼센트 높이라 상위에 확정된 높이가 없을 때(자동 높이 flex 컬럼) 이미지의 실제 세로 비율대로 부풀어서, 세로로 긴 사진(예: 914px)이 카드 전체 높이를 밀어내고 그 초과분이 카드의 `overflow-hidden`에 잘리며 하단 리액션 바까지 같이 가려지는 버그가 있었다. 고정 높이를 주면 `object-contain`이 어떤 비율의 사진이든 그 안에서 안전하게 레터박스한다.
 - 사진이 여러 장이면 가로 캐러셀 + **화살표(‹ ›) + 닷 인디케이터** — "n / N" 텍스트 카운터가 아니라 실제 스와이퍼처럼. 화살표는 `bg-white/90` 원형 버튼, 닷은 활성 `bg-primary` / 비활성 `bg-white/80 ring-1 ring-black/10`(사진 위에 얹혀도 눈에 띄게) — 둘 다 사진 영역 위에 `absolute`로 얹는다.

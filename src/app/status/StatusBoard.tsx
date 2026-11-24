@@ -2,17 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
-import { seasonWeekRange } from "@/lib/season";
 import { formatKoreanDate } from "@/lib/format";
-import { getSignedPhotoUrls } from "@/lib/photos";
 import { earnedBadges, BADGE_CATALOG } from "@/lib/badges";
 import { EmptyState } from "@/components/EmptyState";
 import { BottomSheet } from "@/components/BottomSheet";
 import { SegmentedTabs } from "@/components/SegmentedTabs";
 import { SectionTitle } from "@/components/SectionTitle";
 import { SeasonGate } from "@/components/SeasonGate";
-import { Button } from "@/components/Button";
 import type { WeekStat } from "@/lib/seasonStats";
 import type { SeasonHistoryEntry } from "@/lib/seasonHistory";
 
@@ -26,13 +22,6 @@ type BadgeMember = {
 type SortKey = "name" | "total" | "distance";
 type BadgeSortKey = "name" | "count";
 type View = "season" | "history";
-type ModalActivity = {
-  id: string;
-  ordinal: number;
-  activityDate: string;
-  distanceKm: number;
-  photoUrls: string[];
-};
 
 function totalSuccess(member: Member) {
   return member.weeks.filter((w) => w.isSuccess).length;
@@ -55,8 +44,6 @@ export function StatusBoard({
   currentWeekIndex,
   weekCount,
   currentUserId,
-  seasonId,
-  seasonStartDate,
   history,
   badgeMembers,
   teamSettlementBankName,
@@ -68,8 +55,6 @@ export function StatusBoard({
   currentWeekIndex: number;
   weekCount: number;
   currentUserId: string;
-  seasonId: string;
-  seasonStartDate: string;
   history: SeasonHistoryEntry[];
   badgeMembers: BadgeMember[];
   teamSettlementBankName: string | null;
@@ -78,12 +63,6 @@ export function StatusBoard({
   const [view, setView] = useState<View>("season");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [badgeSortKey, setBadgeSortKey] = useState<BadgeSortKey>("count");
-  const [modal, setModal] = useState<{
-    name: string;
-    weekIndex: number;
-    activities: ModalActivity[];
-  } | null>(null);
-  const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
   const [showBadgeInfo, setShowBadgeInfo] = useState(false);
 
   // "총 거리"/"성공횟수" 칸을 추가하면서 테이블에 w-full을 썼던 탓에
@@ -140,47 +119,6 @@ export function StatusBoard({
         return b.badges.length - a.badges.length || a.name.localeCompare(b.name);
       return a.name.localeCompare(b.name);
     });
-
-  async function openCell(member: Member, weekIndex: number) {
-    if (member.weeks[weekIndex].achieved === 0) return;
-
-    setIsLoadingPhotos(true);
-    setModal({ name: member.name, weekIndex, activities: [] });
-
-    const supabase = createClient();
-    const { start, end } = seasonWeekRange(seasonStartDate, weekIndex);
-
-    const { data: activities } = await supabase
-      .from("activities")
-      .select("id, activity_date, distance_km, activity_photos(storage_path, sort_order)")
-      .eq("user_id", member.id)
-      .eq("season_id", seasonId)
-      .eq("status", "approved")
-      .gte("activity_date", start)
-      .lte("activity_date", end)
-      .order("activity_date", { ascending: true })
-      .returns<
-        {
-          id: string;
-          activity_date: string;
-          distance_km: number;
-          activity_photos: { storage_path: string; sort_order: number }[];
-        }[]
-      >();
-
-    const modalActivities = await Promise.all(
-      (activities ?? []).map(async (activity, index) => ({
-        id: activity.id,
-        ordinal: index + 1,
-        activityDate: activity.activity_date,
-        distanceKm: Number(activity.distance_km),
-        photoUrls: await getSignedPhotoUrls(supabase, activity.activity_photos),
-      })),
-    );
-
-    setModal({ name: member.name, weekIndex, activities: modalActivities });
-    setIsLoadingPhotos(false);
-  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -258,7 +196,7 @@ export function StatusBoard({
 
                 {/* 가운데: 주차별 칸 — 이 영역만 가로 스크롤된다 */}
                 <div ref={scrollRef} className="min-w-0 flex-1 overflow-x-auto px-2">
-                  <div className="flex h-9 items-center text-ink-tertiary">
+                  <div className="flex h-9 w-fit mx-auto items-center text-ink-tertiary">
                     {Array.from({ length: weekCount }, (_, i) => (
                       <div
                         key={i}
@@ -280,22 +218,21 @@ export function StatusBoard({
                           : "border-t border-border-subtle"
                       }`}
                     >
-                      {member.weeks.map((week, weekIndex) => (
-                        <div
-                          key={weekIndex}
-                          className="flex w-10 shrink-0 items-center justify-center"
-                        >
-                          <button
-                            type="button"
-                            onClick={() => openCell(member, weekIndex)}
-                            disabled={week.achieved === 0}
-                            className={cellClassName(week, weekIndex === currentWeekIndex)}
-                            title={`${weekIndex + 1}주차 ${week.achieved}회`}
+                      <div className="flex w-fit mx-auto">
+                        {member.weeks.map((week, weekIndex) => (
+                          <div
+                            key={weekIndex}
+                            className="flex w-10 shrink-0 items-center justify-center"
                           >
-                            {week.achieved > 0 ? week.achieved : ""}
-                          </button>
-                        </div>
-                      ))}
+                            <span
+                              className={cellClassName(week, weekIndex === currentWeekIndex)}
+                              title={`${weekIndex + 1}주차 ${week.achieved}회`}
+                            >
+                              {week.achieved > 0 ? week.achieved : ""}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -460,55 +397,6 @@ export function StatusBoard({
           </div>
         )}
       </SegmentedTabs>
-
-      {modal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6"
-          onClick={() => setModal(null)}
-        >
-          <div
-            className="w-full max-w-sm rounded-2xl bg-surface p-4 shadow-lg"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="text-base font-semibold text-ink-strong">
-              {modal.name} · {modal.weekIndex + 1}주차
-            </p>
-            {isLoadingPhotos ? (
-              <p className="mt-4 py-8 text-center text-base text-ink-tertiary">불러오는 중...</p>
-            ) : modal.activities.length === 0 ? (
-              <p className="mt-4 py-8 text-center text-base text-ink-tertiary">사진이 없어요.</p>
-            ) : (
-              <div className="mt-3 flex max-h-[70vh] flex-col gap-4 overflow-y-auto">
-                {modal.activities.map((activity) => (
-                  <div key={activity.id} className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-semibold text-primary">
-                        {activity.ordinal}회째 · {formatKoreanDate(activity.activityDate)}
-                      </span>
-                      <span className="text-ink-tertiary">{activity.distanceKm.toFixed(2)}km</span>
-                    </div>
-                    <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto">
-                      {activity.photoUrls.map((url) => (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          key={url}
-                          src={url}
-                          alt="인증샷"
-                          loading="lazy"
-                          className="aspect-square w-full shrink-0 snap-center rounded-xl object-cover"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            <Button variant="secondary" className="mt-4" onClick={() => setModal(null)}>
-              닫기
-            </Button>
-          </div>
-        </div>
-      )}
 
       {showBadgeInfo && (
         <BottomSheet onClose={() => setShowBadgeInfo(false)}>

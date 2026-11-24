@@ -21,9 +21,8 @@ function touchDistance(touches: React.TouchList) {
  * Photo viewer shared by the feed, home's 이번 주 인증 기록, and 시즌 전체
  * 기록 — anywhere a single activity's photos need a closer look. Same light
  * card tone as everywhere else in the app (no dark mode) — think of it as
- * one feed card, just bigger, floating over a dimmed backdrop like
- * StatusBoard's week modal. Multiple photos scroll as a snap carousel with
- * arrow + dot controls.
+ * one feed card, just bigger, floating over a dimmed backdrop. Multiple
+ * photos scroll as a snap carousel with arrow + dot controls.
  *
  * Pinch-zoom is disabled for the app as a whole (viewport meta in
  * layout.tsx) so a stray pinch elsewhere doesn't resize the page — this is
