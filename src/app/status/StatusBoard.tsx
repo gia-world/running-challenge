@@ -195,8 +195,8 @@ export function StatusBoard({
                 </div>
 
                 {/* 가운데: 주차별 칸 — 이 영역만 가로 스크롤된다 */}
-                <div ref={scrollRef} className="min-w-0 flex-1 overflow-x-auto px-2">
-                  <div className="flex h-9 w-fit mx-auto items-center text-ink-tertiary">
+                <div ref={scrollRef} className="min-w-0 flex-1 overflow-x-auto">
+                  <div className="flex h-9 w-fit mx-auto items-center px-2 text-ink-tertiary">
                     {Array.from({ length: weekCount }, (_, i) => (
                       <div
                         key={i}
@@ -212,7 +212,7 @@ export function StatusBoard({
                   {sortedMembers.map((member) => (
                     <div
                       key={member.id}
-                      className={`flex h-13 items-center ${
+                      className={`flex h-13 items-center px-2 ${
                         member.id === currentUserId
                           ? "bg-primary-50"
                           : "border-t border-border-subtle"
