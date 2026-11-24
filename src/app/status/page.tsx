@@ -16,6 +16,11 @@ export default async function StatusPage() {
   const { user, viewer } = await requireTeamViewer();
   const supabase = await createClient();
 
+  // 관리자는 이번 시즌에 참여하지 않았어도(결제 안 해서 season_memberships에
+  // 없어도) 현황판은 전부 볼 수 있어야 한다 — 관리 업무상 팀 전체 진행
+  // 상황을 확인할 수 있어야 하니까.
+  const canViewCurrentSeason = viewer.isSeasonMember || viewer.teamRole === "admin";
+
   const { data: memberships } = await supabase
     .from("team_memberships")
     .select("profiles!user_id(id, name)")
@@ -59,7 +64,7 @@ export default async function StatusPage() {
     // still in progress counts here even though it's excluded above.
     for (const id of participantIds) participatedUserIds.add(id);
 
-    if (viewer.isSeasonMember) {
+    if (canViewCurrentSeason) {
       const weeklyStats = await computeSeasonWeeklyStats(
         supabase,
         season.id,
@@ -95,7 +100,7 @@ export default async function StatusPage() {
       activeTab="status"
     >
       <StatusBoard
-        isSeasonMember={viewer.isSeasonMember}
+        isSeasonMember={canViewCurrentSeason}
         activeSeasonRange={viewer.activeSeason}
         members={currentSeasonMembers}
         currentWeekIndex={currentWeekIndex}

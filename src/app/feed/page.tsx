@@ -12,15 +12,18 @@ export default async function FeedPage({
 }) {
   const { user, viewer } = await requireTeamViewer();
   const { activity } = await searchParams;
+  const isAdmin = viewer.teamRole === "admin";
 
   return (
     <PageShell
       teamName={viewer.teamName}
       header={<PageTitle>피드</PageTitle>}
-      isAdmin={viewer.teamRole === "admin"}
+      isAdmin={isAdmin}
       activeTab="feed"
     >
-      <SeasonGate viewer={viewer}>
+      {/* 관리자는 이번 시즌에 참여하지 않았어도(season_memberships에
+          없어도) 팀 피드는 전부 볼 수 있어야 한다. */}
+      <SeasonGate viewer={{ ...viewer, isSeasonMember: viewer.isSeasonMember || isAdmin }}>
         <Feed userId={user.id} highlightActivityId={activity} />
       </SeasonGate>
     </PageShell>
