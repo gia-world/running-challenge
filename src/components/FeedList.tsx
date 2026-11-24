@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { FeedCard } from "@/components/FeedCard";
 import { Button } from "@/components/Button";
-import { formatKoreanDate } from "@/lib/format";
+import { formatDistanceKm, formatKoreanDate } from "@/lib/format";
 import type { FeedItem } from "@/app/feed/loadFeed";
 import { loadMoreFeed } from "@/app/feed/actions";
 
@@ -92,7 +92,7 @@ export function FeedList({
               </p>
               <div className="flex flex-col items-end gap-0.5">
                 <span className="text-ink-secondary">
-                  {formatKoreanDate(item.activityDate)} · {item.distanceKm.toFixed(2)}km
+                  {formatKoreanDate(item.activityDate)} · {formatDistanceKm(item.distanceKm)}
                 </span>
               </div>
             </div>

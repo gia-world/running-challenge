@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { formatKoreanDate } from "@/lib/format";
+import { formatDistanceKm, formatKoreanDate } from "@/lib/format";
 import { earnedBadges, BADGE_CATALOG } from "@/lib/badges";
 import { EmptyState } from "@/components/EmptyState";
 import { BottomSheet } from "@/components/BottomSheet";
@@ -269,7 +269,7 @@ export function StatusBoard({
                             : "border-t border-border-subtle"
                         }`}
                       >
-                        {member.totalDistanceKm.toFixed(2)}km
+                        {formatDistanceKm(member.totalDistanceKm)}
                       </div>
                     ))}
                   </div>

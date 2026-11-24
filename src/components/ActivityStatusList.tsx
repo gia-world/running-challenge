@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { CERTIFICATIONS_BUCKET } from "@/lib/photos";
-import { formatKoreanDate } from "@/lib/format";
+import { formatDistanceKm, formatKoreanDate } from "@/lib/format";
 import { EmptyState } from "./EmptyState";
 import { PhotoViewerModal } from "./PhotoViewerModal";
 import type { ActivityStatus } from "@/lib/types";
@@ -97,7 +97,7 @@ export function ActivityStatusList({
                   )}
                 </div>
                 <span className="font-semibold text-ink-strong">
-                  {Number(activity.distance_km).toFixed(2)}km
+                  {formatDistanceKm(Number(activity.distance_km))}
                 </span>
               </div>
               {activity.status === "rejected" && activity.rejected_reason && (
@@ -111,7 +111,7 @@ export function ActivityStatusList({
       {openActivity && (
         <PhotoViewerModal
           photos={openActivity.photoUrls}
-          caption={`${formatKoreanDate(openActivity.activity_date)} · ${Number(openActivity.distance_km).toFixed(2)}km`}
+          caption={`${formatKoreanDate(openActivity.activity_date)} · ${formatDistanceKm(Number(openActivity.distance_km))}`}
           canDelete={canDelete}
           onClose={() => setOpenActivityId(null)}
           onDelete={() => deleteActivity(openActivity)}

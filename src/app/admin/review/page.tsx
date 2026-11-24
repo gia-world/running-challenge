@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { formatKoreanDate } from "@/lib/format";
+import { formatDistanceKm, formatKoreanDate } from "@/lib/format";
 import { getSignedPhotoUrls } from "@/lib/photos";
 import { PhotoCarousel } from "@/components/PhotoCarousel";
 import { ReviewItem } from "./ReviewItem";
@@ -79,7 +79,7 @@ export default async function AdminReviewPage() {
               <div className="flex items-center justify-between text-base">
                 <span className="font-semibold text-ink-strong">{item.ownerName}</span>
                 <span className="text-ink-secondary">
-                  {formatKoreanDate(item.activity_date)} · {Number(item.distance_km).toFixed(2)}km
+                  {formatKoreanDate(item.activity_date)} · {formatDistanceKm(Number(item.distance_km))}
                 </span>
               </div>
               <p className="mt-1 text-sm text-ink-tertiary">
