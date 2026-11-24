@@ -13,8 +13,7 @@ const SUB_ROW_CLASS = "rounded-xl py-2.5 pl-6 pr-3 text-left text-base font-medi
 const GROUP_LABEL_CLASS = "px-3 pt-3 pb-1 text-sm font-semibold text-ink-tertiary";
 
 const ADMIN_ITEMS = [
-  { href: "/admin/review", label: "재인증 요청함" },
-  { href: "/admin/dropout", label: "중도하차 요청함" },
+  { href: "/admin/review", label: "요청함" },
   { href: "/admin/members", label: "팀원 관리" },
   { href: "/admin/season", label: "시즌 관리" },
   { href: "/admin/announcements", label: "공지사항" },

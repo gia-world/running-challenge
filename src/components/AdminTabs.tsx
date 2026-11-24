@@ -5,8 +5,7 @@ import type { ReactNode } from "react";
 import { SegmentedTabs } from "./SegmentedTabs";
 
 const TABS = [
-  { href: "/admin/review", label: "재인증 요청함" },
-  { href: "/admin/dropout", label: "중도하차 요청함" },
+  { href: "/admin/review", label: "요청함" },
   { href: "/admin/members", label: "팀원 관리" },
   { href: "/admin/season", label: "시즌 관리" },
   { href: "/admin/announcements", label: "공지사항" },
@@ -22,9 +21,10 @@ export function AdminTabs({
   children: ReactNode;
 }) {
   const pathname = usePathname();
+  // 재인증 요청/중도하차 요청이 "요청함" 탭 하나로 합쳐져 있어서, 뱃지도
+  // 어느 쪽이든 대기 중인 게 있으면 보이도록 합산한다.
   const countByHref: Record<string, number> = {
-    "/admin/review": pendingCount,
-    "/admin/dropout": dropoutPendingCount,
+    "/admin/review": pendingCount + dropoutPendingCount,
   };
 
   return (
