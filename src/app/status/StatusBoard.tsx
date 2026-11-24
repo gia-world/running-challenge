@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { seasonWeekRange } from "@/lib/season";
@@ -85,6 +85,44 @@ export function StatusBoard({
   } | null>(null);
   const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
   const [showBadgeInfo, setShowBadgeInfo] = useState(false);
+
+  // "총 거리"/"성공횟수" 칸을 추가하면서 테이블에 w-full을 썼던 탓에
+  // 주차 칸들이 찌그러지던 버그 + "주차별 칸이 스크롤된다는 걸 못
+  // 알아챌 수 있다"는 피드백을 같이 해결한다. 처음엔 이름/성공횟수/
+  // 총거리를 table 안에서 position:sticky로 고정해봤는데, 스크롤을
+  // 끝까지 밀면 고정된 칸 밑에 깔려야 할 주차 칸이 가장자리에서 살짝
+  // 비쳐 보이는 버그가 있었다(테이블 안 sticky는 브라우저마다 알려진
+  // 렌더링 함정이 있다) — 그래서 테이블 하나가 아니라 **이름(안 움직임)
+  // / 주차 칸들(이 안에서만 가로 스크롤) / 성공횟수·총거리(안 움직임)**
+  // 세 개의 독립된 flex 영역으로 나눴다. sticky를 전혀 안 쓰니 그 문제
+  // 자체가 생길 수 없다.
+  //
+  // 스크롤 가능 표시는 처음에 흐림 효과(fade)로 해봤는데, 이 앱은
+  // 다크모드 없이 캔버스/카드가 전부 흰색이라(맨 위 DESIGN.md 원칙)
+  // 흰 배경 위에 흰색으로 흐려지는 효과가 사실상 안 보여서 — 대신 고정
+  // 영역과의 경계에 실선 구분선을 둬서 "여기부터는 고정, 그 안쪽은
+  // 스크롤"을 항상 보이게 표시한다(헤어라인 보더로 구조를 드러내는 이
+  // 앱의 기존 톤과도 더 맞는다).
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const currentWeekCellRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // 현재 주차가 스크롤 영역 가운데 오도록 — 매번 맨 왼쪽부터 찾아야
+    // 하면 번거로우니까. offsetLeft는 가장 가까운 position:relative류
+    // 조상 기준이라(이 트리엔 그런 조상이 없어서) 카드 전체 기준의
+    // 엉뚱한 값이 나온다 — 대신 getBoundingClientRect로 뷰포트 기준
+    // 좌표를 구하고 현재 scrollLeft를 더해서 "스크롤 콘텐츠 안에서의
+    // 위치"를 역산한다.
+    const el = scrollRef.current;
+    const cell = currentWeekCellRef.current;
+    if (el && cell) {
+      const elRect = el.getBoundingClientRect();
+      const cellRect = cell.getBoundingClientRect();
+      const cellLeftInContent = cellRect.left - elRect.left + el.scrollLeft;
+      const cellCenter = cellLeftInContent + cellRect.width / 2;
+      el.scrollLeft = Math.max(0, cellCenter - el.clientWidth / 2);
+    }
+  }, []);
 
   const sortedMembers = [...members].sort((a, b) => {
     if (sortKey === "total") return totalSuccess(b) - totalSuccess(a);
@@ -198,63 +236,107 @@ export function StatusBoard({
                 </button>
               </div>
 
-              <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
-                <table className="w-full min-w-90 border-collapse text-sm">
-                  <thead>
-                    <tr className="text-sm text-ink-tertiary">
-                      <th className="px-3 py-2 text-left font-medium">이름</th>
-                      {Array.from({ length: weekCount }, (_, i) => (
-                        <th
-                          key={i}
-                          className={
-                            i === currentWeekIndex
-                              ? "px-1 py-2 font-bold text-primary"
-                              : "px-1 py-2 font-medium"
-                          }
+              <div className="flex overflow-hidden rounded-2xl border border-border bg-surface text-sm">
+                {/* 왼쪽: 이름 — 스크롤과 무관하게 항상 보임 */}
+                <div className="flex shrink-0 flex-col border-r border-border-subtle">
+                  <div className="flex h-9 items-center px-3 py-2 font-medium text-ink-tertiary">
+                    이름
+                  </div>
+                  {sortedMembers.map((member) => (
+                    <div
+                      key={member.id}
+                      className={`flex h-[52px] items-center whitespace-nowrap px-3 py-2 font-semibold text-ink-strong ${
+                        member.id === currentUserId
+                          ? "bg-primary-50"
+                          : "border-t border-border-subtle"
+                      }`}
+                    >
+                      {member.name}
+                    </div>
+                  ))}
+                </div>
+
+                {/* 가운데: 주차별 칸 — 이 영역만 가로 스크롤된다 */}
+                <div ref={scrollRef} className="min-w-0 flex-1 overflow-x-auto">
+                  <div className="flex h-9 items-center text-ink-tertiary">
+                    {Array.from({ length: weekCount }, (_, i) => (
+                      <div
+                        key={i}
+                        ref={i === currentWeekIndex ? currentWeekCellRef : undefined}
+                        className={`flex w-10 shrink-0 items-center justify-center py-2 ${
+                          i === currentWeekIndex ? "font-bold text-primary" : "font-medium"
+                        }`}
+                      >
+                        {i + 1}주
+                      </div>
+                    ))}
+                  </div>
+                  {sortedMembers.map((member) => (
+                    <div
+                      key={member.id}
+                      className={`flex h-[52px] items-center ${
+                        member.id === currentUserId
+                          ? "bg-primary-50"
+                          : "border-t border-border-subtle"
+                      }`}
+                    >
+                      {member.weeks.map((week, weekIndex) => (
+                        <div
+                          key={weekIndex}
+                          className="flex w-10 shrink-0 items-center justify-center py-2"
                         >
-                          {i + 1}주
-                        </th>
+                          <button
+                            type="button"
+                            onClick={() => openCell(member, weekIndex)}
+                            disabled={week.achieved === 0}
+                            className={cellClassName(week, weekIndex === currentWeekIndex)}
+                            title={`${weekIndex + 1}주차 ${week.achieved}회`}
+                          >
+                            {week.achieved > 0 ? week.achieved : ""}
+                          </button>
+                        </div>
                       ))}
-                      <th className="px-3 py-2 font-medium">성공횟수</th>
-                      <th className="px-3 py-2 font-medium">총 거리</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 오른쪽: 성공횟수/총거리 — 역시 항상 보임 */}
+                <div className="flex shrink-0 border-l border-border-subtle">
+                  <div className="flex shrink-0 flex-col">
+                    <div className="flex h-9 w-20 items-center justify-center px-2 py-2 font-medium text-ink-tertiary">
+                      성공횟수
+                    </div>
                     {sortedMembers.map((member) => (
-                      <tr
+                      <div
                         key={member.id}
-                        className={
+                        className={`flex h-[52px] w-20 items-center justify-center px-2 py-2 font-bold text-ink-strong ${
                           member.id === currentUserId
                             ? "bg-primary-50"
                             : "border-t border-border-subtle"
-                        }
+                        }`}
                       >
-                        <td className="whitespace-nowrap px-3 py-2 font-semibold text-ink-strong">
-                          {member.name}
-                        </td>
-                        {member.weeks.map((week, weekIndex) => (
-                          <td key={weekIndex} className="px-1 py-2 text-center">
-                            <button
-                              type="button"
-                              onClick={() => openCell(member, weekIndex)}
-                              disabled={week.achieved === 0}
-                              className={cellClassName(week, weekIndex === currentWeekIndex)}
-                              title={`${weekIndex + 1}주차 ${week.achieved}회`}
-                            >
-                              {week.achieved > 0 ? week.achieved : ""}
-                            </button>
-                          </td>
-                        ))}
-                        <td className="px-3 py-2 text-center font-bold text-ink-strong">
-                          {totalSuccess(member)}
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-2 text-center text-ink-secondary">
-                          {member.totalDistanceKm.toFixed(2)}km
-                        </td>
-                      </tr>
+                        {totalSuccess(member)}
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                  <div className="flex shrink-0 flex-col border-l border-border-subtle">
+                    <div className="flex h-9 w-24 items-center justify-center px-3 py-2 font-medium text-ink-tertiary">
+                      총 거리
+                    </div>
+                    {sortedMembers.map((member) => (
+                      <div
+                        key={member.id}
+                        className={`flex h-[52px] w-24 items-center justify-center whitespace-nowrap px-3 py-2 text-ink-secondary ${
+                          member.id === currentUserId
+                            ? "bg-primary-50"
+                            : "border-t border-border-subtle"
+                        }`}
+                      >
+                        {member.totalDistanceKm.toFixed(2)}km
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </SeasonGate>
