@@ -239,13 +239,13 @@ export function StatusBoard({
               <div className="flex overflow-hidden rounded-2xl border border-border bg-surface text-sm">
                 {/* 왼쪽: 이름 — 스크롤과 무관하게 항상 보임 */}
                 <div className="flex shrink-0 flex-col border-r border-border-subtle">
-                  <div className="flex h-9 items-center px-3 py-2 font-medium text-ink-tertiary">
+                  <div className="flex h-9 items-center px-4 py-2 font-medium text-ink-tertiary justify-center">
                     이름
                   </div>
                   {sortedMembers.map((member) => (
                     <div
                       key={member.id}
-                      className={`flex h-[52px] items-center whitespace-nowrap px-3 py-2 font-semibold text-ink-strong ${
+                      className={`flex h-13 items-center whitespace-nowrap px-3 py-2 font-semibold text-ink-strong ${
                         member.id === currentUserId
                           ? "bg-primary-50"
                           : "border-t border-border-subtle"
@@ -258,12 +258,12 @@ export function StatusBoard({
 
                 {/* 가운데: 주차별 칸 — 이 영역만 가로 스크롤된다 */}
                 <div ref={scrollRef} className="min-w-0 flex-1 overflow-x-auto">
-                  <div className="flex h-9 items-center text-ink-tertiary">
+                  <div className="flex h-9 px-2 items-center text-ink-tertiary justify-center">
                     {Array.from({ length: weekCount }, (_, i) => (
                       <div
                         key={i}
                         ref={i === currentWeekIndex ? currentWeekCellRef : undefined}
-                        className={`flex w-10 shrink-0 items-center justify-center py-2 ${
+                        className={`flex w-10 px-2 shrink-0 items-center justify-center ${
                           i === currentWeekIndex ? "font-bold text-primary" : "font-medium"
                         }`}
                       >
@@ -274,7 +274,7 @@ export function StatusBoard({
                   {sortedMembers.map((member) => (
                     <div
                       key={member.id}
-                      className={`flex h-[52px] items-center ${
+                      className={`flex h-13 items-center justify-center ${
                         member.id === currentUserId
                           ? "bg-primary-50"
                           : "border-t border-border-subtle"
@@ -283,7 +283,7 @@ export function StatusBoard({
                       {member.weeks.map((week, weekIndex) => (
                         <div
                           key={weekIndex}
-                          className="flex w-10 shrink-0 items-center justify-center py-2"
+                          className="flex w-10 shrink-0 items-center justify-center"
                         >
                           <button
                             type="button"
@@ -303,13 +303,13 @@ export function StatusBoard({
                 {/* 오른쪽: 성공횟수/총거리 — 역시 항상 보임 */}
                 <div className="flex shrink-0 border-l border-border-subtle">
                   <div className="flex shrink-0 flex-col">
-                    <div className="flex h-9 w-20 items-center justify-center px-2 py-2 font-medium text-ink-tertiary">
-                      성공횟수
+                    <div className="flex h-9 w-16 items-center justify-center font-medium text-ink-tertiary">
+                      성공 횟수
                     </div>
                     {sortedMembers.map((member) => (
                       <div
                         key={member.id}
-                        className={`flex h-[52px] w-20 items-center justify-center px-2 py-2 font-bold text-ink-strong ${
+                        className={`flex h-13 w-16 items-center justify-center font-bold text-ink-strong ${
                           member.id === currentUserId
                             ? "bg-primary-50"
                             : "border-t border-border-subtle"
@@ -320,13 +320,13 @@ export function StatusBoard({
                     ))}
                   </div>
                   <div className="flex shrink-0 flex-col border-l border-border-subtle">
-                    <div className="flex h-9 w-24 items-center justify-center px-3 py-2 font-medium text-ink-tertiary">
+                    <div className="flex h-9 w-19 items-center justify-center font-medium text-ink-tertiary">
                       총 거리
                     </div>
                     {sortedMembers.map((member) => (
                       <div
                         key={member.id}
-                        className={`flex h-[52px] w-24 items-center justify-center whitespace-nowrap px-3 py-2 text-ink-secondary ${
+                        className={`flex h-13 w-19 items-center justify-center whitespace-nowrap text-ink-secondary ${
                           member.id === currentUserId
                             ? "bg-primary-50"
                             : "border-t border-border-subtle"
