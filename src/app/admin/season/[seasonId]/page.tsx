@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
-import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
+import { computeSeasonWeeklyStats, emptyMemberSeasonStats } from "@/lib/seasonStats";
 import { computeSeasonSettlements } from "@/lib/settlement";
 import { formatKoreanDate, formatWon } from "@/lib/format";
 import { isBeforeNoonInSeoul, todayInSeoul, yesterdayInSeoul } from "@/lib/week";
@@ -145,7 +145,7 @@ export default async function AdminSeasonDetailPage({
         isParticipant: participantIds.has(m.id),
         dropoutStatus: (dropout?.status as "pending" | "approved" | "rejected" | undefined) ?? null,
         dropoutSettlementAmount: dropout?.settlement_amount ?? null,
-        weeks: weeklyStats.get(m.id) ?? emptyWeekStats(weekCount),
+        weeks: (weeklyStats.get(m.id) ?? emptyMemberSeasonStats(weekCount)).weeks,
       };
     }),
     entryFee,
@@ -213,7 +213,7 @@ export default async function AdminSeasonDetailPage({
         {members.map((member) => {
           const isParticipant = participantIds.has(member.id);
           const dropout = dropoutByUserId.get(member.id);
-          const weeks = weeklyStats.get(member.id) ?? emptyWeekStats(weekCount);
+          const weeks = (weeklyStats.get(member.id) ?? emptyMemberSeasonStats(weekCount)).weeks;
           const settlement = settlements.get(member.id);
           const total = settlement
             ? settlement.refund + (settlement.isCompleted ? prizeShare : 0)

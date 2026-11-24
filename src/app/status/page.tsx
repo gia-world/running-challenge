@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
-import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
+import { computeSeasonWeeklyStats, emptyMemberSeasonStats } from "@/lib/seasonStats";
 import { computeTeamSeasonHistory } from "@/lib/seasonHistory";
 import { seasonWeekIndexForDate, cappedTodayForSeason, seasonWeekCount } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
@@ -46,7 +46,8 @@ export default async function StatusPage() {
   let currentSeasonMembers: {
     id: string;
     name: string;
-    weeks: ReturnType<typeof emptyWeekStats>;
+    weeks: ReturnType<typeof emptyMemberSeasonStats>["weeks"];
+    totalDistanceKm: number;
   }[] = [];
   let currentWeekIndex = 0;
   let weekCount = 0;
@@ -73,11 +74,15 @@ export default async function StatusPage() {
       );
       currentSeasonMembers = allMembers
         .filter((p) => participantIds.has(p.id))
-        .map((p) => ({
-          id: p.id,
-          name: p.name,
-          weeks: weeklyStats.get(p.id) ?? emptyWeekStats(weekCount),
-        }));
+        .map((p) => {
+          const stats = weeklyStats.get(p.id) ?? emptyMemberSeasonStats(weekCount);
+          return {
+            id: p.id,
+            name: p.name,
+            weeks: stats.weeks,
+            totalDistanceKm: stats.totalDistanceKm,
+          };
+        });
       const effectiveDate = cappedTodayForSeason(season.end_date, todayInSeoul());
       currentWeekIndex = seasonWeekIndexForDate(season.start_date, effectiveDate) ?? 0;
     }

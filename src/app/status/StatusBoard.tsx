@@ -16,14 +16,14 @@ import { Button } from "@/components/Button";
 import type { WeekStat } from "@/lib/seasonStats";
 import type { SeasonHistoryEntry } from "@/lib/seasonHistory";
 
-type Member = { id: string; name: string; weeks: WeekStat[] };
+type Member = { id: string; name: string; weeks: WeekStat[]; totalDistanceKm: number };
 type BadgeMember = {
   id: string;
   name: string;
   completedCount: number;
   hasParticipated: boolean;
 };
-type SortKey = "name" | "total";
+type SortKey = "name" | "total" | "distance";
 type BadgeSortKey = "name" | "count";
 type View = "season" | "history";
 type ModalActivity = {
@@ -88,6 +88,7 @@ export function StatusBoard({
 
   const sortedMembers = [...members].sort((a, b) => {
     if (sortKey === "total") return totalSuccess(b) - totalSuccess(a);
+    if (sortKey === "distance") return b.totalDistanceKm - a.totalDistanceKm;
     return a.name.localeCompare(b.name);
   });
 
@@ -186,6 +187,15 @@ export function StatusBoard({
                 >
                   성공횟수순
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setSortKey("distance")}
+                  className={
+                    sortKey === "distance" ? "font-bold text-primary" : "text-ink-tertiary"
+                  }
+                >
+                  거리순
+                </button>
               </div>
 
               <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
@@ -206,6 +216,7 @@ export function StatusBoard({
                         </th>
                       ))}
                       <th className="px-3 py-2 font-medium">성공횟수</th>
+                      <th className="px-3 py-2 font-medium">총 거리</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -236,6 +247,9 @@ export function StatusBoard({
                         ))}
                         <td className="px-3 py-2 text-center font-bold text-ink-strong">
                           {totalSuccess(member)}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2 text-center text-ink-secondary">
+                          {member.totalDistanceKm.toFixed(2)}km
                         </td>
                       </tr>
                     ))}

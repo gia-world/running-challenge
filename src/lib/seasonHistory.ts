@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { computeSeasonWeeklyStats, emptyWeekStats } from "./seasonStats";
+import { computeSeasonWeeklyStats, emptyMemberSeasonStats } from "./seasonStats";
 import { seasonWeekCount } from "./season";
 
 export type SeasonHistoryEntry = {
@@ -60,7 +60,7 @@ export async function computeTeamSeasonHistory(
 
       for (const userId of participantIds) {
         participatedUserIds.add(userId);
-        const weeks = weeklyStats.get(userId) ?? emptyWeekStats(weekCount);
+        const weeks = (weeklyStats.get(userId) ?? emptyMemberSeasonStats(weekCount)).weeks;
         const completed = weeks.every((w) => w.isSuccess);
         if (completed) {
           completedCount += 1;

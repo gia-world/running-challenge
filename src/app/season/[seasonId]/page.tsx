@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireTeamViewer } from "@/lib/viewer";
-import { computeSeasonWeeklyStats, emptyWeekStats } from "@/lib/seasonStats";
+import { computeSeasonWeeklyStats, emptyMemberSeasonStats } from "@/lib/seasonStats";
 import { computeSeasonSettlements } from "@/lib/settlement";
 import { computeSeasonStatus } from "@/lib/seasonStatus";
 import { seasonWeekCount } from "@/lib/season";
@@ -106,7 +106,7 @@ export default async function SeasonReportPage({
   const teamAccountNumber = team?.settlement_account_number ?? null;
   const viewerBankName = profile?.bank_name ?? null;
   const viewerAccountNumber = profile?.bank_account_number ?? null;
-  const viewerWeeks = weeklyStats.get(user.id) ?? emptyWeekStats(weekCount);
+  const viewerWeeks = (weeklyStats.get(user.id) ?? emptyMemberSeasonStats(weekCount)).weeks;
   const viewerCompleted = viewerWeeks.every((w) => w.isSuccess);
 
   const status = computeSeasonStatus(season, todayInSeoul());
@@ -125,7 +125,7 @@ export default async function SeasonReportPage({
         isParticipant: participantIds.has(userId),
         dropoutStatus: (dropout?.status as "pending" | "approved" | "rejected" | undefined) ?? null,
         dropoutSettlementAmount: dropout?.settlement_amount ?? null,
-        weeks: weeklyStats.get(userId) ?? emptyWeekStats(weekCount),
+        weeks: (weeklyStats.get(userId) ?? emptyMemberSeasonStats(weekCount)).weeks,
       };
     }),
     entryFee,
