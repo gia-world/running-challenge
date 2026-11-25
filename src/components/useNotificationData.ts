@@ -5,6 +5,39 @@ import { createClient } from "@/lib/supabase/client";
 import { seasonWeekIndexForDate, seasonWeekRange } from "@/lib/season";
 import { todayInSeoul } from "@/lib/week";
 
+const CONFIRMED_ANNOUNCEMENTS_KEY = "runchall:confirmedAnnouncementIds";
+
+/**
+ * "확인"을 누르면 profiles.last_seen_announcement_at을 서버에 써서 다음
+ * 조회부터 안 보이게 하는데, 그 write가 네트워크를 타는 동안 바로 다른
+ * 화면으로 넘어가면 — PageHeader가 페이지마다 새로 마운트되니 그 즉시
+ * 또 조회가 나가는데 — 아직 반영 안 된 값으로 조회해서 "방금 확인한"
+ * 공지가 또 안 읽은 것처럼 잡혀 팝업이 두 번 뜨는 걸로 보였다. 서버
+ * write가 끝나길 기다리는 대신, "확인"을 누른 공지 id를 이 탭의
+ * sessionStorage에 바로(동기적으로) 남겨서, 서버 값이 따라오기 전까지는
+ * 로컬에서 한 번 더 걸러낸다 — 기기/세션을 넘어가는 진짜 "안 읽음"
+ * 판단은 여전히 서버 값이 맡는다.
+ */
+function getConfirmedAnnouncementIds(): Set<string> {
+  try {
+    const raw = sessionStorage.getItem(CONFIRMED_ANNOUNCEMENTS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function addConfirmedAnnouncementIds(ids: string[]) {
+  try {
+    const next = getConfirmedAnnouncementIds();
+    for (const id of ids) next.add(id);
+    sessionStorage.setItem(CONFIRMED_ANNOUNCEMENTS_KEY, JSON.stringify([...next]));
+  } catch {
+    // 시크릿 모드 등으로 sessionStorage를 못 쓰면 이 보정만 못 받을 뿐 —
+    // 서버 값은 곧 따라오니 최악의 경우도 한 번 더 보이는 정도다.
+  }
+}
+
 export type Announcement = { id: string; body: string };
 export type ImportantNotification = {
   id: string;
@@ -178,7 +211,8 @@ export function useNotificationData() {
       ];
 
       if (cancelled) return;
-      setAnnouncements(unseenAnnouncements ?? []);
+      const confirmedIds = getConfirmedAnnouncementIds();
+      setAnnouncements((unseenAnnouncements ?? []).filter((a) => !confirmedIds.has(a.id)));
       setImportantNotifications(importantList);
       setUserId(user.id);
       setIsReady(true);
@@ -218,6 +252,7 @@ export function useNotificationData() {
 
   function markAnnouncementsSeen() {
     if (announcements.length === 0 || !userId) return;
+    addConfirmedAnnouncementIds(announcements.map((a) => a.id));
     const supabase = createClient();
     supabase
       .from("profiles")
