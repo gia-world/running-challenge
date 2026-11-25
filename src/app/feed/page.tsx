@@ -3,6 +3,7 @@ import { PageShell } from "@/components/PageShell";
 import { PageTitle } from "@/components/PageTitle";
 import { SeasonGate } from "@/components/SeasonGate";
 import { requireTeamViewer } from "@/lib/viewer";
+import { createClient } from "@/lib/supabase/server";
 import { loadFeed } from "./loadFeed";
 
 export default async function FeedPage({
@@ -37,7 +38,13 @@ async function Feed({
   userId: string;
   highlightActivityId?: string;
 }) {
-  const { items, nextCursor } = await loadFeed({ userId, highlightActivityId });
+  const supabase = await createClient();
+  const [{ items, nextCursor }, { data: profile }] = await Promise.all([
+    loadFeed({ userId, highlightActivityId }),
+    // 댓글 작성 시 등록 결과를 기다리지 않고 바로 화면에 보여주려면(낙관적
+    // 업데이트) 작성자 이름이 클라이언트에 미리 있어야 한다.
+    supabase.from("profiles").select("name").eq("id", userId).single(),
+  ]);
 
   if (items.length === 0) {
     return (
@@ -50,6 +57,7 @@ async function Feed({
       initialItems={items}
       initialNextCursor={nextCursor}
       currentUserId={userId}
+      currentUserName={profile?.name ?? null}
       autoOpenActivityId={highlightActivityId}
     />
   );

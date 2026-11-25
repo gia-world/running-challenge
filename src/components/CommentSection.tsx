@@ -11,17 +11,24 @@ const COMMENT_MAX_LENGTH = 300;
 
 /**
  * 댓글 + 대댓글(1단계만) — ReactionBar 바로 아래, 피드 카드와
- * PhotoViewerModal 양쪽에서 똑같이 렌더링된다. 글쓰기는 낙관적 업데이트
- * 없이 저장 후 router.refresh()로 서버 데이터를 다시 받아온다 — 작성자
- * 이름 표시를 위해 본인 프로필 정보를 따로 들고 있을 필요가 없어진다.
+ * PhotoViewerModal 양쪽에서 똑같이 렌더링된다. 글쓰기는 낙관적으로
+ * 업데이트한다 — DB insert를 기다렸다가 router.refresh()로 피드 전체를
+ * 새로 불러오면(사진 서명 URL 재발급까지 포함) 눈에 띄게 오래 걸리고
+ * 화면이 덜컥거려서, 등록 누르자마자 로컬에 바로 추가해 보여주고
+ * insert/refresh는 뒤에서 처리한다. 실패하면 그 항목만 빼고 입력값을
+ * 되돌린다. comments prop이 갱신되면(= refresh가 실제로 도착하면) 그때
+ * 로컬에 쌓아둔 낙관적 댓글은 전부 지운다 — 이제 서버 데이터 쪽에 진짜
+ * 버전이 들어있을 거라서.
  */
 export function CommentSection({
   activityId,
   currentUserId,
+  currentUserName,
   comments,
 }: {
   activityId: string;
   currentUserId: string;
+  currentUserName: string | null;
   comments: CommentItem[];
 }) {
   const router = useRouter();
@@ -30,10 +37,18 @@ export function CommentSection({
   const [replyBody, setReplyBody] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [optimisticComments, setOptimisticComments] = useState<CommentItem[]>([]);
 
-  const topLevel = comments.filter((c) => c.parentCommentId === null);
+  const [prevComments, setPrevComments] = useState(comments);
+  if (comments !== prevComments) {
+    setPrevComments(comments);
+    setOptimisticComments([]);
+  }
+
+  const allComments = [...comments, ...optimisticComments];
+  const topLevel = allComments.filter((c) => c.parentCommentId === null);
   const repliesByParent = new Map<string, CommentItem[]>();
-  for (const comment of comments) {
+  for (const comment of allComments) {
     if (!comment.parentCommentId) continue;
     const list = repliesByParent.get(comment.parentCommentId) ?? [];
     list.push(comment);
@@ -46,6 +61,26 @@ export function CommentSection({
 
     setIsSubmitting(true);
     setError(null);
+
+    const optimisticId = `optimistic-${crypto.randomUUID()}`;
+    setOptimisticComments((prev) => [
+      ...prev,
+      {
+        id: optimisticId,
+        userId: currentUserId,
+        profileName: currentUserName,
+        body: trimmed,
+        createdAt: new Date().toISOString(),
+        parentCommentId,
+      },
+    ]);
+    if (parentCommentId) {
+      setReplyBody("");
+      setReplyingToId(null);
+    } else {
+      setNewBody("");
+    }
+
     try {
       const supabase = createClient();
       const { error: insertError } = await supabase.from("activity_comments").insert({
@@ -56,12 +91,16 @@ export function CommentSection({
       });
       if (insertError) throw insertError;
 
-      setNewBody("");
-      setReplyBody("");
-      setReplyingToId(null);
       router.refresh();
     } catch (err) {
       console.error("[feed] comment submit failed:", err);
+      setOptimisticComments((prev) => prev.filter((c) => c.id !== optimisticId));
+      if (parentCommentId) {
+        setReplyBody(trimmed);
+        setReplyingToId(parentCommentId);
+      } else {
+        setNewBody(trimmed);
+      }
       setError("댓글 등록에 실패했어요. 다시 시도해주세요.");
     } finally {
       setIsSubmitting(false);

@@ -21,6 +21,7 @@ import type { CommentItem } from "@/app/feed/loadFeed";
 export function FeedCard({
   activityId,
   currentUserId,
+  currentUserName,
   isOwnActivity,
   isSeasonSettled,
   canDelete,
@@ -37,6 +38,7 @@ export function FeedCard({
 }: {
   activityId: string;
   currentUserId: string;
+  currentUserName: string | null;
   isOwnActivity: boolean;
   isSeasonSettled: boolean;
   canDelete: boolean;
@@ -131,6 +133,7 @@ export function FeedCard({
           <CommentSection
             activityId={activityId}
             currentUserId={currentUserId}
+            currentUserName={currentUserName}
             comments={comments}
           />
         </>
@@ -153,6 +156,7 @@ export function FeedCard({
               <CommentSection
                 activityId={activityId}
                 currentUserId={currentUserId}
+                currentUserName={currentUserName}
                 comments={comments}
               />
             </>

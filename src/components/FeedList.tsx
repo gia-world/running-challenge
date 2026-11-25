@@ -27,11 +27,13 @@ export function FeedList({
   initialItems,
   initialNextCursor,
   currentUserId,
+  currentUserName,
   autoOpenActivityId,
 }: {
   initialItems: FeedItem[];
   initialNextCursor: string | null;
   currentUserId: string;
+  currentUserName: string | null;
   /** 알림의 "그 피드로 가기" 링크로 들어왔을 때, 그 활동 카드를 열어둔
    * 채로 보여준다. */
   autoOpenActivityId?: string;
@@ -64,6 +66,7 @@ export function FeedList({
           key={item.id}
           activityId={item.id}
           currentUserId={currentUserId}
+          currentUserName={currentUserName}
           isOwnActivity={item.isOwnActivity}
           isSeasonSettled={item.isSeasonSettled}
           canDelete={item.canDelete}
