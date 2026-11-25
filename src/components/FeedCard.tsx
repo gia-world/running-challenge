@@ -113,7 +113,7 @@ export function FeedCard({
   };
 
   const noteBlock = note && (
-    <p className="whitespace-pre-wrap px-4 pb-2 text-sm text-ink-secondary">{note}</p>
+    <p className="whitespace-pre-wrap px-4 pt-3 pb-2 text-sm text-ink-secondary">{note}</p>
   );
 
   return (
