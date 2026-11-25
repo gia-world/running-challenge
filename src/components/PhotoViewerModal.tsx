@@ -246,7 +246,7 @@ export function PhotoViewerModal({
           )}
         </div>
 
-        <div className="flex shrink-0 flex-col gap-2 overflow-y-auto">
+        <div className="flex min-h-0 flex-col gap-2 overflow-y-auto">
           {footer}
 
           {canDelete && (
