@@ -32,7 +32,7 @@ export function PageHeader({
     genericUnreadCount,
     isReady,
     markAnnouncementsSeen,
-    refreshGenericCount,
+    markGenericNotificationsRead,
   } = useNotificationData();
 
   return (
@@ -54,7 +54,7 @@ export function PageHeader({
       <div className="flex items-center gap-1">
         <NotificationBell
           unreadCount={importantNotifications.length + genericUnreadCount}
-          onRead={refreshGenericCount}
+          onRead={markGenericNotificationsRead}
         />
         <HamburgerMenu isAdmin={isAdmin} />
       </div>

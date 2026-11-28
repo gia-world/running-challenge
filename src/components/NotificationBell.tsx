@@ -13,14 +13,14 @@ import { NotificationListSheet } from "@/components/NotificationListSheet";
  * 내려준다.
  *
  * `onRead`는 시트 안에서 알림을 읽음 처리할 때(한 건 클릭 또는 "모두
- * 확인") 호출돼서 PageHeader의 안읽은 개수를 다시 세게 한다.
+ * 확인") 호출돼서 PageHeader의 안읽은 개수를 그만큼 바로 줄이게 한다.
  */
 export function NotificationBell({
   unreadCount,
   onRead,
 }: {
   unreadCount: number;
-  onRead: () => void;
+  onRead: (markedCount: number) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 

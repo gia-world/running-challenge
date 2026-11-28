@@ -88,8 +88,9 @@ export function NotificationListSheet({
   onChange,
 }: {
   onClose: () => void;
-  /** 알림을 읽음 처리할 때마다 호출 — 벨 뱃지 숫자를 다시 세게 한다. */
-  onChange: () => void;
+  /** 알림을 읽음 처리할 때마다 호출 — 몇 건 읽음 처리했는지 넘겨서 벨
+   * 뱃지 숫자를 그만큼 바로 줄이게 한다. */
+  onChange: (markedCount: number) => void;
 }) {
   const [items, setItems] = useState<NotificationRow[] | null>(null);
 
@@ -129,7 +130,7 @@ export function NotificationListSheet({
     setItems(
       (prev) => prev?.map((n) => (ids.includes(n.id) ? { ...n, read_at: nowIso } : n)) ?? prev,
     );
-    onChange();
+    onChange(ids.length);
 
     const supabase = createClient();
     supabase

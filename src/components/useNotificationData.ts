@@ -59,9 +59,9 @@ export type ImportantNotification = {
  * 공지/중요 알림(announcements, importantNotifications)은 마운트 시
  * 한 번만 조회한다 — PageHeader 자체가 페이지마다 새로 마운트되니
  * 결과적으로 "페이지를 옮길 때마다 다시 확인"은 그대로 유지된다. 안읽은
- * 일반 알림 개수(genericUnreadCount)만 refreshGenericCount로 다시 셀 수
- * 있게 했다 — 알림 시트에서 읽음 처리한 직후 벨 뱃지가 바로 줄어들어야
- * 하기 때문.
+ * 일반 알림 개수(genericUnreadCount)만 markGenericNotificationsRead로
+ * 바로 줄일 수 있게 했다 — 알림 시트에서 읽음 처리한 직후 벨 뱃지가
+ * 바로 줄어들어야 하기 때문.
  */
 export function useNotificationData() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -263,12 +263,25 @@ export function useNotificationData() {
       });
   }
 
+  // 알림 시트에서 "모두 확인"/개별 클릭으로 읽음 처리한 직후 호출된다.
+  // read_at UPDATE와 이 안읽은-개수 재조회가 서로 다른 요청이라, 재조회가
+  // UPDATE보다 먼저 서버에 닿으면 방금 읽은 걸 포함한 예전 숫자를 돌려받아
+  // 뱃지가 바로 안 줄어드는 레이스가 있었다 — 서버 응답을 기다리는 대신
+  // "몇 개 읽었는지"(markedCount)를 호출부가 이미 알고 있으니 그만큼 바로
+  // 빼서 뱃지를 즉시 갱신하고, genericRefreshKey로 백그라운드 재조회도
+  // 같이 걸어서(다른 곳에서 동시에 새 알림이 왔을 경우 등) 결국 서버
+  // 값과 맞춰둔다.
+  function markGenericNotificationsRead(markedCount: number) {
+    setGenericUnreadCount((prev) => Math.max(0, prev - markedCount));
+    setGenericRefreshKey((k) => k + 1);
+  }
+
   return {
     announcements,
     importantNotifications,
     genericUnreadCount,
     isReady,
     markAnnouncementsSeen,
-    refreshGenericCount: () => setGenericRefreshKey((k) => k + 1),
+    markGenericNotificationsRead,
   };
 }
